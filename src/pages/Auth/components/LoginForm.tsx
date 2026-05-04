@@ -1,6 +1,8 @@
 import { useForm } from "react-hook-form";
 import { Button } from "../../../components/Button/index";
 import { Input } from "../../../components/Input/index";
+import { api } from "../../../services/api";
+import { useNavigate } from "react-router-dom";
 
 interface LoginFormValues {
   email: string;
@@ -20,9 +22,21 @@ export function LoginForm({ onCreateAccount }: LoginFormProps) {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({ mode: "onBlur" });
 
-  async function onSubmit() {
-    await new Promise((resolve) => setTimeout(resolve, 900));
+  const navigate = useNavigate();
+
+async function onSubmit(data: LoginFormValues) {
+  try {
+    const response = await api.post("/users/login", data);
+
+    console.log("Login OK:", response.data);
+
+    localStorage.setItem("user", JSON.stringify(response.data));
+
+    navigate("/home"); // ou dashboard
+  } catch (error: any) {
+    alert(error?.response?.data?.message || "Erro no login");
   }
+}
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

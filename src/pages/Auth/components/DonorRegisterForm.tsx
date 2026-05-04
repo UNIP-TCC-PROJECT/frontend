@@ -2,6 +2,8 @@ import { useForm } from "react-hook-form";
 import { Button } from "../../../components/Button/index";
 import { Input } from "../../../components/Input/index";
 import { Section } from "./Section";
+import { api } from "../../../services/api";
+import { useNavigate } from "react-router-dom";
 
 interface DonorFormValues {
   fullName: string;
@@ -23,10 +25,36 @@ export function DonorRegisterForm() {
   } = useForm<DonorFormValues>({ mode: "onBlur" });
 
   const passwordValue = watch("password");
+  const navigate = useNavigate();
+  
+  async function onSubmit(data: DonorFormValues) {
+    try {
+      const response = await api.post("/users", {
+        name: data.fullName,
+        email: data.email,
+        password: data.password,
+        type: "DOADOR", // Importante: enviar o tipo
+        cpf: data.cpf,
+        phone: data.phone,
+      });
 
-  async function onSubmit() {
-    await new Promise((resolve) => setTimeout(resolve, 900));
+      console.log("Cadastro realizado:", response.data);
+
+      const loginResponse = await api.post("/users/login", {
+        email: data.email,
+        password: data.password,
+      });
+      
+      localStorage.setItem("user", JSON.stringify(loginResponse.data));
+      navigate("/home");
+      
+    } catch (error: any) {
+      const message = error?.response?.data?.message || "Erro ao criar conta";
+      alert(message);
+      console.error("Erro no cadastro:", error);
+    }
   }
+
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
