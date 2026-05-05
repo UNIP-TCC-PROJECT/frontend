@@ -37,27 +37,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col bg-gray-50 min-h-screen">
-      {/* Header */}
-      <header className="top-0 left-0 z-20 fixed bg-white shadow w-full">
-        <div className="flex justify-between items-center mx-auto px-6 py-4 max-w-6xl">
-          <Link to="/" className="font-bold text-blue-700 text-2xl">
-            DoaFácil
-          </Link>
-          <nav className="flex items-center gap-6">
-            <Link to="/ongs" className="font-medium hover:text-blue-700">
-              ONGs
-            </Link>
-            <a href="#sobre" className="font-medium hover:text-blue-700">
-              Sobre
-            </a>
-            <Link to="/perfil" className="font-medium hover:text-blue-700">
-              Perfil
-            </Link>
-          </nav>
-        </div>
-      </header>
-
+    <>
       {/* Hero */}
       <section className="flex flex-col flex-1 justify-center items-center bg-gradient-to-b from-blue-50 to-transparent px-4 pt-32 pb-12 text-center">
         <h1 className="mb-4 font-extrabold text-gray-900 text-4xl md:text-5xl">
@@ -141,27 +121,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-white mt-auto py-6 border-gray-200 border-t">
-        <div className="flex md:flex-row flex-col justify-between items-center gap-2 mx-auto px-4 max-w-6xl text-gray-500 text-sm">
-          <div>
-            <a href="#sobre" className="mr-4 hover:text-blue-700">
-              Sobre
-            </a>
-            <a href="#termos" className="mr-4 hover:text-blue-700">
-              Termos
-            </a>
-            <a href="#contato" className="hover:text-blue-700">
-              Contato
-            </a>
-          </div>
-          <span>
-            &copy; {new Date().getFullYear()} DoaFácil. Todos os direitos
-            reservados.
-          </span>
-        </div>
-      </footer>
-    </div>
+    </>
   );
 }

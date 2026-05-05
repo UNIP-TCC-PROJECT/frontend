@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa";
 
 const categories = [
@@ -64,103 +64,81 @@ export default function Ongs() {
   });
 
   return (
-    <div className="flex flex-col bg-gray-50 min-h-screen">
-      {/* Header */}
-      <header className="top-0 left-0 z-20 fixed bg-white shadow w-full">
-        <div className="flex justify-between items-center mx-auto px-6 py-4 max-w-6xl">
-          <Link to="/" className="font-bold text-blue-700 text-2xl">
-            DoaFácil
-          </Link>
-          <nav className="flex items-center gap-6">
-            <Link to="/" className="font-medium hover:text-blue-700">
-              Home
-            </Link>
-            <span className="pb-1 border-blue-700 border-b-2 font-semibold text-blue-700">
-              ONGs
-            </span>
-            <Link to="/perfil" className="font-medium hover:text-blue-700">
-              Perfil
-            </Link>
-          </nav>
-        </div>
-      </header>
+    <>
+      {/* Título */}
+      <h1 className="mb-2 font-extrabold text-gray-900 text-3xl md:text-4xl">
+        ONGs disponíveis
+      </h1>
+      <p className="mb-8 text-gray-600">
+        Encontre instituições confiáveis para apoiar
+      </p>
 
-      <main className="flex-1 mx-auto px-4 pt-32 pb-12 w-full max-w-6xl">
-        {/* Título */}
-        <h1 className="mb-2 font-extrabold text-gray-900 text-3xl md:text-4xl">
-          ONGs disponíveis
-        </h1>
-        <p className="mb-8 text-gray-600">
-          Encontre instituições confiáveis para apoiar
-        </p>
-
-        {/* Filtros */}
-        <div className="flex md:flex-row flex-col md:items-center gap-4 mb-8">
-          <input
-            type="text"
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar ONG..."
-            className="bg-white shadow-sm px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 w-full md:w-72"
-          />
-          <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <button
-                key={cat.value}
-                onClick={() => setCategoria(cat.value)}
-                className={`px-5 py-2 rounded-full border text-sm font-medium shadow-sm transition ${categoria === cat.value ? "bg-blue-700 text-white border-blue-700" : "bg-white text-blue-700 border-blue-200 hover:bg-blue-50"}`}
-              >
-                {cat.label}
-              </button>
-            ))}
-            {categoria && (
-              <button
-                onClick={() => setCategoria("")}
-                className="bg-gray-100 ml-2 px-4 py-2 border border-gray-300 rounded-full text-gray-500 text-xs"
-              >
-                Limpar filtro
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Lista de ONGs */}
-        <div className="gap-7 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {ongsFiltradas.length === 0 && (
-            <div className="col-span-full py-12 text-gray-400 text-center">
-              Nenhuma ONG encontrada.
-            </div>
-          )}
-          {ongsFiltradas.map((ong) => (
-            <div
-              key={ong.id}
-              className="flex flex-col bg-white shadow p-6 border border-gray-100 rounded-xl"
+      {/* Filtros */}
+      <div className="flex md:flex-row flex-col md:items-center gap-4 mb-8">
+        <input
+          type="text"
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          placeholder="Buscar ONG..."
+          className="bg-white shadow-sm px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 w-full md:w-72"
+        />
+        <div className="flex flex-wrap gap-2">
+          {categories.map((cat) => (
+            <button
+              key={cat.value}
+              onClick={() => setCategoria(cat.value)}
+              className={`px-5 py-2 rounded-full border text-sm font-medium shadow-sm transition ${categoria === cat.value ? "bg-blue-700 text-white border-blue-700" : "bg-white text-blue-700 border-blue-200 hover:bg-blue-50"}`}
             >
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-lg">{ong.nome}</h3>
-                {ong.confiavel && (
-                  <span className="flex items-center gap-1 ml-2 font-semibold text-green-600 text-xs">
-                    <FaCheckCircle /> Perfil completo
-                  </span>
-                )}
-              </div>
-              <span className="mb-1 text-blue-700 text-sm">{ong.cidade}</span>
-              <p className="mb-2 text-gray-600 text-sm line-clamp-2">
-                {ong.descricao}
-              </p>
-              <span className="inline-block bg-blue-50 mb-4 px-3 py-1 rounded-full w-fit font-medium text-blue-700 text-xs">
-                {categories.find((c) => c.value === ong.categoria)?.label}
-              </span>
-              <button
-                onClick={() => navigate(`/ong/${ong.id}`)}
-                className="bg-blue-700 hover:bg-blue-800 shadow mt-auto px-4 py-2 rounded font-medium text-white text-center transition"
-              >
-                Ver perfil
-              </button>
-            </div>
+              {cat.label}
+            </button>
           ))}
+          {categoria && (
+            <button
+              onClick={() => setCategoria("")}
+              className="bg-gray-100 ml-2 px-4 py-2 border border-gray-300 rounded-full text-gray-500 text-xs"
+            >
+              Limpar filtro
+            </button>
+          )}
         </div>
-      </main>
-    </div>
+      </div>
+
+      {/* Lista de ONGs */}
+      <div className="gap-7 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {ongsFiltradas.length === 0 && (
+          <div className="col-span-full py-12 text-gray-400 text-center">
+            Nenhuma ONG encontrada.
+          </div>
+        )}
+        {ongsFiltradas.map((ong) => (
+          <div
+            key={ong.id}
+            className="flex flex-col bg-white shadow p-6 border border-gray-100 rounded-xl"
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-semibold text-lg">{ong.nome}</h3>
+              {ong.confiavel && (
+                <span className="flex items-center gap-1 ml-2 font-semibold text-green-600 text-xs">
+                  <FaCheckCircle /> Perfil completo
+                </span>
+              )}
+            </div>
+            <span className="mb-1 text-blue-700 text-sm">{ong.cidade}</span>
+            <p className="mb-2 text-gray-600 text-sm line-clamp-2">
+              {ong.descricao}
+            </p>
+            <span className="inline-block bg-blue-50 mb-4 px-3 py-1 rounded-full w-fit font-medium text-blue-700 text-xs">
+              {categories.find((c) => c.value === ong.categoria)?.label}
+            </span>
+            <button
+              onClick={() => navigate(`/ong/${ong.id}`)}
+              className="bg-blue-700 hover:bg-blue-800 shadow mt-auto px-4 py-2 rounded font-medium text-white text-center transition"
+            >
+              Ver perfil
+            </button>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }
