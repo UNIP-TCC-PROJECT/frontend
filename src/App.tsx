@@ -1,5 +1,7 @@
+import Auth from "./pages/Auth/index";
+
 function App() {
-  return <h1 className="font-bold text-green-500 text-5xl">Tailwind OK 🚀</h1>;
+  return <Auth />;
 }
 
 export default App;

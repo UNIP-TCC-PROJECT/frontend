@@ -1,0 +1,104 @@
+import { useForm } from "react-hook-form";
+import { Button } from "../../../components/Button/index";
+import { Input } from "../../../components/Input/index";
+import { api } from "../../../services/api";
+import { useNavigate } from "react-router-dom";
+
+interface LoginFormValues {
+  email: string;
+  password: string;
+}
+
+interface LoginFormProps {
+  onCreateAccount: () => void;
+}
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export function LoginForm({ onCreateAccount }: LoginFormProps) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({ mode: "onBlur" });
+
+  const navigate = useNavigate();
+
+async function onSubmit(data: LoginFormValues) {
+  try {
+    const response = await api.post("/users/login", data);
+
+    console.log("Login OK:", response.data);
+
+    localStorage.setItem("user", JSON.stringify(response.data));
+
+    navigate("/home"); // ou dashboard
+  } catch (error: any) {
+    alert(error?.response?.data?.message || "Erro no login");
+  }
+}
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <header className="space-y-2 text-center">
+        <h2 className="font-semibold text-slate-900 text-2xl">Entrar</h2>
+        <p className="text-slate-500 text-sm">
+          Acesse sua conta para acompanhar o impacto.
+        </p>
+      </header>
+
+      <div className="space-y-4">
+        <Input
+          label="Email"
+          name="email"
+          type="email"
+          placeholder="voce@email.com"
+          required
+          autoComplete="email"
+          error={errors.email?.message}
+          inputProps={register("email", {
+            required: "Email is required.",
+            pattern: {
+              value: emailRegex,
+              message: "Enter a valid email address.",
+            },
+          })}
+        />
+        <Input
+          label="Senha"
+          name="password"
+          type="password"
+          placeholder="Sua senha"
+          required
+          autoComplete="current-password"
+          error={errors.password?.message}
+          inputProps={register("password", {
+            required: "Password is required.",
+          })}
+        />
+      </div>
+
+      <div className="flex flex-wrap justify-between items-center gap-4 text-sm">
+        <button
+          type="button"
+          className="text-brand-primary hover:text-blue-700 transition"
+        >
+          Esqueci minha senha
+        </button>
+      </div>
+
+      <Button type="submit" isLoading={isSubmitting} className="w-full">
+        Entrar
+      </Button>
+
+      <Button
+        type="button"
+        variant="ghost"
+        className="w-full"
+        onClick={onCreateAccount}
+      >
+        Criar conta
+      </Button>
+    </form>
+  );
+}
