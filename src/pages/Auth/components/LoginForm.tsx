@@ -1,8 +1,7 @@
 import { useForm } from "react-hook-form";
 import { Button } from "../../../components/Button/index";
 import { Input } from "../../../components/Input/index";
-import { api } from "../../../services/api";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../context/AuthContext";
 
 interface LoginFormValues {
   email: string;
@@ -22,21 +21,15 @@ export function LoginForm({ onCreateAccount }: LoginFormProps) {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({ mode: "onBlur" });
 
-  const navigate = useNavigate();
+  const { login } = useAuth();
 
-async function onSubmit(data: LoginFormValues) {
-  try {
-    const response = await api.post("/users/login", data);
-
-    console.log("Login OK:", response.data);
-
-    localStorage.setItem("user", JSON.stringify(response.data));
-
-    navigate("/home"); // ou dashboard
-  } catch (error: any) {
-    alert(error?.response?.data?.message || "Erro no login");
+  async function onSubmit(data: LoginFormValues) {
+    try {
+      await login(data.email, data.password);
+    } catch (error: any) {
+      console.error("Erro no login:", error);
+    }
   }
-}
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
