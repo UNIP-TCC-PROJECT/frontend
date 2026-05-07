@@ -1,7 +1,35 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+
+import { useState, useRef, useEffect } from "react";
+
+import { useAuth } from "../../context/AuthContext";
+
+import ProfileIcon from "./icons/ProfileIcon";
+import MyAccountModal from "./components/MyAccountModal";
 
 export default function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const { logout } = useAuth();
+
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
 
   return (
     <header className="top-0 left-0 z-20 fixed bg-white shadow w-full">
@@ -19,9 +47,24 @@ export default function Header() {
           <a href="#sobre" className="font-medium hover:text-blue-700">
             Sobre
           </a>
-          <Link to="/perfil" className="font-medium hover:text-blue-700">
-            Perfil
-          </Link>
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              aria-label="Minha conta"
+              className="flex justify-center items-center hover:bg-slate-100 border border-slate-200 rounded-full w-9 h-9 transition"
+              onClick={() => setOpen((v) => !v)}
+            >
+              <ProfileIcon />
+            </button>
+
+            {open && (
+              <MyAccountModal
+                setOpen={setOpen}
+                navigate={navigate}
+                logout={logout}
+              />
+            )}
+          </div>
         </nav>
       </div>
     </header>
