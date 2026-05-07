@@ -3,7 +3,10 @@ import { Routes, Route } from "react-router-dom";
 import Auth from "./pages/Auth/index";
 import Home from "./pages/Home";
 import Ongs from "./pages/Ongs";
+
 import Layout from "./components/Layout";
+
+import { RequireAuth } from "./context/AuthContext";
 
 function App() {
   return (
@@ -14,8 +17,22 @@ function App() {
         element={
           <Layout>
             <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/ongs" element={<Ongs />} />
+              <Route
+                path="/"
+                element={
+                  <RequireAuth>
+                    <Home />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/ongs"
+                element={
+                  <RequireAuth>
+                    <Ongs />
+                  </RequireAuth>
+                }
+              />
             </Routes>
           </Layout>
         }

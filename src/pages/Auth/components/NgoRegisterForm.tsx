@@ -1,9 +1,10 @@
 import { useForm } from "react-hook-form";
+
 import { Button } from "../../../components/Button/index";
 import { Input, Textarea } from "../../../components/Input/index";
 import { Section } from "./Section";
-import { useNavigate } from "react-router-dom";
-import { api } from "../../../services/api";
+
+import { useAuth } from "../../../context/AuthContext";
 
 interface NgoFormValues {
   ngoName: string;
@@ -35,38 +36,29 @@ export function NgoRegisterForm() {
   const {
     register,
     handleSubmit,
-    watch, 
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<NgoFormValues>({ mode: "onBlur" });
 
-  const navigate = useNavigate(); 
+  const { register: registerUser, login } = useAuth();
+
   const passwordValue = watch("password");
 
   async function onSubmit(data: NgoFormValues) {
     try {
-      const response = await api.post("/users", {
+      await registerUser({
         name: data.ngoName,
         email: data.email,
-        password: data.password, 
+        password: data.password,
         type: "ONG",
         cnpj: data.cnpj,
         phone: data.phone,
         description: data.description,
       });
 
-      console.log("Cadastro da ONG realizado:", response.data);
-
-      const loginResponse = await api.post("/users/login", {
-        email: data.email,
-        password: data.password, 
-      });
-
-      localStorage.setItem("user", JSON.stringify(loginResponse.data));
-      navigate("/home");
+      await login(data.email, data.password);
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Erro ao criar conta da ONG";
-      alert(message);
-      console.error("Erro no cadastro:", error);
+      console.error("Erro no cadastro da ONG:", error);
     }
   }
 
@@ -118,31 +110,32 @@ export function NgoRegisterForm() {
       </Section>
 
       <Section title="Segurança" description="Crie sua senha de acesso.">
-  <Input
-    label="Senha"
-    name="password"
-    type="password"
-    placeholder="Crie uma senha"
-    required
-    error={errors.password?.message}
-    inputProps={register("password", {
-      required: "Senha é obrigatória.",
-      minLength: { value: 6, message: "Mínimo 6 caracteres." }
-    })}
-  />
-  <Input
-    label="Confirmar senha"
-    name="confirmPassword"
-    type="password"
-    placeholder="Repita a senha"
-    required
-    error={errors.confirmPassword?.message}
-    inputProps={register("confirmPassword", {
-      required: "Confirmação é obrigatória.",
-      validate: (value) => value === passwordValue || "Senhas não conferem.",
-    })}
-  />
-</Section>
+        <Input
+          label="Senha"
+          name="password"
+          type="password"
+          placeholder="Crie uma senha"
+          required
+          error={errors.password?.message}
+          inputProps={register("password", {
+            required: "Senha é obrigatória.",
+            minLength: { value: 6, message: "Mínimo 6 caracteres." },
+          })}
+        />
+        <Input
+          label="Confirmar senha"
+          name="confirmPassword"
+          type="password"
+          placeholder="Repita a senha"
+          required
+          error={errors.confirmPassword?.message}
+          inputProps={register("confirmPassword", {
+            required: "Confirmação é obrigatória.",
+            validate: (value) =>
+              value === passwordValue || "Senhas não conferem.",
+          })}
+        />
+      </Section>
 
       <Section title="Contato" description="Como podemos entrar em contato?">
         <Input
