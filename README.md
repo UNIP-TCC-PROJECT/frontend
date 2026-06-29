@@ -1,73 +1,92 @@
-# React + TypeScript + Vite
+# Frontend — TCC
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicação **web** do projeto de TCC, feita em React + TypeScript com Vite.
+É uma plataforma que conecta **ONGs** e **doadores**: as ONGs se cadastram e
+ficam visíveis em uma listagem, e os doadores podem se cadastrar, buscar e
+conhecer as ONGs.
 
-Currently, two official plugins are available:
+> ℹ️ Este é um projeto **web** — roda no navegador. **Não** é um app mobile,
+> então **não** precisa de Expo, Android Studio nem de emulador/celular.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tecnologias
 
-## React Compiler
+- [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vite.dev/) — build e servidor de desenvolvimento
+- [Tailwind CSS](https://tailwindcss.com/) — estilização
+- [React Router](https://reactrouter.com/) — rotas (`/`, `/ongs`, `/auth`)
+- [React Hook Form](https://react-hook-form.com/) — formulários
+- [Axios](https://axios-http.com/) — comunicação com a API
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Pré-requisitos
 
-## Expanding the ESLint configuration
+- **Node.js 22.9.0** (versão exigida pelo projeto)
+- **Yarn** (gerenciador de pacotes)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Para verificar se você tem o Node na versão certa:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+node -v   # deve mostrar v22.9.0
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Se não tiver o Node 22.9.0 instalado, baixe em
+[nodejs.org](https://nodejs.org/) ou, de preferência, use um gerenciador de
+versões para alternar facilmente entre versões:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# usando nvm (Linux/macOS) ou nvm-windows (Windows)
+nvm install 22.9.0
+nvm use 22.9.0
+```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Caso não tenha o Yarn, instale com:
+
+```bash
+npm install -g yarn
+```
+
+## Instalação
+
+Clone o repositório, entre na pasta `frontend` e instale as dependências:
+
+```bash
+yarn install
+```
+
+## Como rodar
+
+Inicie o servidor de desenvolvimento:
+
+```bash
+yarn dev
+```
+
+O Vite vai mostrar no terminal o endereço local (normalmente
+`http://localhost:5173`). Abra esse endereço no navegador.
+
+### Backend / API
+
+O frontend conversa com uma API em `http://localhost:3000`
+(configurada em [`src/services/api.ts`](src/services/api.ts)).
+Para as telas de cadastro, login e listagem de ONGs funcionarem por completo,
+o backend precisa estar rodando nesse endereço.
+
+## Scripts disponíveis
+
+| Comando        | O que faz                                            |
+| -------------- | ---------------------------------------------------- |
+| `yarn dev`     | Sobe o servidor de desenvolvimento com hot reload    |
+| `yarn build`   | Gera a build de produção em `dist/`                  |
+| `yarn preview` | Serve localmente a build de produção para testar     |
+| `yarn lint`    | Roda o ESLint no projeto                             |
+
+## Estrutura do projeto
+
+```
+src/
+├── components/   # Componentes reutilizáveis (Button, Input, Header, Footer...)
+├── context/      # Contextos React (ex.: AuthContext)
+├── pages/        # Páginas/rotas (Home, Ongs, Auth)
+├── services/     # Configuração da API (axios)
+├── App.tsx       # Definição das rotas
+└── main.tsx      # Ponto de entrada da aplicação
 ```
