@@ -8,6 +8,14 @@ conhecer as ONGs.
 > ℹ️ Este é um projeto **web** — roda no navegador. **Não** é um app mobile,
 > então **não** precisa de Expo, Android Studio nem de emulador/celular.
 
+## Sumário
+
+- [Tecnologias](#tecnologias)
+- [Pré-requisitos](#pré-requisitos)
+- [Como instalar e rodar](#instalação)
+- [Scripts disponíveis](#scripts-disponíveis)
+- [Estrutura do projeto](#estrutura-do-projeto)
+
 ## Tecnologias
 
 - [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
@@ -19,46 +27,34 @@ conhecer as ONGs.
 
 ## Pré-requisitos
 
-- **Node.js 22.9.0** (versão exigida pelo projeto)
-- **Yarn** (gerenciador de pacotes)
+Antes de começar, você precisa ter instalado na sua máquina:
 
-Para verificar se você tem o Node na versão certa:
+- **[Node.js](https://nodejs.org/)** — versão **22.9.0** (instale exatamente essa versão)
+- **[Yarn](https://yarnpkg.com/)** (gerenciador de pacotes usado neste projeto)
+  ```bash
+  npm install -g yarn
+  ```
+- **Git** para clonar o repositório
 
-```bash
-node -v   # deve mostrar v22.9.0
-```
+## Como instalar e rodar
 
-Se não tiver o Node 22.9.0 instalado, baixe em
-[nodejs.org](https://nodejs.org/) ou, de preferência, use um gerenciador de
-versões para alternar facilmente entre versões:
+1. Clone o repositório e entre na pasta do frontend:
 
-```bash
-# usando nvm (Linux/macOS) ou nvm-windows (Windows)
-nvm install 22.9.0
-nvm use 22.9.0
-```
+   ```bash
+   git clone <url-do-repositorio>
+   cd UNIP-EXTENSION/frontend
+   ```
 
-Caso não tenha o Yarn, instale com:
+2. Instale as dependências:
 
-```bash
-npm install -g yarn
-```
+   ```bash
+   yarn install
+   ```
 
-## Instalação
-
-Clone o repositório, entre na pasta `frontend` e instale as dependências:
-
-```bash
-yarn install
-```
-
-## Como rodar
-
-Inicie o servidor de desenvolvimento:
-
-```bash
-yarn dev
-```
+3. Inicie o servidor de desenvolvimento do Expo:
+   ```bash
+   yarn start
+   ```
 
 O Vite vai mostrar no terminal o endereço local (normalmente
 `http://localhost:5173`). Abra esse endereço no navegador.
@@ -72,12 +68,12 @@ o backend precisa estar rodando nesse endereço.
 
 ## Scripts disponíveis
 
-| Comando        | O que faz                                            |
-| -------------- | ---------------------------------------------------- |
-| `yarn dev`     | Sobe o servidor de desenvolvimento com hot reload    |
-| `yarn build`   | Gera a build de produção em `dist/`                  |
-| `yarn preview` | Serve localmente a build de produção para testar     |
-| `yarn lint`    | Roda o ESLint no projeto                             |
+| Comando        | O que faz                                         |
+| -------------- | ------------------------------------------------- |
+| `yarn dev`     | Sobe o servidor de desenvolvimento com hot reload |
+| `yarn build`   | Gera a build de produção em `dist/`               |
+| `yarn preview` | Serve localmente a build de produção para testar  |
+| `yarn lint`    | Roda o ESLint no projeto                          |
 
 ## Estrutura do projeto
 
