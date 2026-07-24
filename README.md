@@ -53,7 +53,7 @@ Antes de começar, você precisa ter instalado na sua máquina:
 
 3. Inicie o servidor de desenvolvimento do Expo:
    ```bash
-   yarn start
+   yarn dev
    ```
 
 O Vite vai mostrar no terminal o endereço local (normalmente
