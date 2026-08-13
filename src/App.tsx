@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Auth from "./pages/Auth/index";
 import Home from "./pages/Home";
 import Ongs from "./pages/Ongs";
+import OngDetails from "./pages/OngDetails";
 
 import Layout from "./components/Layout";
 
@@ -17,6 +18,7 @@ function App() {
           <Layout>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/ongs/:id" element={<OngDetails />} />
               <Route path="/ongs" element={<Ongs />} />
             </Routes>
           </Layout>

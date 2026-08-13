@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa";
-import axios from "axios";
-
+import { api } from "../services/api";
 const categories = [
   { label: "Animais", value: "animais" },
   { label: "Crianças", value: "criancas" },
@@ -21,7 +20,7 @@ export default function Ongs() {
   useEffect(() => {
     async function fetchOngs() {
       try {
-        const response = await axios.get("http://localhost:3000/users/ongs");
+        const response = await api.get("/users/ongs");
 
         setOngs(response.data);
       } catch (error) {
@@ -128,7 +127,7 @@ export default function Ongs() {
               </p>
 
               <button
-                onClick={() => navigate(`/ong/${ong.id}`)}
+                onClick={() => navigate(`/ongs/${ong.id}`)}
                 className="bg-blue-700 hover:bg-blue-800 shadow mt-auto px-4 py-2 rounded font-medium text-white text-center transition"
               >
                 Ver perfil
