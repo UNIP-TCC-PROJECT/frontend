@@ -119,6 +119,14 @@ export default function Ongs() {
                 </span>
               </div>
 
+              <div className="flex items-center gap-1 mb-2 text-sm">
+                <span className="text-yellow-500">★</span>
+                <span className="font-medium text-gray-700">
+                  {Number(ong.averageRating ?? 0).toFixed(1)}
+                </span>
+                <span className="text-gray-400">({ong.totalReviews ?? 0})</span>
+              </div>
+
               {ong?.city && (
                 <span className="mb-1 text-blue-700 text-sm">{ong.city}</span>
               )}
@@ -128,7 +136,7 @@ export default function Ongs() {
               </p>
 
               <button
-                onClick={() => navigate(`/ong/${ong.id}`)}
+                onClick={() => navigate(`/ongs/${ong.id}`)}
                 className="bg-blue-700 hover:bg-blue-800 shadow mt-auto px-4 py-2 rounded font-medium text-white text-center transition"
               >
                 Ver perfil
