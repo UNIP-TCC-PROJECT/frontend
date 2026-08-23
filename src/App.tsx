@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Auth from "./pages/Auth/index";
 import Home from "./pages/Home";
 import Ongs from "./pages/Ongs";
-import OngProfile from "./pages/OngProfile";
+import OngDetails from "./pages/OngDetails";
 
 import Layout from "./components/Layout";
 
@@ -19,7 +19,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/ongs" element={<Ongs />} />
-              <Route path="/ongs/:id" element={<OngProfile />} />
+              <Route path="/ongs/:id" element={<OngDetails />} />
             </Routes>
           </Layout>
         }
