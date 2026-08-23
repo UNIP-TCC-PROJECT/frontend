@@ -35,28 +35,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem("user");
-    if (stored) {
-      setUser(JSON.parse(stored));
+    const token = localStorage.getItem("access_token");
+    const storedUser = localStorage.getItem("user");
+
+    if (token && storedUser) {
+      setUser(JSON.parse(storedUser));
     }
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await api.post("/users/login", { email, password });
+    const response = await api.post("/users/login", {
+      email,
+      password,
+    });
 
-    localStorage.setItem("user", JSON.stringify(response.data));
+    const { access_token } = response.data;
 
-    setUser(response.data);
+    // Salva o JWT
+    localStorage.setItem("access_token", access_token);
+
+    // Busca os dados do usuário autenticado
+    const userResponse = await api.get("/users/me");
+
+    // Salva o usuário
+    localStorage.setItem("user", JSON.stringify(userResponse.data));
+
+    setUser(userResponse.data);
 
     navigate("/");
   };
 
   const register = async (data: any) => {
     await api.post("/users", data);
+
     await login(data.email, data.password);
   };
 
   const logout = () => {
+    localStorage.removeItem("access_token");
     localStorage.removeItem("user");
 
     setUser(null);
@@ -72,7 +88,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, register, logout, isLoggedIn, getUser }}
+      value={{
+        user,
+        login,
+        register,
+        logout,
+        isLoggedIn,
+        getUser,
+      }}
     >
       {children}
     </AuthContext.Provider>
