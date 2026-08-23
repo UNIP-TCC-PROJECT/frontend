@@ -18,8 +18,8 @@ function App() {
           <Layout>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/ongs/:id" element={<OngDetails />} />
               <Route path="/ongs" element={<Ongs />} />
+              <Route path="/ongs/:id" element={<OngDetails />} />
             </Routes>
           </Layout>
         }

@@ -4,6 +4,7 @@ import { api } from "../services/api";
 import { FaCheckCircle, FaEnvelope, FaWhatsapp, FaInstagram, FaGlobe, FaCopy } from "react-icons/fa";
 import MetaCarousel from "./components/MetaCarousel";
 import MetaDetailsModal from "./components/MetaDetailsModal";
+import { StarRating } from "../components/StarRating";
 
 interface Ong {
   id: number;
@@ -19,6 +20,8 @@ interface Ong {
   profileImage?: string;
   category?: string;
   createdAt: string;
+  averageRating?: number;
+  totalReviews?: number;
 }
 
 interface Meta {
@@ -211,6 +214,40 @@ export default function OngDetails() {
         <p className="leading-relaxed text-gray-600">
           {ong.description || "Esta ONG ainda não possui uma descrição."}
         </p>
+
+      </div>
+
+            {/* Avaliações */}
+      <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
+
+        <h2 className="mb-3 text-xl font-bold text-gray-900">
+          Avaliações
+        </h2>
+
+        <div className="mb-5 flex items-center gap-2">
+          <span className="text-2xl text-yellow-500">★</span>
+          <span className="text-lg font-semibold text-gray-800">
+            {Number(ong.averageRating ?? 0).toFixed(1)}
+          </span>
+          <span className="text-sm text-gray-500">
+            ({ong.totalReviews ?? 0} avaliações)
+          </span>
+        </div>
+
+        <p className="mb-3 text-sm font-medium text-gray-700">
+          Deixe sua avaliação
+        </p>
+
+        <StarRating
+          ongId={ong.id}
+          onRated={(novaMedia, novoTotal) =>
+            setOng((prev) =>
+              prev
+                ? { ...prev, averageRating: novaMedia, totalReviews: novoTotal }
+                : prev
+            )
+          }
+        />
 
       </div>
 
