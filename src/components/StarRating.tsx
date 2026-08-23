@@ -13,13 +13,15 @@ export function StarRating({ ongId, currentUserRating, onRated }: StarRatingProp
   const [error, setError] = useState("");
 
   async function handleClick(nota: number) {
-    const stored = localStorage.getItem("user");
-    if (!stored) {
+    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("access_token");
+
+    if (!storedUser || !token) {
       setError("Você precisa estar logado para avaliar.");
       return;
     }
 
-    const user = JSON.parse(stored);
+    const user = JSON.parse(storedUser);
 
     if (user.type !== "DOADOR") {
       setError("Somente doadores podem avaliar ONGs.");
@@ -32,8 +34,11 @@ export function StarRating({ ongId, currentUserRating, onRated }: StarRatingProp
     try {
       const response = await fetch(`http://localhost:3000/users/${ongId}/reviews`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ doadorId: Number(user.id), nota }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ nota }),
       });
 
       if (!response.ok) {
