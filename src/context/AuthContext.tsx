@@ -25,6 +25,7 @@ interface AuthContextProps {
   logout: () => void;
   isLoggedIn: boolean;
   getUser: () => User | null;
+  updateUser: (data: User) => void;
 }
 
 const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
@@ -84,6 +85,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return user;
   };
 
+  const updateUser = (data: User) => {
+    localStorage.setItem("user", JSON.stringify(data));
+    setUser(data);
+  };
+
   const isLoggedIn = !!user;
 
   return (
@@ -95,6 +101,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         logout,
         isLoggedIn,
         getUser,
+        updateUser,
       }}
     >
       {children}
