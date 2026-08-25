@@ -4,8 +4,10 @@ import Auth from "./pages/Auth/index";
 import Home from "./pages/Home";
 import Ongs from "./pages/Ongs";
 import OngDetails from "./pages/OngDetails";
+import Perfil from "./pages/Perfil";
 
 import Layout from "./components/Layout";
+import { RequireAuth } from "./context/AuthContext";
 
 function App() {
   return (
@@ -20,6 +22,14 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/ongs" element={<Ongs />} />
               <Route path="/ongs/:id" element={<OngDetails />} />
+              <Route
+                path="/perfil"
+                element={
+                  <RequireAuth>
+                    <Perfil />
+                  </RequireAuth>
+                }
+              />
             </Routes>
           </Layout>
         }
