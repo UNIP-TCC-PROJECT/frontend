@@ -33,16 +33,16 @@ const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
+  const [user, setUser] = useState<User | null>(() => {
     const token = localStorage.getItem("access_token");
     const storedUser = localStorage.getItem("user");
 
     if (token && storedUser) {
-      setUser(JSON.parse(storedUser));
+      return JSON.parse(storedUser);
     }
-  }, []);
+
+    return null;
+  });
 
   const login = async (email: string, password: string) => {
     const response = await api.post("/users/login", {
