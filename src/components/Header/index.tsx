@@ -12,7 +12,7 @@ export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { logout, isLoggedIn } = useAuth();
+  const { logout, isLoggedIn, user } = useAuth();
 
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -66,6 +66,7 @@ export default function Header() {
                   setOpen={setOpen}
                   navigate={navigate}
                   logout={logout}
+                  isOng={user?.type === "ONG"}
                 />
               )}
             </div>

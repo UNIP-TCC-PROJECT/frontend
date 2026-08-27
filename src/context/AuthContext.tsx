@@ -123,3 +123,19 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
 
   return isLoggedIn ? children : null;
 }
+
+export function RequireOng({ children }: { children: JSX.Element }) {
+  const { isLoggedIn, user } = useAuth();
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/auth");
+    } else if (user?.type !== "ONG") {
+      navigate("/");
+    }
+  }, [isLoggedIn, user, navigate]);
+
+  return isLoggedIn && user?.type === "ONG" ? children : null;
+}
