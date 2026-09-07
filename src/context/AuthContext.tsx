@@ -1,7 +1,6 @@
 import React, {
   createContext,
   useContext,
-  useEffect,
   useState,
   type JSX,
 } from "react";
@@ -15,6 +14,7 @@ interface User {
   name: string;
   email: string;
   type: string;
+  status: string;
   [key: string]: any;
 }
 
@@ -52,13 +52,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const { access_token } = response.data;
 
-    // Salva o JWT
     localStorage.setItem("access_token", access_token);
 
-    // Busca os dados do usuário autenticado
     const userResponse = await api.get("/users/me");
 
-    // Salva o usuário
     localStorage.setItem("user", JSON.stringify(userResponse.data));
 
     setUser(userResponse.data);
@@ -118,7 +115,7 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isLoggedIn) {
       navigate("/auth");
     }
