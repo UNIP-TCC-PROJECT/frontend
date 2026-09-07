@@ -40,7 +40,7 @@ export function NgoRegisterForm() {
     formState: { errors, isSubmitting },
   } = useForm<NgoFormValues>({ mode: "onBlur" });
 
-  const { register: registerUser, login } = useAuth();
+const { register: registerUser } = useAuth();
 
   const passwordValue = watch("password");
 
@@ -55,8 +55,6 @@ export function NgoRegisterForm() {
         phone: data.phone,
         description: data.description,
       });
-
-      await login(data.email, data.password);
     } catch (error: any) {
       console.error("Erro no cadastro da ONG:", error);
     }

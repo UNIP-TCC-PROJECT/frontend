@@ -112,10 +112,15 @@ export default function Ongs() {
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-lg">{ong.name}</h3>
 
-                <span className="flex items-center gap-1 ml-2 font-semibold text-green-600 text-xs">
-                  <FaCheckCircle />
-                  Perfil completo
-                </span>
+                {ong.medalhaVerde && (
+                  <span
+                    className="flex items-center gap-1 ml-2 font-semibold text-green-600 text-xs"
+                    title="Dados cadastrais verificados automaticamente"
+                  >
+                    <FaCheckCircle />
+                    CNPJ verificado
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center gap-1 mb-2 text-sm">

@@ -9,6 +9,7 @@ import { StarRating } from "../components/StarRating";
 interface Ong {
   id: number;
   name: string;
+  medalhaVerde: boolean;
   email: string;
   cnpj?: string;
   phone?: string;
@@ -181,10 +182,15 @@ export default function OngDetails() {
                 {ong.name}
               </h1>
 
-              <span className="flex items-center gap-1 text-sm font-semibold text-green-600">
-                <FaCheckCircle />
-                Perfil completo
-              </span>
+                {ong.medalhaVerde && (
+                  <span
+                    className="flex items-center gap-1 text-sm font-semibold text-green-600"
+                    title="Dados cadastrais verificados automaticamente"
+                  >
+                    <FaCheckCircle />
+                    CNPJ verificado
+                  </span>
+                )}
 
             </div>
 
