@@ -4,7 +4,7 @@ import { Button } from "../../../components/Button/index";
 import { Input, Textarea } from "../../../components/Input/index";
 import { Section } from "./Section";
 
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../../../context/useAuth";
 
 interface NgoFormValues {
   ngoName: string;

@@ -1,13 +1,9 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  type JSX,
-} from "react";
+import React, { createContext, useEffect, useState, type JSX } from "react";
 
 import { useNavigate } from "react-router-dom";
 
 import { api } from "../services/api";
+import { useAuth } from "./useAuth";
 
 interface User {
   id: string;
@@ -28,7 +24,9 @@ interface AuthContextProps {
   updateUser: (data: User) => void;
 }
 
-const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
+export const AuthContext = createContext<AuthContextProps>(
+  {} as AuthContextProps
+);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
@@ -106,16 +104,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
-
 export function RequireAuth({ children }: { children: JSX.Element }) {
   const { isLoggedIn } = useAuth();
 
   const navigate = useNavigate();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isLoggedIn) {
       navigate("/auth");
     }

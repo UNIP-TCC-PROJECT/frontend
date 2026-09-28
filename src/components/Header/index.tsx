@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { useState, useRef, useEffect } from "react";
 
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 
 import ProfileIcon from "./icons/ProfileIcon";
 
