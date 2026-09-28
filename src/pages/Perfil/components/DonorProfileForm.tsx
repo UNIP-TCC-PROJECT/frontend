@@ -6,7 +6,7 @@ import { Input } from "../../../components/Input/index";
 import { Section } from "../../Auth/components/Section";
 
 import { api } from "../../../services/api";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../../../context/useAuth";
 
 interface DonorProfile {
   id: number;

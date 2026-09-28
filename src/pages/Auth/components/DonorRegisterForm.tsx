@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "../../../components/Button/index";
 import { Input } from "../../../components/Input/index";
 import { Section } from "./Section";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../../../context/useAuth";
 
 interface DonorFormValues {
   fullName: string;

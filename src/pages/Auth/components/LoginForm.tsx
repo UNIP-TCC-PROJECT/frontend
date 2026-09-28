@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "../../../components/Button/index";
 import { Input } from "../../../components/Input/index";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../../../context/useAuth";
 
 interface LoginFormValues {
   email: string;
@@ -23,11 +24,18 @@ export function LoginForm({ onCreateAccount }: LoginFormProps) {
 
   const { login } = useAuth();
 
+  const [formError, setFormError] = useState("");
+
   async function onSubmit(data: LoginFormValues) {
     try {
+      setFormError("");
       await login(data.email, data.password);
     } catch (error: any) {
       console.error("Erro no login:", error);
+      setFormError(
+        error?.response?.data?.message ??
+          "Não foi possível fazer login. Verifique seus dados e tente novamente."
+      );
     }
   }
 
@@ -79,6 +87,12 @@ export function LoginForm({ onCreateAccount }: LoginFormProps) {
           Esqueci minha senha
         </button>
       </div>
+
+      {formError ? (
+        <p role="alert" className="text-amber-600 text-sm">
+          {formError}
+        </p>
+      ) : null}
 
       <Button type="submit" isLoading={isSubmitting} className="w-full">
         Entrar

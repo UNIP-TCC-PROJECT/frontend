@@ -5,9 +5,10 @@ import Home from "./pages/Home";
 import Ongs from "./pages/Ongs";
 import OngDetails from "./pages/OngDetails";
 import Perfil from "./pages/Perfil";
+import MinhasMetas from "./pages/MinhasMetas";
 
 import Layout from "./components/Layout";
-import { RequireAuth } from "./context/AuthContext";
+import { RequireAuth, RequireOng } from "./context/AuthContext";
 
 function App() {
   return (
@@ -28,6 +29,14 @@ function App() {
                   <RequireAuth>
                     <Perfil />
                   </RequireAuth>
+                }
+              />
+              <Route
+                path="/minhas-metas"
+                element={
+                  <RequireOng>
+                    <MinhasMetas />
+                  </RequireOng>
                 }
               />
             </Routes>

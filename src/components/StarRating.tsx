@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { api } from "../services/api";
 
 interface StarRatingProps {
   ongId: string | number;
@@ -32,25 +33,14 @@ export function StarRating({ ongId, currentUserRating, onRated }: StarRatingProp
     setError("");
 
     try {
-      const response = await fetch(`http://localhost:3000/users/${ongId}/reviews`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ nota }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => null);
-        throw new Error(data?.message || "Erro ao enviar avaliação.");
-      }
-
-      const ongAtualizada = await response.json();
+      const response = await api.post(`/users/${ongId}/reviews`, { nota });
+      const ongAtualizada = response.data;
       setSelected(nota);
       onRated(ongAtualizada.averageRating, ongAtualizada.totalReviews);
     } catch (err: any) {
-      setError(err.message || "Não foi possível enviar sua avaliação.");
+      setError(
+        err.response?.data?.message || err.message || "Não foi possível enviar sua avaliação."
+      );
     } finally {
       setSending(false);
     }
