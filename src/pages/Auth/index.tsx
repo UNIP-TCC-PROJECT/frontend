@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Card } from "../../components/Card/index";
 import { LoginForm } from "./components/LoginForm";
 import { RegisterForm } from "./components/RegisterForm";
@@ -12,7 +12,11 @@ interface LoginForm {
 type AuthMode = "login" | "register";
 
 export default function Auth() {
-  const [authMode, setAuthMode] = useState<AuthMode>("login");
+  const [searchParams] = useSearchParams();
+
+  const [authMode, setAuthMode] = useState<AuthMode>(
+    searchParams.get("modo") === "cadastro" ? "register" : "login"
+  );
 
   return (
     <div className="bg-brand-background min-h-screen text-brand-text">

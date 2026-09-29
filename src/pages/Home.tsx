@@ -1,55 +1,120 @@
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaCheckCircle } from "react-icons/fa";
+import { FaBuilding, FaCheckCircle, FaShieldAlt, FaHandSparkles } from "react-icons/fa";
+import { api } from "../services/api";
 import { CATEGORIES as categories } from "../constants/categories";
 
-const featuredOngs = [
-  {
-    id: 1,
-    name: "Amigos dos Animais",
-    city: "São Paulo",
-    description: "Protegendo e cuidando de animais em situação de rua.",
-  },
-  {
-    id: 2,
-    name: "Criança Feliz",
-    city: "Rio de Janeiro",
-    description: "Apoiando crianças em situação de vulnerabilidade.",
-  },
-  {
-    id: 3,
-    name: "Alimente o Futuro",
-    city: "Belo Horizonte",
-    description: "Distribuição de alimentos para famílias carentes.",
-  },
-];
+interface Ong {
+  id: number;
+  name: string;
+  city?: string;
+  description?: string;
+  averageRating?: number;
+  medalhaVerde?: boolean;
+}
 
 export default function Home() {
   const navigate = useNavigate();
+
+  const [ongs, setOngs] = useState<Ong[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchOngs() {
+      try {
+        const response = await api.get("/users/ongs");
+        setOngs(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar ONGs:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchOngs();
+  }, []);
 
   const handleCategoryClick = (cat: string) => {
     navigate(`/ongs?categoria=${cat}`);
   };
 
+  const verifiedCount = ongs.filter((ong) => ong.medalhaVerde).length;
+
+  const featuredOngs = [...ongs]
+    .sort((a, b) => Number(b.averageRating ?? 0) - Number(a.averageRating ?? 0))
+    .slice(0, 3);
+
   return (
     <>
       {/* Hero */}
-      <section className="relative left-1/2 -mx-[50vw] -mt-32 flex flex-col flex-1 justify-center items-center bg-gradient-to-b from-brand-sage to-transparent px-4 pt-40 pb-12 w-screen text-center">
-        <h1 className="mb-4 font-serif text-brand-text text-4xl md:text-5xl">
-          Ajude causas reais com transparência
-        </h1>
-        <p className="mb-8 text-brand-text/70 text-lg md:text-xl">
-          Encontre ONGs confiáveis para apoiar
-        </p>
-        <Link
-          to="/ongs"
-          className="bg-brand-primary hover:bg-brand-primaryDark shadow-xs px-8 py-3 rounded-full font-semibold text-brand-background transition-all"
-        >
-          Acessar ONGs
-        </Link>
+      <section className="relative left-1/2 -mx-[50vw] -mt-32 bg-gradient-to-b from-brand-sage to-transparent px-4 pt-40 pb-16 w-screen">
+        <div className="items-center gap-10 grid grid-cols-1 lg:grid-cols-12 mx-auto max-w-6xl">
+          <div className="space-y-6 lg:col-span-7">
+            <div className="inline-flex items-center gap-2 bg-brand-surface px-3.5 py-1 border border-brand-primary/20 rounded-full font-semibold text-brand-primary text-xs uppercase tracking-wider">
+              <FaHandSparkles className="w-3.5 h-3.5" />
+              Plataforma de conexão transparente
+            </div>
+
+            <h1 className="font-serif text-brand-text text-4xl md:text-5xl leading-[1.1]">
+              Ajude causas reais com{" "}
+              <span className="text-brand-primary italic">transparência</span>
+            </h1>
+
+            <p className="max-w-xl text-brand-text/70 text-lg">
+              Encontre ONGs verificadas para apoiar com doações, materiais ou
+              trabalho voluntário.
+            </p>
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                to="/ongs"
+                className="bg-brand-primary hover:bg-brand-primaryDark shadow-xs px-8 py-3 rounded-full font-semibold text-brand-background transition-all"
+              >
+                Acessar ONGs
+              </Link>
+              <Link
+                to="/auth?modo=cadastro"
+                className="bg-brand-surface hover:bg-brand-sage px-8 py-3 border border-brand-text/15 rounded-full font-semibold text-brand-text transition-all"
+              >
+                Cadastrar minha ONG
+              </Link>
+            </div>
+          </div>
+
+          <div className="space-y-4 bg-brand-surface shadow-xs p-6 border border-brand-text/10 rounded-3xl lg:col-span-5">
+            <h3 className="pb-3 border-brand-text/10 border-b font-semibold text-brand-text/50 text-xs uppercase tracking-widest">
+              Impacto da plataforma
+            </h3>
+            <div className="gap-3 grid grid-cols-2">
+              <div className="bg-brand-background p-4 border border-brand-text/10 rounded-2xl">
+                <div className="flex items-center gap-2 mb-1 text-brand-primary">
+                  <FaBuilding className="w-4 h-4" />
+                  <span className="font-serif font-bold text-brand-text text-2xl">
+                    {loading ? "..." : ongs.length}
+                  </span>
+                </div>
+                <span className="font-medium text-brand-text/60 text-xs">
+                  ONGs cadastradas
+                </span>
+              </div>
+              <div className="bg-brand-background p-4 border border-brand-text/10 rounded-2xl">
+                <div className="flex items-center gap-2 mb-1 text-brand-primary">
+                  <FaShieldAlt className="w-4 h-4" />
+                  <span className="font-serif font-bold text-brand-text text-2xl">
+                    {loading ? "..." : verifiedCount}
+                  </span>
+                </div>
+                <span className="font-medium text-brand-text/60 text-xs">
+                  Com CNPJ verificado
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Confiança */}
-      <section className="gap-6 grid grid-cols-1 md:grid-cols-3 mx-auto mb-12 px-4 max-w-4xl">
+      <section id="sobre" className="gap-6 grid grid-cols-1 md:grid-cols-3 mx-auto mb-12 px-4 pt-12 max-w-4xl scroll-mt-28">
         {[
           {
             title: "ONGs com perfis completos",
@@ -96,35 +161,50 @@ export default function Home() {
         <h2 className="mb-6 font-serif text-brand-text text-2xl">
           ONGs em destaque
         </h2>
-        <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
-          {featuredOngs.map((ong) => (
-            <div
-              key={ong.id}
-              className="group flex flex-col bg-brand-surface shadow-xs hover:shadow-md p-6 border border-brand-text/10 hover:border-brand-text/30 rounded-2xl transition-all"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="flex justify-center items-center bg-brand-sage rounded-full ring-2 ring-brand-primary/20 w-11 h-11 font-serif font-bold text-brand-primary shrink-0">
-                  {ong.name.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <h3 className="font-serif font-bold text-brand-text group-hover:text-brand-primary text-base transition-colors">
-                    {ong.name}
-                  </h3>
-                  <span className="text-brand-text/60 text-xs">{ong.city}</span>
-                </div>
-              </div>
-              <p className="flex-1 mb-4 text-brand-text/70 text-sm leading-relaxed">
-                {ong.description}
-              </p>
-              <Link
-                to={`/ong/${ong.id}`}
-                className="bg-brand-primary hover:bg-brand-primaryDark shadow-xs mt-auto px-4 py-2.5 rounded-full font-semibold text-brand-background text-xs text-center transition-all"
+
+        {loading && (
+          <p className="py-8 text-brand-text/60 text-center">Carregando ONGs...</p>
+        )}
+
+        {!loading && featuredOngs.length === 0 && (
+          <p className="py-8 text-brand-text/60 text-center">
+            Ainda não há ONGs cadastradas.
+          </p>
+        )}
+
+        {!loading && featuredOngs.length > 0 && (
+          <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
+            {featuredOngs.map((ong) => (
+              <div
+                key={ong.id}
+                className="group flex flex-col bg-brand-surface shadow-xs hover:shadow-md p-6 border border-brand-text/10 hover:border-brand-text/30 rounded-2xl transition-all"
               >
-                Ver perfil
-              </Link>
-            </div>
-          ))}
-        </div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex justify-center items-center bg-brand-sage rounded-full ring-2 ring-brand-primary/20 w-11 h-11 font-serif font-bold text-brand-primary shrink-0">
+                    {ong.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 className="font-serif font-bold text-brand-text group-hover:text-brand-primary text-base transition-colors">
+                      {ong.name}
+                    </h3>
+                    {ong.city ? (
+                      <span className="text-brand-text/60 text-xs">{ong.city}</span>
+                    ) : null}
+                  </div>
+                </div>
+                <p className="flex-1 mb-4 text-brand-text/70 text-sm line-clamp-3 leading-relaxed">
+                  {ong.description || "Sem descrição disponível."}
+                </p>
+                <Link
+                  to={`/ongs/${ong.id}`}
+                  className="bg-brand-primary hover:bg-brand-primaryDark shadow-xs mt-auto px-4 py-2.5 rounded-full font-semibold text-brand-background text-xs text-center transition-all"
+                >
+                  Ver perfil
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </>
   );
