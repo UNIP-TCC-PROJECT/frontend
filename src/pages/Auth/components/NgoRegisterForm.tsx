@@ -10,7 +10,7 @@ interface NgoFormValues {
   ngoName: string;
   cnpj: string;
   description: string;
-  area: string;
+  category: string;
   email: string;
   phone: string;
   website: string;
@@ -25,7 +25,6 @@ interface NgoFormValues {
   pixKey: string;
   legalName: string;
   legalCpf: string;
-  document?: FileList;
   password: string;
   confirmPassword: string;
 }
@@ -37,10 +36,11 @@ export function NgoRegisterForm() {
     register,
     handleSubmit,
     watch,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<NgoFormValues>({ mode: "onBlur" });
 
-const { register: registerUser } = useAuth();
+  const { register: registerUser } = useAuth();
 
   const passwordValue = watch("password");
 
@@ -54,9 +54,27 @@ const { register: registerUser } = useAuth();
         cnpj: data.cnpj,
         phone: data.phone,
         description: data.description,
+        category: data.category,
+        website: data.website,
+        zip: data.zip,
+        street: data.street,
+        city: data.city,
+        state: data.state,
+        bank: data.bank,
+        agency: data.agency,
+        account: data.account,
+        accountType: data.accountType,
+        pixKey: data.pixKey,
+        legalName: data.legalName,
+        legalCpf: data.legalCpf,
       });
     } catch (error: any) {
-      console.error("Erro no cadastro da ONG:", error);
+      const apiMessage = error.response?.data?.message;
+      const message = Array.isArray(apiMessage)
+        ? apiMessage.join(" ")
+        : apiMessage || "Não foi possível concluir o cadastro. Tente novamente.";
+
+      setError("root.server", { message });
     }
   }
 
@@ -73,7 +91,7 @@ const { register: registerUser } = useAuth();
           required
           error={errors.ngoName?.message}
           inputProps={register("ngoName", {
-            required: "This field is required.",
+            required: "O nome da ONG é obrigatório.",
           })}
         />
         <Input
@@ -82,7 +100,7 @@ const { register: registerUser } = useAuth();
           placeholder="00.000.000/0001-00"
           required
           error={errors.cnpj?.message}
-          inputProps={register("cnpj", { required: "This field is required." })}
+          inputProps={register("cnpj", { required: "O CNPJ é obrigatório." })}
         />
         <div className="md:col-span-2">
           <Textarea
@@ -93,17 +111,17 @@ const { register: registerUser } = useAuth();
             rows={4}
             error={errors.description?.message}
             textareaProps={register("description", {
-              required: "This field is required.",
+              required: "A descrição é obrigatória.",
             })}
           />
         </div>
         <Input
           label="Area de atuacao"
-          name="area"
+          name="category"
           placeholder="Educacao, saude, animais"
           required
-          error={errors.area?.message}
-          inputProps={register("area", { required: "This field is required." })}
+          error={errors.category?.message}
+          inputProps={register("category", { required: "A área de atuação é obrigatória." })}
         />
       </Section>
 
@@ -116,8 +134,8 @@ const { register: registerUser } = useAuth();
           required
           error={errors.password?.message}
           inputProps={register("password", {
-            required: "Senha é obrigatória.",
-            minLength: { value: 6, message: "Mínimo 6 caracteres." },
+            required: "A senha é obrigatória.",
+            minLength: { value: 6, message: "A senha deve ter pelo menos 6 caracteres." },
           })}
         />
         <Input
@@ -128,9 +146,9 @@ const { register: registerUser } = useAuth();
           required
           error={errors.confirmPassword?.message}
           inputProps={register("confirmPassword", {
-            required: "Confirmação é obrigatória.",
+            required: "A confirmação de senha é obrigatória.",
             validate: (value) =>
-              value === passwordValue || "Senhas não conferem.",
+              value === passwordValue || "As senhas não conferem.",
           })}
         />
       </Section>
@@ -145,10 +163,10 @@ const { register: registerUser } = useAuth();
           autoComplete="email"
           error={errors.email?.message}
           inputProps={register("email", {
-            required: "This field is required.",
+            required: "O e-mail é obrigatório.",
             pattern: {
               value: emailRegex,
-              message: "Enter a valid email address.",
+              message: "Informe um e-mail válido.",
             },
           })}
         />
@@ -161,7 +179,7 @@ const { register: registerUser } = useAuth();
           autoComplete="tel"
           error={errors.phone?.message}
           inputProps={register("phone", {
-            required: "This field is required.",
+            required: "O telefone é obrigatório.",
           })}
         />
         <Input
@@ -180,7 +198,7 @@ const { register: registerUser } = useAuth();
           placeholder="00000-000"
           required
           error={errors.zip?.message}
-          inputProps={register("zip", { required: "This field is required." })}
+          inputProps={register("zip", { required: "O CEP é obrigatório." })}
         />
         <Input
           label="Rua e numero"
@@ -189,7 +207,7 @@ const { register: registerUser } = useAuth();
           required
           error={errors.street?.message}
           inputProps={register("street", {
-            required: "This field is required.",
+            required: "O endereço é obrigatório.",
           })}
         />
         <Input
@@ -198,7 +216,7 @@ const { register: registerUser } = useAuth();
           placeholder="Sao Paulo"
           required
           error={errors.city?.message}
-          inputProps={register("city", { required: "This field is required." })}
+          inputProps={register("city", { required: "A cidade é obrigatória." })}
         />
         <Input
           label="Estado"
@@ -207,7 +225,7 @@ const { register: registerUser } = useAuth();
           required
           error={errors.state?.message}
           inputProps={register("state", {
-            required: "This field is required.",
+            required: "O estado é obrigatório.",
           })}
         />
       </Section>
@@ -222,7 +240,7 @@ const { register: registerUser } = useAuth();
           placeholder="Nome do banco"
           required
           error={errors.bank?.message}
-          inputProps={register("bank", { required: "This field is required." })}
+          inputProps={register("bank", { required: "O banco é obrigatório." })}
         />
         <Input
           label="Agencia"
@@ -231,7 +249,7 @@ const { register: registerUser } = useAuth();
           required
           error={errors.agency?.message}
           inputProps={register("agency", {
-            required: "This field is required.",
+            required: "A agência é obrigatória.",
           })}
         />
         <Input
@@ -241,7 +259,7 @@ const { register: registerUser } = useAuth();
           required
           error={errors.account?.message}
           inputProps={register("account", {
-            required: "This field is required.",
+            required: "A conta é obrigatória.",
           })}
         />
         <Input
@@ -251,7 +269,7 @@ const { register: registerUser } = useAuth();
           required
           error={errors.accountType?.message}
           inputProps={register("accountType", {
-            required: "This field is required.",
+            required: "O tipo de conta é obrigatório.",
           })}
         />
         <div className="md:col-span-2">
@@ -262,7 +280,7 @@ const { register: registerUser } = useAuth();
             required
             error={errors.pixKey?.message}
             inputProps={register("pixKey", {
-              required: "This field is required.",
+              required: "A chave PIX é obrigatória.",
             })}
           />
         </div>
@@ -279,7 +297,7 @@ const { register: registerUser } = useAuth();
           required
           error={errors.legalName?.message}
           inputProps={register("legalName", {
-            required: "This field is required.",
+            required: "O responsável legal é obrigatório.",
           })}
         />
         <Input
@@ -289,29 +307,16 @@ const { register: registerUser } = useAuth();
           required
           error={errors.legalCpf?.message}
           inputProps={register("legalCpf", {
-            required: "This field is required.",
+            required: "O CPF é obrigatório.",
           })}
         />
-        <div className="md:col-span-2">
-          <div className="space-y-2">
-            <label
-              htmlFor="document"
-              className="font-medium text-slate-700 text-sm"
-            >
-              Documento (opcional)
-            </label>
-            <input
-              id="document"
-              type="file"
-              className="bg-white px-4 py-3 border border-slate-300 border-dashed rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40 w-full text-slate-700 text-sm transition"
-              {...register("document")}
-            />
-            <p className="text-slate-500 text-xs">
-              Envie um comprovante da ONG.
-            </p>
-          </div>
-        </div>
       </Section>
+
+      {errors.root?.server?.message && (
+        <p role="alert" className="text-red-700 text-sm">
+          {errors.root.server.message}
+        </p>
+      )}
 
       <Button type="submit" isLoading={isSubmitting} className="w-full">
         Criar conta
