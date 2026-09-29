@@ -100,10 +100,10 @@ export default function MinhasMetas() {
     <div className="mx-auto max-w-4xl">
       <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="font-extrabold text-gray-900 text-3xl">
+          <h1 className="font-serif text-brand-text text-3xl">
             Minhas metas
           </h1>
-          <p className="mt-1 text-gray-600">
+          <p className="mt-1 text-brand-text/70">
             Gerencie as metas e campanhas da sua ONG.
           </p>
         </div>
@@ -113,7 +113,7 @@ export default function MinhasMetas() {
 
       {formOpen && (
         <Card className="mb-6">
-          <h2 className="mb-4 font-bold text-gray-900 text-xl">
+          <h2 className="mb-4 font-serif text-brand-text text-xl">
             {editingMeta ? "Editar meta" : "Nova meta"}
           </h2>
           <MetaForm
@@ -128,14 +128,14 @@ export default function MinhasMetas() {
       )}
 
       {loading ? (
-        <div className="py-10 text-gray-500 text-center">
+        <div className="py-10 text-brand-text/60 text-center">
           Carregando suas metas...
         </div>
       ) : error ? (
         <p className="text-red-500 text-center">{error}</p>
       ) : metas.length === 0 ? (
-        <div className="bg-white shadow-sm p-8 border border-gray-100 rounded-2xl text-center">
-          <p className="text-gray-500">
+        <div className="bg-brand-surface shadow-sm p-8 border border-brand-text/10 rounded-2xl text-center">
+          <p className="text-brand-text/60">
             Você ainda não cadastrou nenhuma meta.
           </p>
         </div>
@@ -147,27 +147,27 @@ export default function MinhasMetas() {
             return (
               <div
                 key={meta.id}
-                className={`rounded-2xl border bg-white p-6 shadow-sm ${
-                  meta.active ? "border-gray-100" : "border-gray-100 opacity-60"
+                className={`rounded-2xl border bg-brand-surface p-6 shadow-sm ${
+                  meta.active ? "border-brand-text/10" : "border-brand-text/10 opacity-60"
                 }`}
               >
                 <div className="flex flex-wrap justify-between items-start gap-3">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-bold text-gray-900 text-lg">
+                      <h3 className="font-bold text-brand-text text-lg">
                         {meta.title}
                       </h3>
-                      <span className="bg-blue-50 px-2 py-0.5 rounded-full font-semibold text-blue-700 text-xs">
+                      <span className="bg-brand-sage px-2 py-0.5 rounded-full font-semibold text-brand-primary text-xs">
                         {getTypeLabel(meta.type)}
                       </span>
                       {!meta.active && (
-                        <span className="bg-gray-100 px-2 py-0.5 rounded-full font-semibold text-gray-500 text-xs">
+                        <span className="bg-brand-text/10 px-2 py-0.5 rounded-full font-semibold text-brand-text/60 text-xs">
                           Inativa
                         </span>
                       )}
                     </div>
                     {meta.description && (
-                      <p className="text-gray-600 text-sm">
+                      <p className="text-brand-text/70 text-sm">
                         {meta.description}
                       </p>
                     )}
@@ -190,13 +190,13 @@ export default function MinhasMetas() {
                   </div>
                 </div>
 
-                <div className="mt-4 h-3 overflow-hidden rounded-full bg-gray-200">
+                <div className="mt-4 h-3 overflow-hidden rounded-full bg-brand-sage">
                   <div
-                    className="bg-blue-700 rounded-full h-full transition-all duration-500"
+                    className="bg-brand-primary rounded-full h-full transition-all duration-500"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-                <p className="mt-2 font-semibold text-blue-700 text-xs">
+                <p className="mt-2 font-semibold text-brand-primary text-xs">
                   {Math.round(progress)}% alcançado
                 </p>
               </div>

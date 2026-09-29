@@ -56,7 +56,7 @@ export function StarRating({ ongId, currentUserRating, onRated }: StarRatingProp
             onMouseEnter={() => setHover(estrela)}
             onMouseLeave={() => setHover(0)}
             className={`text-3xl cursor-pointer transition ${
-              estrela <= (hover || selected) ? "text-yellow-400" : "text-gray-300"
+              estrela <= (hover || selected) ? "text-yellow-400" : "text-brand-text/20"
             } ${sending ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             ★

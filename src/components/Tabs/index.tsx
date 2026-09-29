@@ -18,7 +18,7 @@ export function Tabs({ tabs, activeId, onChange, ariaLabel }: TabsProps) {
     <div
       role="tablist"
       aria-label={ariaLabel ?? "Tabs"}
-      className="flex bg-slate-100 p-1 rounded-2xl"
+      className="flex bg-brand-sage p-1 rounded-full"
     >
       {tabs.map((tab) => {
         const isActive = tab.id === activeId;
@@ -31,13 +31,13 @@ export function Tabs({ tabs, activeId, onChange, ariaLabel }: TabsProps) {
             aria-selected={isActive}
             aria-controls={`tabpanel-${tab.id}`}
             onClick={() => onChange(tab.id)}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-all ${
               isActive
-                ? "bg-white text-brand-primary shadow-sm"
-                : "text-slate-500 hover:text-slate-700"
+                ? "bg-brand-primary text-brand-background shadow-sm"
+                : "text-brand-primary/70 hover:text-brand-primary hover:bg-brand-primary/10"
             }`}
           >
-            {tab.icon ? <span className="text-base">{tab.icon}</span> : null}
+            {tab.icon ? <span className="text-sm normal-case tracking-normal">{tab.icon}</span> : null}
             {tab.label}
           </button>
         );

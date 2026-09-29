@@ -39,16 +39,16 @@ export default function Home() {
   return (
     <>
       {/* Hero */}
-      <section className="flex flex-col flex-1 justify-center items-center bg-gradient-to-b from-blue-50 to-transparent px-4 pt-32 pb-12 text-center">
-        <h1 className="mb-4 font-extrabold text-gray-900 text-4xl md:text-5xl">
+      <section className="relative left-1/2 -mx-[50vw] -mt-32 flex flex-col flex-1 justify-center items-center bg-gradient-to-b from-brand-sage to-transparent px-4 pt-40 pb-12 w-screen text-center">
+        <h1 className="mb-4 font-serif text-brand-text text-4xl md:text-5xl">
           Ajude causas reais com transparência
         </h1>
-        <p className="mb-8 text-gray-600 text-lg md:text-xl">
+        <p className="mb-8 text-brand-text/70 text-lg md:text-xl">
           Encontre ONGs confiáveis para apoiar
         </p>
         <Link
           to="/ongs"
-          className="bg-blue-700 hover:bg-blue-800 shadow px-8 py-3 rounded-lg font-semibold text-white transition"
+          className="bg-brand-primary hover:bg-brand-primaryDark shadow-xs px-8 py-3 rounded-full font-semibold text-brand-background transition-all"
         >
           Acessar ONGs
         </Link>
@@ -72,24 +72,24 @@ export default function Home() {
         ].map((item, i) => (
           <div
             key={i}
-            className="flex flex-col items-center bg-white shadow p-6 border border-gray-100 rounded-xl text-center"
+            className="flex flex-col items-center bg-brand-surface shadow-xs hover:shadow-md p-6 border border-brand-text/10 hover:border-brand-text/30 rounded-2xl text-center transition-all"
           >
-            <FaCheckCircle className="mb-2 text-green-500 text-3xl" />
-            <h3 className="mb-1 font-semibold text-lg">{item.title}</h3>
-            <p className="text-gray-500 text-sm">{item.desc}</p>
+            <FaCheckCircle className="mb-2 text-brand-primary text-3xl" />
+            <h3 className="mb-1 font-semibold text-brand-text text-lg">{item.title}</h3>
+            <p className="text-brand-text/60 text-sm">{item.desc}</p>
           </div>
         ))}
       </section>
 
       {/* Categorias */}
       <section className="mx-auto mb-16 px-4 max-w-3xl">
-        <h2 className="mb-4 font-bold text-gray-800 text-2xl">Categorias</h2>
+        <h2 className="mb-4 font-serif text-brand-text text-2xl">Categorias</h2>
         <div className="flex flex-wrap justify-center gap-4">
           {categories.map((cat) => (
             <button
               key={cat.value}
               onClick={() => handleCategoryClick(cat.value)}
-              className="bg-white hover:bg-blue-50 shadow-sm px-6 py-2 border border-blue-200 rounded-full font-medium text-blue-700 transition"
+              className="bg-brand-surface hover:bg-brand-sage shadow-sm px-6 py-2 border border-brand-text/15 rounded-full font-medium text-brand-primary transition"
             >
               {cat.label}
             </button>
@@ -99,21 +99,32 @@ export default function Home() {
 
       {/* ONGs em destaque */}
       <section className="mx-auto mb-20 px-4 max-w-5xl">
-        <h2 className="mb-6 font-bold text-gray-800 text-2xl">
+        <h2 className="mb-6 font-serif text-brand-text text-2xl">
           ONGs em destaque
         </h2>
         <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
           {featuredOngs.map((ong) => (
             <div
               key={ong.id}
-              className="flex flex-col bg-white shadow p-6 border border-gray-100 rounded-xl"
+              className="group flex flex-col bg-brand-surface shadow-xs hover:shadow-md p-6 border border-brand-text/10 hover:border-brand-text/30 rounded-2xl transition-all"
             >
-              <h3 className="mb-1 font-semibold text-lg">{ong.name}</h3>
-              <span className="mb-2 text-blue-700 text-sm">{ong.city}</span>
-              <p className="flex-1 mb-4 text-gray-600">{ong.description}</p>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex justify-center items-center bg-brand-sage rounded-full ring-2 ring-brand-primary/20 w-11 h-11 font-serif font-bold text-brand-primary shrink-0">
+                  {ong.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="font-serif font-bold text-brand-text group-hover:text-brand-primary text-base transition-colors">
+                    {ong.name}
+                  </h3>
+                  <span className="text-brand-text/60 text-xs">{ong.city}</span>
+                </div>
+              </div>
+              <p className="flex-1 mb-4 text-brand-text/70 text-sm leading-relaxed">
+                {ong.description}
+              </p>
               <Link
                 to={`/ong/${ong.id}`}
-                className="bg-blue-700 hover:bg-blue-800 shadow mt-auto px-4 py-2 rounded font-medium text-white text-center transition"
+                className="bg-brand-primary hover:bg-brand-primaryDark shadow-xs mt-auto px-4 py-2.5 rounded-full font-semibold text-brand-background text-xs text-center transition-all"
               >
                 Ver perfil
               </Link>

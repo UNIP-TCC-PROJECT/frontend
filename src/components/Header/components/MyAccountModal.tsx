@@ -7,9 +7,9 @@ interface MyAccountModalProps {
 
 function MyAccountModal({ setOpen, navigate, logout, isOng }: MyAccountModalProps) {
   return (
-    <div className="right-0 z-30 absolute flex flex-col gap-2 bg-white shadow-lg mt-2 p-2 border border-slate-200 rounded-lg w-48 animate-fade-in">
+    <div className="right-0 z-30 absolute flex flex-col gap-2 bg-brand-surface shadow-lg mt-2 p-2 border border-brand-text/10 rounded-lg w-48 animate-fade-in">
       <button
-        className="hover:bg-slate-100 px-4 py-2 rounded w-full font-medium text-slate-700 text-left"
+        className="hover:bg-brand-sage px-4 py-2 rounded w-full font-medium text-brand-text text-left"
         onClick={() => {
           setOpen(false);
           navigate("/perfil");
@@ -19,7 +19,7 @@ function MyAccountModal({ setOpen, navigate, logout, isOng }: MyAccountModalProp
       </button>
       {isOng && (
         <button
-          className="hover:bg-slate-100 px-4 py-2 rounded w-full font-medium text-slate-700 text-left"
+          className="hover:bg-brand-sage px-4 py-2 rounded w-full font-medium text-brand-text text-left"
           onClick={() => {
             setOpen(false);
             navigate("/minhas-metas");
@@ -29,7 +29,7 @@ function MyAccountModal({ setOpen, navigate, logout, isOng }: MyAccountModalProp
         </button>
       )}
       <button
-        className="hover:bg-red-50 mt-1 px-4 py-2 border-slate-100 border-t rounded w-full font-medium text-red-600 text-left"
+        className="hover:bg-red-50 mt-1 px-4 py-2 border-brand-text/10 border-t rounded w-full font-medium text-red-600 text-left"
         onClick={() => {
           setOpen(false);
           logout();
