@@ -18,7 +18,12 @@ export default function Auth() {
     <div className="bg-brand-background min-h-screen text-brand-text">
       <div className="flex flex-col mx-auto px-4 py-12 w-full max-w-4xl">
         <header className="text-center">
-          <h1 className="mt-4 font-serif text-3xl">DoaFácil</h1>
+          <Link
+            to="/"
+            className="inline-block mt-4 font-serif text-3xl hover:text-brand-primary transition-colors"
+          >
+            DoaFácil
+          </Link>
           <p className="mt-2 text-brand-text/60 text-sm">
             Plataforma segura para ONGs e doadores.
           </p>
