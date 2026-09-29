@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa";
 import { api } from "../services/api";
 const categories = [
@@ -11,11 +11,27 @@ const categories = [
 
 export default function Ongs() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
   const [ongs, setOngs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const requestedCategory = searchParams.get("categoria") ?? "";
+  const category = categories.some((item) => item.value === requestedCategory)
+    ? requestedCategory
+    : "";
+
+  function selectCategory(value: string) {
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (value) {
+      nextParams.set("categoria", value);
+    } else {
+      nextParams.delete("categoria");
+    }
+
+    setSearchParams(nextParams);
+  }
 
   useEffect(() => {
     async function fetchOngs() {
@@ -66,7 +82,7 @@ export default function Ongs() {
           {categories.map((cat) => (
             <button
               key={cat.value}
-              onClick={() => setCategory(cat.value)}
+              onClick={() => selectCategory(cat.value)}
               className={`px-5 py-2 rounded-full border text-sm font-medium shadow-sm transition ${
                 category === cat.value
                   ? "bg-blue-700 text-white border-blue-700"
@@ -79,7 +95,7 @@ export default function Ongs() {
 
           {category && (
             <button
-              onClick={() => setCategory("")}
+              onClick={() => selectCategory("")}
               className="bg-gray-100 ml-2 px-4 py-2 border border-gray-300 rounded-full text-gray-500 text-xs"
             >
               Limpar filtro
