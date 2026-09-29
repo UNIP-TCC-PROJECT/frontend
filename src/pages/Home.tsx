@@ -112,7 +112,7 @@ export default function Home() {
               <span className="mb-2 text-blue-700 text-sm">{ong.city}</span>
               <p className="flex-1 mb-4 text-gray-600">{ong.description}</p>
               <Link
-                to={`/ong/${ong.id}`}
+                to={`/ongs/${ong.id}`}
                 className="bg-blue-700 hover:bg-blue-800 shadow mt-auto px-4 py-2 rounded font-medium text-white text-center transition"
               >
                 Ver perfil
