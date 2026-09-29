@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "../../../components/Button/index";
 import { Input } from "../../../components/Input/index";
@@ -27,8 +28,12 @@ export function DonorRegisterForm() {
 
   const passwordValue = watch("password");
 
+  const [submitError, setSubmitError] = useState("");
+
   async function onSubmit(data: DonorFormValues) {
     try {
+      setSubmitError("");
+
       await registerUser({
         name: data.fullName,
         email: data.email,
@@ -41,12 +46,25 @@ export function DonorRegisterForm() {
       await login(data.email, data.password);
     } catch (error: any) {
       console.error("Erro no cadastro:", error);
+
+      const apiMessage = error?.response?.data?.message;
+      setSubmitError(
+        Array.isArray(apiMessage)
+          ? apiMessage.join(" ")
+          : apiMessage || "Não foi possível concluir o cadastro. Tente novamente."
+      );
     }
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <Section title="Dados basicos" description="Informacoes para o cadastro.">
+      {submitError ? (
+        <p role="alert" className="bg-amber-50 p-3 rounded-lg text-amber-700 text-sm">
+          {submitError}
+        </p>
+      ) : null}
+
+      <Section title="Dados básicos" description="Informações para o cadastro.">
         <Input
           label="Nome completo"
           name="fullName"
@@ -55,13 +73,14 @@ export function DonorRegisterForm() {
           autoComplete="name"
           error={errors.fullName?.message}
           inputProps={register("fullName", {
-            required: "This field is required.",
+            required: "Este campo é obrigatório.",
           })}
         />
         <Input
           label="CPF"
           name="cpf"
           placeholder="000.000.000-00"
+          mask="999.999.999-99"
           inputProps={register("cpf")}
         />
         <Input
@@ -73,10 +92,10 @@ export function DonorRegisterForm() {
           autoComplete="email"
           error={errors.email?.message}
           inputProps={register("email", {
-            required: "This field is required.",
+            required: "Este campo é obrigatório.",
             pattern: {
               value: emailRegex,
-              message: "Enter a valid email address.",
+              message: "Informe um email válido.",
             },
           })}
         />
@@ -85,11 +104,12 @@ export function DonorRegisterForm() {
           name="phone"
           type="tel"
           placeholder="(11) 99999-9999"
+          mask="(99) 99999-9999"
           inputProps={register("phone")}
         />
       </Section>
 
-      <Section title="Seguranca" description="Crie sua senha de acesso.">
+      <Section title="Segurança" description="Crie sua senha de acesso.">
         <Input
           label="Senha"
           name="password"
@@ -99,7 +119,7 @@ export function DonorRegisterForm() {
           autoComplete="new-password"
           error={errors.password?.message}
           inputProps={register("password", {
-            required: "This field is required.",
+            required: "Este campo é obrigatório.",
           })}
         />
         <Input
@@ -111,9 +131,9 @@ export function DonorRegisterForm() {
           autoComplete="new-password"
           error={errors.confirmPassword?.message}
           inputProps={register("confirmPassword", {
-            required: "This field is required.",
+            required: "Este campo é obrigatório.",
             validate: (value) =>
-              value === passwordValue || "Passwords do not match.",
+              value === passwordValue || "As senhas não conferem.",
           })}
         />
       </Section>

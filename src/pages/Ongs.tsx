@@ -2,12 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa";
 import { api } from "../services/api";
-const categories = [
-  { label: "Animais", value: "animais" },
-  { label: "Crianças", value: "criancas" },
-  { label: "Alimentos", value: "alimentos" },
-  { label: "Roupas", value: "roupas" },
-];
+import { CATEGORIES as categories } from "../constants/categories";
 
 export default function Ongs() {
   const navigate = useNavigate();

@@ -1,12 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa";
-
-const categories = [
-  { label: "Animais", value: "animais" },
-  { label: "Crianças", value: "criancas" },
-  { label: "Alimentos", value: "alimentos" },
-  { label: "Roupas", value: "roupas" },
-];
+import { CATEGORIES as categories } from "../constants/categories";
 
 const featuredOngs = [
   {

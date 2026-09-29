@@ -58,10 +58,10 @@ export function LoginForm({ onCreateAccount }: LoginFormProps) {
           autoComplete="email"
           error={errors.email?.message}
           inputProps={register("email", {
-            required: "Email is required.",
+            required: "O email é obrigatório.",
             pattern: {
               value: emailRegex,
-              message: "Enter a valid email address.",
+              message: "Informe um email válido.",
             },
           })}
         />
@@ -74,7 +74,7 @@ export function LoginForm({ onCreateAccount }: LoginFormProps) {
           autoComplete="current-password"
           error={errors.password?.message}
           inputProps={register("password", {
-            required: "Password is required.",
+            required: "A senha é obrigatória.",
           })}
         />
       </div>
