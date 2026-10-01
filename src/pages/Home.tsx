@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa";
+import { api } from "../services/api";
 
 const categories = [
   { label: "Animais", value: "animais" },
@@ -8,29 +10,67 @@ const categories = [
   { label: "Roupas", value: "roupas" },
 ];
 
-const featuredOngs = [
-  {
-    id: 1,
-    name: "Amigos dos Animais",
-    city: "São Paulo",
-    description: "Protegendo e cuidando de animais em situação de rua.",
-  },
-  {
-    id: 2,
-    name: "Criança Feliz",
-    city: "Rio de Janeiro",
-    description: "Apoiando crianças em situação de vulnerabilidade.",
-  },
-  {
-    id: 3,
-    name: "Alimente o Futuro",
-    city: "Belo Horizonte",
-    description: "Distribuição de alimentos para famílias carentes.",
-  },
-];
+type FeaturedOng = {
+  id: number;
+  name: string;
+  city?: string | null;
+  state?: string | null;
+  category?: string | null;
+  averageRating?: number | string | null;
+  totalReviews?: number | null;
+};
 
 export default function Home() {
   const navigate = useNavigate();
+
+  const [featuredOngs, setFeaturedOngs] = useState<FeaturedOng[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function fetchFeaturedOngs() {
+      try {
+        const response = await api.get<FeaturedOng[]>("/users/ongs");
+
+        if (!Array.isArray(response.data)) {
+          throw new Error("A API retornou um formato inválido.");
+        }
+
+        if (active) {
+          const rankedOngs = [...response.data].sort((a, b) => {
+            const ratingDifference =
+              Number(b.averageRating ?? 0) - Number(a.averageRating ?? 0);
+
+            if (ratingDifference !== 0) {
+              return ratingDifference;
+            }
+
+            return Number(b.totalReviews ?? 0) - Number(a.totalReviews ?? 0);
+          });
+
+          if (active) {
+            setFeaturedOngs(rankedOngs.slice(0, 3));
+          }
+        }
+      } catch {
+        if (active) {
+          setError("Não foi possível carregar as ONGs em destaque.");
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchFeaturedOngs();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleCategoryClick = (cat: string) => {
     navigate(`/ongs?categoria=${cat}`);
@@ -102,6 +142,13 @@ export default function Home() {
         <h2 className="mb-6 font-bold text-gray-800 text-2xl">
           ONGs em destaque
         </h2>
+        {loading && <p role="status">Carregando ONGs...</p>}
+
+        {error && <p role="alert">{error}</p>}
+
+        {!loading && !error && featuredOngs.length === 0 && (
+          <p>Nenhuma ONG cadastrada no momento.</p>
+        )}
         <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
           {featuredOngs.map((ong) => (
             <div
@@ -109,8 +156,24 @@ export default function Home() {
               className="flex flex-col bg-white shadow p-6 border border-gray-100 rounded-xl"
             >
               <h3 className="mb-1 font-semibold text-lg">{ong.name}</h3>
-              <span className="mb-2 text-blue-700 text-sm">{ong.city}</span>
-              <p className="flex-1 mb-4 text-gray-600">{ong.description}</p>
+
+              <div className="flex items-center gap-1 mb-2 text-sm">
+                <span className="text-yellow-500">★</span>
+                <span className="font-medium text-gray-700">
+                  {Number(ong.averageRating ?? 0).toFixed(1)}
+                </span>
+                <span className="text-gray-400">({ong.totalReviews ?? 0})</span>
+              </div>
+
+              {(ong.city || ong.state) && (
+                <span className="mb-1 text-blue-700 text-sm">
+                  {[ong.city, ong.state].filter(Boolean).join(" - ")}
+                </span>
+              )}
+
+              <p className="flex-1 mb-4 text-gray-600">
+                {ong.category || "Categoria não informada."}
+              </p>
               <Link
                 to={`/ongs/${ong.id}`}
                 className="bg-blue-700 hover:bg-blue-800 shadow mt-auto px-4 py-2 rounded font-medium text-white text-center transition"
