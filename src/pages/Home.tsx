@@ -7,9 +7,12 @@ import { CATEGORIES as categories } from "../constants/categories";
 interface Ong {
   id: number;
   name: string;
-  city?: string;
+  city?: string | null;
+  state?: string | null;
+  category?: string | null;
   description?: string;
-  averageRating?: number;
+  averageRating?: number | string | null;
+  totalReviews?: number | null;
   medalhaVerde?: boolean;
 }
 
@@ -18,20 +21,39 @@ export default function Home() {
 
   const [ongs, setOngs] = useState<Ong[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    let active = true;
+
     async function fetchOngs() {
       try {
-        const response = await api.get("/users/ongs");
-        setOngs(response.data);
-      } catch (error) {
-        console.error("Erro ao buscar ONGs:", error);
+        const response = await api.get<Ong[]>("/users/ongs");
+
+        if (!Array.isArray(response.data)) {
+          throw new Error("A API retornou um formato inválido.");
+        }
+
+        if (active) {
+          setOngs(response.data);
+        }
+      } catch (err) {
+        console.error("Erro ao buscar ONGs:", err);
+        if (active) {
+          setError("Não foi possível carregar as ONGs em destaque.");
+        }
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     }
 
     fetchOngs();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleCategoryClick = (cat: string) => {
@@ -41,7 +63,16 @@ export default function Home() {
   const verifiedCount = ongs.filter((ong) => ong.medalhaVerde).length;
 
   const featuredOngs = [...ongs]
-    .sort((a, b) => Number(b.averageRating ?? 0) - Number(a.averageRating ?? 0))
+    .sort((a, b) => {
+      const ratingDifference =
+        Number(b.averageRating ?? 0) - Number(a.averageRating ?? 0);
+
+      if (ratingDifference !== 0) {
+        return ratingDifference;
+      }
+
+      return Number(b.totalReviews ?? 0) - Number(a.totalReviews ?? 0);
+    })
     .slice(0, 3);
 
   return (
@@ -166,7 +197,13 @@ export default function Home() {
           <p className="py-8 text-brand-text/60 text-center">Carregando ONGs...</p>
         )}
 
-        {!loading && featuredOngs.length === 0 && (
+        {error && (
+          <p role="alert" className="py-8 text-brand-text/60 text-center">
+            {error}
+          </p>
+        )}
+
+        {!loading && !error && featuredOngs.length === 0 && (
           <p className="py-8 text-brand-text/60 text-center">
             Ainda não há ONGs cadastradas.
           </p>
@@ -187,13 +224,24 @@ export default function Home() {
                     <h3 className="font-serif font-bold text-brand-text group-hover:text-brand-primary text-base transition-colors">
                       {ong.name}
                     </h3>
-                    {ong.city ? (
-                      <span className="text-brand-text/60 text-xs">{ong.city}</span>
-                    ) : null}
+                    {(ong.city || ong.state) && (
+                      <span className="text-brand-text/60 text-xs">
+                        {[ong.city, ong.state].filter(Boolean).join(" - ")}
+                      </span>
+                    )}
                   </div>
                 </div>
+                <div className="flex items-center gap-1 mb-2 text-sm">
+                  <span className="text-yellow-500">★</span>
+                  <span className="font-medium text-brand-text">
+                    {Number(ong.averageRating ?? 0).toFixed(1)}
+                  </span>
+                  <span className="text-brand-text/40">
+                    ({ong.totalReviews ?? 0})
+                  </span>
+                </div>
                 <p className="flex-1 mb-4 text-brand-text/70 text-sm line-clamp-3 leading-relaxed">
-                  {ong.description || "Sem descrição disponível."}
+                  {ong.description || ong.category || "Sem descrição disponível."}
                 </p>
                 <Link
                   to={`/ongs/${ong.id}`}
