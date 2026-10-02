@@ -6,9 +6,10 @@
 
 @layer base {
   :root {
-    font-family: "Plus Jakarta Sans", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-family:
+      "Plus Jakarta Sans", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     color: #1a1a1a;
-    background-color: #f9f8f3;
+    background-color: #f7fafd;
   }
 
   * {
