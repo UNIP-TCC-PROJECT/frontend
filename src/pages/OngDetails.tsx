@@ -5,6 +5,7 @@ import { FaCheckCircle, FaEnvelope, FaWhatsapp, FaInstagram, FaGlobe, FaCopy } f
 import MetaCarousel from "./components/MetaCarousel";
 import MetaDetailsModal from "./components/MetaDetailsModal";
 import { StarRating } from "../components/StarRating";
+import { ReportModal } from "../components/ReportModal";
 
 interface Ong {
   id: number;
@@ -23,6 +24,14 @@ interface Ong {
   createdAt: string;
   averageRating?: number;
   totalReviews?: number;
+}
+
+interface Comment {
+  id: number;
+  nota: number;
+  comentario: string;
+  createdAt: string;
+  autorNome: string;
 }
 
 interface Meta {
@@ -51,6 +60,29 @@ export default function OngDetails() {
   const [selectedMeta, setSelectedMeta] = useState<Meta | null>(null);
   const [metas, setMetas] = useState<Meta[]>([]);
   const [loadingMetas, setLoadingMetas] = useState(true);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [reportComment, setReportComment] = useState<Comment | null>(null);
+
+  const [myReview, setMyReview] = useState<{
+    id: number;
+    nota: number;
+    comentario: string | null;
+  } | null>(null);
+
+  async function fetchComments() {
+    try {
+      const response = await api.get(`/users/${id}/reviews`);
+      setComments(response.data);
+
+      if (localStorage.getItem("access_token")) {
+        const mine = await api.get(`/users/${id}/reviews/me`);
+        setMyReview(mine.data || null);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar comentários:", error);
+    }
+  }
 
   useEffect(() => {
     async function fetchOng() {
@@ -73,6 +105,7 @@ export default function OngDetails() {
 
     if (id) {
       fetchOng();
+      fetchComments();
     }
   }, [id]);
 
@@ -253,9 +286,76 @@ export default function OngDetails() {
                 : prev
             )
           }
+          currentUserRating={myReview?.nota}
+          currentUserComment={myReview?.comentario}
+          onCommented={fetchComments}
         />
 
+        <div className="mt-8 space-y-4">
+          {comments.length === 0 ? (
+            <p className="text-sm text-brand-text/60">
+              Ainda não há comentários.
+            </p>
+          ) : (
+            comments.map((c) => (
+              <div
+                key={c.id}
+                className="rounded-xl border border-brand-text/10 bg-brand-sage p-4"
+              >
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="font-medium text-brand-text">
+                    {c.autorNome}{" "}
+                    <span className="text-yellow-500">
+                      {"★".repeat(c.nota)}
+                    </span>
+                  </span>
+                  {c.id === myReview?.id ? (
+                    <span className="text-xs text-brand-text/50">Seu comentário</span>
+                  ) : (
+                    <button
+                      onClick={() => setReportComment(c)}
+                      className="text-xs text-brand-text/50 underline hover:text-red-600"
+                    >
+                      Denunciar comentário
+                    </button>
+                  )}
+                </div>
+                <p className="whitespace-pre-line text-sm text-brand-text/70">
+                  {c.comentario}
+                </p>
+              </div>
+            ))
+          )}
+        </div>
+
+        {reportComment && (
+          <ReportModal
+            targetType="COMENTARIO"
+            targetId={reportComment.id}
+            targetLabel={`Comentário de ${reportComment.autorNome}`}
+            onClose={() => setReportComment(null)}
+          />
+        )}
+
       </div>
+
+      <div className="mb-6 text-right">
+        <button
+          onClick={() => setReportOpen(true)}
+          className="text-sm text-brand-text/50 underline hover:text-red-600"
+        >
+          Denunciar ONG
+        </button>
+      </div>
+
+      {reportOpen && (
+        <ReportModal
+          targetType="ONG"
+          targetId={ong.id}
+          targetLabel={ong.name}
+          onClose={() => setReportOpen(false)}
+        />
+      )}
 
       {/* Como ajudar */}
       <div className="mb-6 rounded-2xl border border-brand-text/10 bg-brand-surface p-8 shadow-sm">
