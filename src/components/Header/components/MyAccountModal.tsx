@@ -7,7 +7,7 @@ interface MyAccountModalProps {
 
 function MyAccountModal({ setOpen, navigate, logout, isOng }: MyAccountModalProps) {
   return (
-    <div className="right-0 z-30 absolute flex flex-col gap-2 bg-brand-surface shadow-lg mt-2 p-2 border border-brand-text/10 rounded-lg w-48 animate-fade-in">
+    <div className="right-0 z-30 absolute flex flex-col gap-2 bg-brand-surface shadow-lg mt-2 p-2 border border-brand-text/10 rounded-lg w-48 fade-in">
       <button
         className="hover:bg-brand-sage px-4 py-2 rounded w-full font-medium text-brand-text text-left"
         onClick={() => {

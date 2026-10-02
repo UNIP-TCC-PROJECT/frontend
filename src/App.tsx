@@ -13,14 +13,13 @@ import { RequireAuth, RequireOng } from "./context/AuthContext";
 function App() {
   return (
     <Routes>
-      <Route path="/auth" element={<Auth />} />
-
       <Route
         path="*"
         element={
           <Layout>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/auth" element={<Auth />} />
               <Route path="/ongs" element={<Ongs />} />
               <Route path="/ongs/:id" element={<OngDetails />} />
               <Route
