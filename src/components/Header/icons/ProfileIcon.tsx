@@ -1,4 +1,26 @@
+import { useState } from "react";
+import { useAuth } from "../../../context/AuthContext";
+import { imagemUrl } from "../../../services/api";
+
 function ProfileIcon() {
+  const { user } = useAuth();
+  const [erro, setErro] = useState(false);
+
+  const foto = imagemUrl(user?.profileImage);
+
+  // Se tem foto e ela carregou, mostra a foto
+  if (foto && !erro) {
+    return (
+      <img
+        src={foto}
+        alt={user?.name ?? "Perfil"}
+        onError={() => setErro(true)}
+        className="w-full h-full rounded-full object-cover"
+      />
+    );
+  }
+
+  // Senão, o boneco de sempre
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

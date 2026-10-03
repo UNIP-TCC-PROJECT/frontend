@@ -1,20 +1,19 @@
-import { useRef, useState } from 'react';
-import { FaCamera } from 'react-icons/fa';
+import { useRef, useState } from "react";
+import { FaCamera } from "react-icons/fa";
+import { api, imagemUrl } from "../services/api";
+import { useAuth } from "../context/AuthContext";
+
+const TIPO_LABEL = {
+  ONG: "ONG",
+  DOADOR: "Doador",
+} as const;
 
 export default function Perfil() {
-  const [user, setUser] = useState({
-    nome: 'João Silva',
-    email: 'joao@email.com',
-    telefone: '(11) 99999-9999',
-    tipo: 'Doador',
-    avatarUrl: null as string | null,
-    criadoEm: '10/01/2026',
-  });
+  const { user, updateUser } = useAuth();
 
-  // Preview local da nova imagem (antes de salvar)
   const [preview, setPreview] = useState<string | null>(null);
-
-  // Referência para o input escondido
+  const [arquivo, setArquivo] = useState<File | null>(null);
+  const [salvando, setSalvando] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   function abrirSeletor() {
@@ -25,49 +24,65 @@ export default function Perfil() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validação de tipo
-    if (!file.type.startsWith('image/')) {
-      alert('Por favor, selecione uma imagem (JPG, PNG ou WEBP).');
+    if (!/^image\/(jpe?g|png|webp)$/.test(file.type)) {
+      alert("Por favor, selecione uma imagem (JPG, PNG ou WEBP).");
       return;
     }
 
-    // Validação de tamanho (máx 2MB)
     if (file.size > 2 * 1024 * 1024) {
-      alert('A imagem deve ter no máximo 2MB.');
+      alert("A imagem deve ter no máximo 2MB.");
       return;
     }
 
-    // Cria preview local
-    const url = URL.createObjectURL(file);
-    setPreview(url);
+    if (preview) URL.revokeObjectURL(preview);
+    setArquivo(file);
+    setPreview(URL.createObjectURL(file));
   }
 
   function cancelarSelecao() {
     if (preview) URL.revokeObjectURL(preview);
     setPreview(null);
-    if (inputRef.current) inputRef.current.value = '';
+    setArquivo(null);
+    if (inputRef.current) inputRef.current.value = "";
   }
 
-  function salvarFoto() {
-    // 👇 Por enquanto, só atualiza o user localmente.
-    // Depois vamos trocar por uma chamada à API.
-    if (!preview) return;
+  async function salvarFoto() {
+    if (!arquivo || !user) return;
 
-    setUser((prev) => ({ ...prev, avatarUrl: preview }));
-    setPreview(null);
-    if (inputRef.current) inputRef.current.value = '';
+    const form = new FormData();
+    form.append("file", arquivo); // mesmo nome do FileInterceptor('file')
+
+    try {
+      setSalvando(true);
+
+      // O axios define o Content-Type multipart sozinho. Não coloque manualmente.
+      const { data } = await api.post<{ profileImage: string }>(
+        "/users/me/avatar",
+        form
+      );
+
+      // Atualiza o contexto + localStorage: Perfil e Navbar mudam juntos
+      updateUser({ profileImage: data.profileImage });
+      cancelarSelecao();
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao salvar a foto. Tente novamente.");
+    } finally {
+      setSalvando(false);
+    }
   }
 
-  // A imagem exibida é o preview (se tiver) ou a atual
-  const imagemExibida = preview ?? user.avatarUrl;
+  if (!user) {
+    return <p className="p-10 text-center">Faça login para ver seu perfil.</p>;
+  }
+
+  const imagemExibida = preview ?? imagemUrl(user.profileImage);
 
   return (
     <main className="min-h-[calc(100vh-160px)] bg-slate-50 py-10 px-4">
       <div className="max-w-3xl mx-auto flex flex-col gap-6">
-
         {/* Card do topo — foto + nome */}
         <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 flex flex-col sm:flex-row items-center sm:items-start gap-6">
-
           {/* ===== FOTO ===== */}
           <div className="relative group">
             <div
@@ -78,12 +93,12 @@ export default function Perfil() {
               {imagemExibida ? (
                 <img
                   src={imagemExibida}
-                  alt={user.nome}
+                  alt={user.name}
                   className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-md"
                 />
               ) : (
                 <div className="w-28 h-28 rounded-full bg-blue-600 text-white flex items-center justify-center text-4xl font-bold border-4 border-white shadow-md">
-                  {user.nome.charAt(0).toUpperCase()}
+                  {user.name.charAt(0).toUpperCase()}
                 </div>
               )}
 
@@ -114,11 +129,11 @@ export default function Perfil() {
 
           {/* Informações + botões */}
           <div className="flex-1 text-center sm:text-left">
-            <h1 className="text-2xl font-bold text-slate-800">{user.nome}</h1>
+            <h1 className="text-2xl font-bold text-slate-800">{user.name}</h1>
             <p className="text-slate-500">{user.email}</p>
 
             <span className="inline-block mt-3 px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700">
-              {user.tipo}
+              {TIPO_LABEL[user.type]}
             </span>
 
             {/* Botões de ação da foto */}
@@ -136,13 +151,15 @@ export default function Perfil() {
                   <button
                     type="button"
                     onClick={salvarFoto}
-                    className="px-4 py-2 text-sm font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+                    disabled={salvando}
+                    className="px-4 py-2 text-sm font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors disabled:opacity-60"
                   >
-                    Salvar foto
+                    {salvando ? "Salvando..." : "Salvar foto"}
                   </button>
                   <button
                     type="button"
                     onClick={cancelarSelecao}
+                    disabled={salvando}
                     className="px-4 py-2 text-sm font-medium rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors"
                   >
                     Cancelar
@@ -174,11 +191,14 @@ export default function Perfil() {
           </div>
 
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
-            <InfoItem label="Nome completo" value={user.nome} />
+            <InfoItem label="Nome completo" value={user.name} />
             <InfoItem label="E-mail" value={user.email} />
-            <InfoItem label="Telefone" value={user.telefone} />
-            <InfoItem label="Tipo de conta" value={user.tipo} />
-            <InfoItem label="Membro desde" value={user.criadoEm} />
+            <InfoItem label="Telefone" value={user.phone ?? "—"} />
+            <InfoItem label="Tipo de conta" value={TIPO_LABEL[user.type]} />
+            <InfoItem
+              label="Membro desde"
+              value={new Date(user.createdAt).toLocaleDateString("pt-BR")}
+            />
           </dl>
         </section>
 
@@ -189,7 +209,6 @@ export default function Perfil() {
             Alterar senha
           </button>
         </section>
-
       </div>
     </main>
   );
