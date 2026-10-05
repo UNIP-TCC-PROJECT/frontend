@@ -1,10 +1,12 @@
+import { useState, type FocusEvent } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "../../../components/Button/index";
-import { Input, Textarea } from "../../../components/Input/index";
+import { Input, Select, Textarea } from "../../../components/Input/index";
 import { Section } from "./Section";
 
 import { useAuth } from "../../../context/useAuth";
+import { CATEGORIES } from "../../../constants/categories";
 
 interface NgoFormValues {
   ngoName: string;
@@ -37,12 +39,50 @@ export function NgoRegisterForm() {
     handleSubmit,
     watch,
     setError,
+    setValue,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<NgoFormValues>({ mode: "onBlur" });
 
   const { register: registerUser } = useAuth();
 
   const passwordValue = watch("password");
+
+  const [cepStatus, setCepStatus] = useState<"idle" | "loading" | "error">("idle");
+
+  const zipField = register("zip", { required: "O CEP é obrigatório." });
+
+  async function handleZipBlur(event: FocusEvent<HTMLInputElement>) {
+    await zipField.onBlur(event);
+
+    const cep = event.target.value.replace(/\D/g, "");
+
+    if (cep.length !== 8) {
+      return;
+    }
+
+    try {
+      setCepStatus("loading");
+
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await response.json();
+
+      if (data.erro) {
+        setCepStatus("error");
+        return;
+      }
+
+      setValue("street", `${data.logradouro}${data.bairro ? `, ${data.bairro}` : ""}`, {
+        shouldValidate: true,
+      });
+      setValue("city", data.localidade, { shouldValidate: true });
+      setValue("state", data.uf, { shouldValidate: true });
+      clearErrors(["street", "city", "state"]);
+      setCepStatus("idle");
+    } catch {
+      setCepStatus("error");
+    }
+  }
 
   async function onSubmit(data: NgoFormValues) {
     try {
@@ -81,13 +121,13 @@ export function NgoRegisterForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <Section
-        title="Dados basicos"
-        description="Informacoes essenciais sobre a ONG."
+        title="Dados básicos"
+        description="Informações essenciais sobre a ONG."
       >
         <Input
           label="Nome da ONG"
           name="ngoName"
-          placeholder="Nome da organizacao"
+          placeholder="Nome da organização"
           required
           error={errors.ngoName?.message}
           inputProps={register("ngoName", {
@@ -98,15 +138,16 @@ export function NgoRegisterForm() {
           label="CNPJ"
           name="cnpj"
           placeholder="00.000.000/0001-00"
+          mask="99.999.999/9999-99"
           required
           error={errors.cnpj?.message}
           inputProps={register("cnpj", { required: "O CNPJ é obrigatório." })}
         />
         <div className="md:col-span-2">
           <Textarea
-            label="Descricao"
+            label="Descrição"
             name="description"
-            placeholder="Descreva a missao da ONG"
+            placeholder="Descreva a missão da ONG"
             required
             rows={4}
             error={errors.description?.message}
@@ -115,13 +156,16 @@ export function NgoRegisterForm() {
             })}
           />
         </div>
-        <Input
-          label="Area de atuacao"
+        <Select
+          label="Área de atuação"
           name="category"
-          placeholder="Educacao, saude, animais"
+          placeholder="Selecione uma área"
+          options={CATEGORIES}
           required
           error={errors.category?.message}
-          inputProps={register("category", { required: "A área de atuação é obrigatória." })}
+          selectProps={register("category", {
+            required: "A área de atuação é obrigatória.",
+          })}
         />
       </Section>
 
@@ -175,6 +219,7 @@ export function NgoRegisterForm() {
           name="phone"
           type="tel"
           placeholder="(11) 99999-9999"
+          mask="(99) 99999-9999"
           required
           autoComplete="tel"
           error={errors.phone?.message}
@@ -191,17 +236,31 @@ export function NgoRegisterForm() {
         />
       </Section>
 
-      <Section title="Endereco" description="Informe o endereco oficial.">
+      <Section title="Endereço" description="Informe o endereço oficial.">
+        <div>
+          <Input
+            label="CEP"
+            name="zip"
+            placeholder="00000-000"
+            mask="99999-999"
+            required
+            error={errors.zip?.message}
+            inputProps={{
+              ...zipField,
+              onBlur: handleZipBlur,
+            }}
+          />
+          {cepStatus === "loading" ? (
+            <p className="mt-1 text-brand-text/50 text-xs">Buscando endereço...</p>
+          ) : null}
+          {cepStatus === "error" ? (
+            <p className="mt-1 text-amber-600 text-xs">
+              CEP não encontrado. Preencha o endereço manualmente.
+            </p>
+          ) : null}
+        </div>
         <Input
-          label="CEP"
-          name="zip"
-          placeholder="00000-000"
-          required
-          error={errors.zip?.message}
-          inputProps={register("zip", { required: "O CEP é obrigatório." })}
-        />
-        <Input
-          label="Rua e numero"
+          label="Rua e número"
           name="street"
           placeholder="Rua, 123"
           required
@@ -213,7 +272,7 @@ export function NgoRegisterForm() {
         <Input
           label="Cidade"
           name="city"
-          placeholder="Sao Paulo"
+          placeholder="São Paulo"
           required
           error={errors.city?.message}
           inputProps={register("city", { required: "A cidade é obrigatória." })}
@@ -231,8 +290,8 @@ export function NgoRegisterForm() {
       </Section>
 
       <Section
-        title="Dados bancarios"
-        description="Informacoes para recebimento de doacoes."
+        title="Dados bancários"
+        description="Informações para recebimento de doações."
       >
         <Input
           label="Banco"
@@ -243,7 +302,7 @@ export function NgoRegisterForm() {
           inputProps={register("bank", { required: "O banco é obrigatório." })}
         />
         <Input
-          label="Agencia"
+          label="Agência"
           name="agency"
           placeholder="0001"
           required
@@ -265,7 +324,7 @@ export function NgoRegisterForm() {
         <Input
           label="Tipo de conta"
           name="accountType"
-          placeholder="Corrente ou poupanca"
+          placeholder="Corrente ou poupança"
           required
           error={errors.accountType?.message}
           inputProps={register("accountType", {
@@ -276,7 +335,7 @@ export function NgoRegisterForm() {
           <Input
             label="Chave PIX"
             name="pixKey"
-            placeholder="Email, telefone ou chave aleatoria"
+            placeholder="Email, telefone ou chave aleatória"
             required
             error={errors.pixKey?.message}
             inputProps={register("pixKey", {
@@ -287,11 +346,11 @@ export function NgoRegisterForm() {
       </Section>
 
       <Section
-        title="Validacao legal"
-        description="Dados do responsavel legal e documentos."
+        title="Validação legal"
+        description="Dados do responsável legal e documentos."
       >
         <Input
-          label="Responsavel legal"
+          label="Responsável legal"
           name="legalName"
           placeholder="Nome completo"
           required
@@ -304,6 +363,7 @@ export function NgoRegisterForm() {
           label="CPF"
           name="legalCpf"
           placeholder="000.000.000-00"
+          mask="999.999.999-99"
           required
           error={errors.legalCpf?.message}
           inputProps={register("legalCpf", {

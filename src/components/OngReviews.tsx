@@ -30,8 +30,8 @@ export function OngReviews({
   }
 
   return (
-    <section className="mb-6 rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
-      <h2 className="mb-3 text-xl font-bold text-gray-900">
+    <section className="mb-6 rounded-2xl border border-brand-text/10 bg-brand-surface p-8 shadow-sm">
+      <h2 className="mb-3 font-serif text-xl text-brand-text">
         Avaliações
       </h2>
 
@@ -39,10 +39,10 @@ export function OngReviews({
         <span aria-hidden="true" className="text-2xl text-yellow-500">
           ★
         </span>
-        <span className="text-lg font-semibold text-gray-800">
+        <span className="text-lg font-semibold text-brand-text/80">
           {Number(averageRating ?? 0).toFixed(1)}
         </span>
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-brand-text/60">
           ({totalReviews ?? 0} avaliações)
         </span>
       </div>
@@ -54,20 +54,20 @@ export function OngReviews({
           onSaved={handleSaved}
         />
       ) : !user ? (
-        <p className="text-sm text-gray-600">
-          <Link to="/auth" className="text-blue-700 underline">
+        <p className="text-sm text-brand-text/70">
+          <Link to="/auth" className="text-brand-primary underline">
             Entre na sua conta
           </Link>{" "}
           de doador para avaliar esta ONG.
         </p>
       ) : (
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-brand-text/70">
           Somente doadores com uma conta ativa podem avaliar ONGs.
         </p>
       )}
 
-      <div className="mt-6 border-t border-gray-200 pt-6">
-        <h3 className="mb-4 font-semibold text-gray-800">
+      <div className="mt-6 border-t border-brand-text/10 pt-6">
+        <h3 className="mb-4 font-semibold text-brand-text/80">
           Avaliações publicadas
         </h3>
 

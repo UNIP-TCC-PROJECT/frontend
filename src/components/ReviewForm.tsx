@@ -189,7 +189,7 @@ export function ReviewForm({ ongId, onSaved }: ReviewFormProps) {
 
   if (loading) {
     return (
-      <p role="status" className="text-sm text-gray-500">
+      <p role="status" className="text-sm text-brand-text/60">
         Carregando sua avaliação...
       </p>
     );
@@ -204,7 +204,7 @@ export function ReviewForm({ ongId, onSaved }: ReviewFormProps) {
         <button
           type="button"
           onClick={() => setAttempt((previous) => previous + 1)}
-          className="mt-2 text-sm text-blue-700 underline"
+          className="mt-2 text-sm text-brand-primary underline"
         >
           Tentar novamente
         </button>
@@ -215,14 +215,14 @@ export function ReviewForm({ ongId, onSaved }: ReviewFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <fieldset disabled={busy} className="space-y-4">
-        <legend className="mb-3 font-medium text-gray-700">
+        <legend className="mb-3 font-medium text-brand-text/80">
           {hasReview ? "Editar sua avaliação" : "Deixe sua avaliação"}
         </legend>
 
         <StarRatingInput value={nota} onChange={setNota} disabled={busy} />
 
         <label className="block">
-          <span className="mb-2 block text-sm text-gray-700">
+          <span className="mb-2 block text-sm text-brand-text/80">
             Comentário sobre sua experiência (opcional)
           </span>
           <textarea
@@ -235,8 +235,9 @@ export function ReviewForm({ ongId, onSaved }: ReviewFormProps) {
             aria-describedby="review-comment-counter"
             aria-invalid={characterCount > 100}
             placeholder="Conte brevemente como foi sua experiência."
-            className="w-full rounded-lg border border-gray-300 p-3
-              focus:border-blue-700 focus:outline-none
+            className="w-full rounded-lg border border-brand-text/20 bg-brand-surface p-3
+              text-brand-text placeholder:text-brand-text/50
+              focus:border-brand-primary focus:outline-none
               disabled:opacity-60"
           />
         </label>
@@ -244,14 +245,14 @@ export function ReviewForm({ ongId, onSaved }: ReviewFormProps) {
         <p
           id="review-comment-counter"
           className={`text-right text-sm ${
-            characterCount > 100 ? "text-red-600" : "text-gray-500"
+            characterCount > 100 ? "text-red-600" : "text-brand-text/60"
           }`}
         >
           {characterCount}/100 caracteres
         </p>
 
         {hasReview && (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-brand-text/60">
             Para remover seu comentário, apague o texto e salve. Sua nota será
             mantida se você não alterar as estrelas.
           </p>
@@ -261,8 +262,8 @@ export function ReviewForm({ ongId, onSaved }: ReviewFormProps) {
           <button
             type="submit"
             disabled={busy || characterCount > 100}
-            className="rounded-lg bg-blue-700 px-5 py-2 font-medium
-              text-white hover:bg-blue-800
+            className="rounded-lg bg-brand-primary px-5 py-2 font-medium
+              text-brand-background hover:bg-brand-primaryDark
               disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? "Salvando..." : "Salvar avaliação"}

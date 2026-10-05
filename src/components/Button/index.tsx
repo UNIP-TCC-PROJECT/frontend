@@ -9,11 +9,11 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-brand-primary text-white hover:bg-blue-700 focus-visible:ring-brand-primary/50",
+    "bg-brand-primary text-brand-background hover:bg-brand-primaryDark focus-visible:ring-brand-primary/50",
   success:
-    "bg-brand-secondary text-white hover:bg-emerald-600 focus-visible:ring-brand-secondary/50",
+    "bg-emerald-700 text-white hover:bg-emerald-800 focus-visible:ring-emerald-700/50",
   ghost:
-    "bg-transparent text-brand-primary hover:bg-blue-50 focus-visible:ring-brand-primary/30",
+    "bg-transparent text-brand-primary hover:bg-brand-primary/10 focus-visible:ring-brand-primary/30",
 };
 
 export function Button({

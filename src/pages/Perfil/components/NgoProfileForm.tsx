@@ -2,11 +2,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "../../../components/Button/index";
-import { Input, Textarea } from "../../../components/Input/index";
+import { Input, Select, Textarea } from "../../../components/Input/index";
 import { Section } from "../../Auth/components/Section";
 
 import { api } from "../../../services/api";
 import { useAuth } from "../../../context/useAuth";
+import { CATEGORIES } from "../../../constants/categories";
 
 interface NgoProfile {
   id: number;
@@ -94,8 +95,8 @@ export function NgoProfileForm({ profile, onSaved, onCancel }: NgoProfileFormPro
         </p>
       ) : null}
       <Section
-        title="Dados basicos"
-        description="Informacoes essenciais sobre a ONG."
+        title="Dados básicos"
+        description="Informações essenciais sobre a ONG."
       >
         <Input
           label="Nome da ONG"
@@ -110,6 +111,7 @@ export function NgoProfileForm({ profile, onSaved, onCancel }: NgoProfileFormPro
           label="CNPJ"
           name="cnpj"
           placeholder="00.000.000/0001-00"
+          mask="99.999.999/9999-99"
           inputProps={register("cnpj")}
         />
         <div className="md:col-span-2">
@@ -121,11 +123,12 @@ export function NgoProfileForm({ profile, onSaved, onCancel }: NgoProfileFormPro
             textareaProps={register("description")}
           />
         </div>
-        <Input
+        <Select
           label="Área de atuação"
           name="category"
-          placeholder="Educação, saúde, animais"
-          inputProps={register("category")}
+          placeholder="Selecione uma área"
+          options={CATEGORIES}
+          selectProps={register("category")}
         />
       </Section>
 
@@ -149,12 +152,14 @@ export function NgoProfileForm({ profile, onSaved, onCancel }: NgoProfileFormPro
           name="phone"
           type="tel"
           placeholder="(11) 99999-9999"
+          mask="(99) 99999-9999"
           inputProps={register("phone")}
         />
         <Input
           label="WhatsApp"
           name="whatsapp"
           placeholder="(11) 99999-9999"
+          mask="(99) 99999-9999"
           inputProps={register("whatsapp")}
         />
         <Input

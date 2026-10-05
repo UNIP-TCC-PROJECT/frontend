@@ -42,8 +42,8 @@ export function LoginForm({ onCreateAccount }: LoginFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <header className="space-y-2 text-center">
-        <h2 className="font-semibold text-slate-900 text-2xl">Entrar</h2>
-        <p className="text-slate-500 text-sm">
+        <h2 className="font-serif text-brand-text text-2xl">Entrar</h2>
+        <p className="text-brand-text/60 text-sm">
           Acesse sua conta para acompanhar o impacto.
         </p>
       </header>
@@ -58,10 +58,10 @@ export function LoginForm({ onCreateAccount }: LoginFormProps) {
           autoComplete="email"
           error={errors.email?.message}
           inputProps={register("email", {
-            required: "Email is required.",
+            required: "O email é obrigatório.",
             pattern: {
               value: emailRegex,
-              message: "Enter a valid email address.",
+              message: "Informe um email válido.",
             },
           })}
         />
@@ -74,7 +74,7 @@ export function LoginForm({ onCreateAccount }: LoginFormProps) {
           autoComplete="current-password"
           error={errors.password?.message}
           inputProps={register("password", {
-            required: "Password is required.",
+            required: "A senha é obrigatória.",
           })}
         />
       </div>
@@ -82,7 +82,7 @@ export function LoginForm({ onCreateAccount }: LoginFormProps) {
       <div className="flex flex-wrap justify-between items-center gap-4 text-sm">
         <button
           type="button"
-          className="text-brand-primary hover:text-blue-700 transition"
+          className="text-brand-primary hover:text-brand-primaryDark transition"
         >
           Esqueci minha senha
         </button>

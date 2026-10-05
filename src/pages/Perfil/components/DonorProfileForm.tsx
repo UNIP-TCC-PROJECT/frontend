@@ -75,7 +75,7 @@ export function DonorProfileForm({ profile, onSaved, onCancel }: DonorProfileFor
           {submitError}
         </p>
       ) : null}
-      <Section title="Dados basicos" description="Suas informações de cadastro.">
+      <Section title="Dados básicos" description="Suas informações de cadastro.">
         <Input
           label="Nome completo"
           name="name"
@@ -90,6 +90,7 @@ export function DonorProfileForm({ profile, onSaved, onCancel }: DonorProfileFor
           label="CPF"
           name="cpf"
           placeholder="000.000.000-00"
+          mask="999.999.999-99"
           inputProps={register("cpf")}
         />
         <Input
@@ -112,6 +113,7 @@ export function DonorProfileForm({ profile, onSaved, onCancel }: DonorProfileFor
           name="phone"
           type="tel"
           placeholder="(11) 99999-9999"
+          mask="(99) 99999-9999"
           inputProps={register("phone")}
         />
       </Section>

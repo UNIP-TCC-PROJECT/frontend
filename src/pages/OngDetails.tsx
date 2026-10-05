@@ -12,6 +12,7 @@ import {
 import MetaCarousel from "./components/MetaCarousel";
 import MetaDetailsModal from "./components/MetaDetailsModal";
 import { OngReviews } from "../components/OngReviews";
+import { ReportModal } from "../components/ReportModal";
 
 interface Ong {
   id: number;
@@ -28,8 +29,8 @@ interface Ong {
   profileImage?: string;
   category?: string;
   createdAt: string;
-  averageRating?: number;
-  totalReviews?: number;
+  averageRating?: number | string | null;
+  totalReviews?: number | null;
 }
 
 interface Meta {
@@ -58,6 +59,7 @@ export default function OngDetails() {
   const [selectedMeta, setSelectedMeta] = useState<Meta | null>(null);
   const [metas, setMetas] = useState<Meta[]>([]);
   const [loadingMetas, setLoadingMetas] = useState(true);
+  const [reportOpen, setReportOpen] = useState(false);
 
   useEffect(() => {
     async function fetchOng() {
@@ -83,13 +85,11 @@ export default function OngDetails() {
     }
   }, [id]);
 
-
   async function handleCopyPix() {
     if (!ong?.pixKey) return;
 
     try {
       await navigator.clipboard.writeText(ong.pixKey);
-
       setCopied(true);
 
       setTimeout(() => {
@@ -102,7 +102,7 @@ export default function OngDetails() {
 
   if (loading) {
     return (
-      <div className="py-10 text-center text-gray-500">
+      <div className="py-10 text-center text-brand-text/60">
         Carregando perfil da ONG...
       </div>
     );
@@ -111,11 +111,13 @@ export default function OngDetails() {
   if (error || !ong) {
     return (
       <div className="py-10 text-center">
-        <p className="mb-4 text-red-500">{error || "ONG não encontrada."}</p>
+        <p className="mb-4 text-red-500">
+          {error || "ONG não encontrada."}
+        </p>
 
         <button
           onClick={() => navigate("/ongs")}
-          className="rounded-lg bg-blue-700 px-5 py-2 font-medium text-white hover:bg-blue-800"
+          className="rounded-lg bg-brand-primary px-5 py-2 font-medium text-brand-background hover:bg-brand-primaryDark"
         >
           Voltar para ONGs
         </button>
@@ -128,16 +130,16 @@ export default function OngDetails() {
       {/* Voltar */}
       <button
         onClick={() => navigate("/ongs")}
-        className="mb-6 font-medium text-blue-700 hover:text-blue-800"
+        className="mb-6 font-medium text-brand-primary hover:text-brand-primaryDark"
       >
         ← Voltar para ONGs
       </button>
 
       {/* Cabeçalho */}
-      <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
+      <div className="mb-6 rounded-2xl border border-brand-text/10 bg-brand-surface p-8 shadow-sm">
         <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
           {/* Foto */}
-          <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-100 text-3xl font-bold text-blue-700">
+          <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-sage text-3xl font-bold text-brand-primary">
             {ong.profileImage ? (
               <img
                 src={ong.profileImage}
@@ -152,7 +154,7 @@ export default function OngDetails() {
           {/* Informações */}
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-3xl font-extrabold text-gray-900">
+              <h1 className="text-3xl font-serif text-brand-text">
                 {ong.name}
               </h1>
 
@@ -168,10 +170,12 @@ export default function OngDetails() {
             </div>
 
             {ong.category && (
-              <p className="mt-2 capitalize text-blue-700">{ong.category}</p>
+              <p className="mt-2 capitalize text-brand-primary">
+                {ong.category}
+              </p>
             )}
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-brand-text/60">
               CNPJ: {ong.cnpj || "Não informado"}
             </p>
           </div>
@@ -179,13 +183,16 @@ export default function OngDetails() {
       </div>
 
       {/* Sobre */}
-      <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
-        <h2 className="mb-3 text-xl font-bold text-gray-900">Sobre a ONG</h2>
+      <div className="mb-6 rounded-2xl border border-brand-text/10 bg-brand-surface p-8 shadow-sm">
+        <h2 className="mb-3 text-xl font-serif text-brand-text">
+          Sobre a ONG
+        </h2>
 
-        <p className="leading-relaxed text-gray-600">
+        <p className="leading-relaxed text-brand-text/70">
           {ong.description || "Esta ONG ainda não possui uma descrição."}
         </p>
       </div>
+
       {/* Avaliações */}
       <OngReviews
         key={ong.id}
@@ -205,50 +212,66 @@ export default function OngDetails() {
         }
       />
 
+      {/* Denúncia da ONG */}
+      <div className="mb-6 text-right">
+        <button
+          onClick={() => setReportOpen(true)}
+          className="text-sm text-brand-text/50 underline hover:text-red-600"
+        >
+          Denunciar ONG
+        </button>
+      </div>
+
+      {reportOpen && (
+        <ReportModal
+          targetType="ONG"
+          targetId={ong.id}
+          targetLabel={ong.name}
+          onClose={() => setReportOpen(false)}
+        />
+      )}
+
       {/* Como ajudar */}
-      <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
-        <h2 className="mb-6 text-xl font-bold text-gray-900">
+      <div className="mb-6 rounded-2xl border border-brand-text/10 bg-brand-surface p-8 shadow-sm">
+        <h2 className="mb-6 text-xl font-serif text-brand-text">
           Como você pode ajudar
         </h2>
 
         <div className="grid gap-4 md:grid-cols-2">
-          {/* Dinheiro */}
-          <div className="rounded-xl border border-blue-100 bg-blue-50 p-5">
-            <h3 className="mb-2 font-bold text-gray-900">
+          <div className="rounded-xl border border-brand-text/10 bg-brand-sage p-5">
+            <h3 className="mb-2 font-bold text-brand-text">
               💰 Doação financeira
             </h3>
 
-            <p className="text-sm leading-relaxed text-gray-600">
-              Contribua financeiramente para ajudar a ONG a manter seus projetos
-              e atividades.
+            <p className="text-sm leading-relaxed text-brand-text/70">
+              Contribua financeiramente para ajudar a ONG a manter seus
+              projetos e atividades.
             </p>
           </div>
 
-          {/* Materiais */}
-          <div className="rounded-xl border border-green-100 bg-green-50 p-5">
-            <h3 className="mb-2 font-bold text-gray-900">
+          <div className="rounded-xl border border-brand-text/10 bg-brand-sage p-5">
+            <h3 className="mb-2 font-bold text-brand-text">
               📦 Doação de materiais
             </h3>
 
-            <p className="text-sm leading-relaxed text-gray-600">
-              Doe materiais e itens que a ONG realmente precisa para continuar
-              seu trabalho.
+            <p className="text-sm leading-relaxed text-brand-text/70">
+              Doe materiais e itens que a ONG realmente precisa para
+              continuar seu trabalho.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Contato + PIX */}
+      {/* Contato e PIX */}
       <div className="mb-6 grid gap-6 md:grid-cols-2">
-        {/* Contato */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
-          <h2 className="mb-5 text-xl font-bold text-gray-900">
+        <div className="rounded-2xl border border-brand-text/10 bg-brand-surface p-8 shadow-sm">
+          <h2 className="mb-5 text-xl font-serif text-brand-text">
             Informações de contato
           </h2>
 
-          <div className="space-y-4 text-gray-600">
+          <div className="space-y-4 text-brand-text/70">
             <div className="flex items-center gap-3">
-              <FaEnvelope className="text-blue-700" />
+              <FaEnvelope className="text-brand-primary" />
               <span>{ong.email}</span>
             </div>
 
@@ -275,12 +298,12 @@ export default function OngDetails() {
 
             {ong.website && (
               <div className="flex items-center gap-3">
-                <FaGlobe className="text-blue-700" />
+                <FaGlobe className="text-brand-primary" />
                 <a
                   href={ong.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-700 hover:underline"
+                  className="text-brand-primary hover:underline"
                 >
                   Site da instituição
                 </a>
@@ -289,27 +312,27 @@ export default function OngDetails() {
           </div>
         </div>
 
-        {/* PIX */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
-          <h2 className="mb-5 text-xl font-bold text-gray-900">Chave PIX</h2>
+        <div className="rounded-2xl border border-brand-text/10 bg-brand-surface p-8 shadow-sm">
+          <h2 className="mb-5 text-xl font-serif text-brand-text">
+            Chave PIX
+          </h2>
 
           {ong.pixKey ? (
             <>
-              <div className="mb-4 break-all rounded-lg bg-gray-50 p-4 font-mono text-sm text-gray-700">
+              <div className="mb-4 break-all rounded-lg bg-brand-sage p-4 font-mono text-sm text-brand-text/80">
                 {ong.pixKey}
               </div>
 
               <button
                 onClick={handleCopyPix}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 py-3 font-medium text-white transition hover:bg-blue-800"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-primary px-4 py-3 font-medium text-brand-background transition hover:bg-brand-primaryDark"
               >
                 <FaCopy />
-
                 {copied ? "Chave copiada!" : "Copiar chave PIX"}
               </button>
             </>
           ) : (
-            <p className="text-gray-500">
+            <p className="text-brand-text/60">
               Esta ONG ainda não cadastrou uma chave PIX.
             </p>
           )}
@@ -319,26 +342,25 @@ export default function OngDetails() {
       {/* Metas */}
       <div className="mb-10">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-serif text-brand-text">
             Como você pode ajudar
           </h2>
 
-          <p className="mt-1 text-gray-600">
+          <p className="mt-1 text-brand-text/70">
             Veja as necessidades atuais desta ONG.
           </p>
         </div>
 
         {loadingMetas ? (
-          <div className="rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-sm">
-            <p className="text-gray-500">Carregando metas...</p>
+          <div className="rounded-2xl border border-brand-text/10 bg-brand-surface p-8 text-center shadow-sm">
+            <p className="text-brand-text/60">
+              Carregando metas...
+            </p>
           </div>
         ) : (
           <MetaCarousel
             metas={metas}
-            onSelectMeta={(meta) => {
-              console.log("Meta selecionada:", meta);
-              setSelectedMeta(meta);
-            }}
+            onSelectMeta={(meta) => setSelectedMeta(meta)}
           />
         )}
 

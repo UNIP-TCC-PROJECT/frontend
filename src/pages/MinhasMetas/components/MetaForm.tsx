@@ -126,12 +126,12 @@ export function MetaForm({ meta, onSaved, onCancel }: MetaFormProps) {
         />
 
         <div className="space-y-2">
-          <label htmlFor="type" className="font-medium text-slate-700 text-sm">
+          <label htmlFor="type" className="font-medium text-brand-text/70 text-sm">
             Tipo <span className="text-amber-600">*</span>
           </label>
           <select
             id="type"
-            className="bg-white shadow-sm px-4 py-3 border border-slate-200 focus-visible:border-brand-primary rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40 w-full text-slate-900 text-sm transition"
+            className="bg-brand-surface shadow-sm px-4 py-3 border border-brand-text/15 focus-visible:border-brand-primary rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40 w-full text-brand-text text-sm transition"
             {...register("type", { required: true })}
           >
             <option value="FINANCEIRA">Financeira</option>
@@ -143,13 +143,13 @@ export function MetaForm({ meta, onSaved, onCancel }: MetaFormProps) {
         <div className="space-y-2">
           <label
             htmlFor="priority"
-            className="font-medium text-slate-700 text-sm"
+            className="font-medium text-brand-text/70 text-sm"
           >
             Prioridade
           </label>
           <select
             id="priority"
-            className="bg-white shadow-sm px-4 py-3 border border-slate-200 focus-visible:border-brand-primary rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40 w-full text-slate-900 text-sm transition"
+            className="bg-brand-surface shadow-sm px-4 py-3 border border-brand-text/15 focus-visible:border-brand-primary rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40 w-full text-brand-text text-sm transition"
             {...register("priority")}
           >
             <option value="BAIXA">Baixa</option>
