@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaBuilding, FaCheckCircle, FaShieldAlt, FaHandSparkles } from "react-icons/fa";
+import {
+  FaBuilding,
+  FaCheckCircle,
+  FaShieldAlt,
+  FaHandSparkles,
+} from "react-icons/fa";
 import { api } from "../services/api";
 import { CATEGORIES as categories } from "../constants/categories";
 
@@ -145,7 +150,10 @@ export default function Home() {
       </section>
 
       {/* Confiança */}
-      <section id="sobre" className="gap-6 grid grid-cols-1 md:grid-cols-3 mx-auto mb-12 px-4 pt-12 max-w-4xl scroll-mt-28">
+      <section
+        id="sobre"
+        className="gap-6 grid grid-cols-1 md:grid-cols-3 mx-auto mb-12 px-4 pt-12 max-w-4xl scroll-mt-28"
+      >
         {[
           {
             title: "ONGs com perfis completos",
@@ -165,7 +173,9 @@ export default function Home() {
             className="flex flex-col items-center bg-brand-surface shadow-xs hover:shadow-md p-6 border border-brand-text/10 hover:border-brand-text/30 rounded-2xl text-center transition-all"
           >
             <FaCheckCircle className="mb-2 text-brand-primary text-3xl" />
-            <h3 className="mb-1 font-semibold text-brand-text text-lg">{item.title}</h3>
+            <h3 className="mb-1 font-semibold text-brand-text text-lg">
+              {item.title}
+            </h3>
             <p className="text-brand-text/60 text-sm">{item.desc}</p>
           </div>
         ))}
@@ -194,7 +204,9 @@ export default function Home() {
         </h2>
 
         {loading && (
-          <p className="py-8 text-brand-text/60 text-center">Carregando ONGs...</p>
+          <p className="py-8 text-brand-text/60 text-center">
+            Carregando ONGs...
+          </p>
         )}
 
         {error && (
@@ -241,7 +253,7 @@ export default function Home() {
                   </span>
                 </div>
                 <p className="flex-1 mb-4 text-brand-text/70 text-sm line-clamp-3 leading-relaxed">
-                  {ong.description || ong.category || "Sem descrição disponível."}
+                  {ong.category || "Categoria não informada."}{" "}
                 </p>
                 <Link
                   to={`/ongs/${ong.id}`}
