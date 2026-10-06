@@ -65,8 +65,8 @@ export default function MetaCarousel({
 
   if (metas.length === 0) {
     return (
-      <div className="rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-sm">
-        <p className="text-gray-500">
+      <div className="rounded-2xl border border-brand-text/10 bg-brand-surface p-8 text-center shadow-sm">
+        <p className="text-brand-text/60">
           Esta ONG não possui metas ou campanhas ativas no momento.
         </p>
       </div>
@@ -94,7 +94,7 @@ export default function MetaCarousel({
       <button
   type="button"
   onClick={() => onSelectMeta(meta)}
-  className="w-full rounded-2xl border border-gray-100 bg-white p-8 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+  className="w-full rounded-2xl border border-brand-text/10 bg-brand-surface p-8 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md"
 >
 
         {/* Cabeçalho */}
@@ -104,20 +104,20 @@ export default function MetaCarousel({
             {getTypeIcon(meta.type)}
           </span>
 
-          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+          <span className="rounded-full bg-brand-sage px-3 py-1 text-xs font-semibold text-brand-primary">
             {getTypeLabel(meta.type)}
           </span>
 
         </div>
 
         {/* Título */}
-        <h3 className="text-2xl font-bold text-gray-900">
+        <h3 className="text-2xl font-serif text-brand-text">
           {meta.title}
         </h3>
 
         {/* Descrição */}
         {meta.description && (
-          <p className="mt-3 leading-relaxed text-gray-600">
+          <p className="mt-3 leading-relaxed text-brand-text/70">
             {meta.description}
           </p>
         )}
@@ -127,21 +127,21 @@ export default function MetaCarousel({
 
           {meta.type === "FINANCEIRA" ? (
             <div className="flex items-center justify-between text-sm">
-              <span className="font-semibold text-gray-900">
+              <span className="font-semibold text-brand-text">
                 {formatCurrency(meta.currentAmount)}
               </span>
 
-              <span className="text-gray-500">
+              <span className="text-brand-text/60">
                 de {formatCurrency(meta.targetAmount ?? 0)}
               </span>
             </div>
           ) : (
             <div className="flex items-center justify-between text-sm">
-              <span className="font-semibold text-gray-900">
+              <span className="font-semibold text-brand-text">
                 {meta.currentQuantity} {meta.unit ?? "unidades"}
               </span>
 
-              <span className="text-gray-500">
+              <span className="text-brand-text/60">
                 de {meta.targetQuantity ?? 0}{" "}
                 {meta.unit ?? "unidades"}
               </span>
@@ -149,9 +149,9 @@ export default function MetaCarousel({
           )}
 
           {/* Barra */}
-          <div className="mt-3 h-3 overflow-hidden rounded-full bg-gray-200">
+          <div className="mt-3 h-3 overflow-hidden rounded-full bg-brand-sage">
             <div
-              className="h-full rounded-full bg-blue-700 transition-all duration-500"
+              className="h-full rounded-full bg-brand-primary transition-all duration-500"
               style={{
                 width: `${progress}%`,
               }}
@@ -161,12 +161,12 @@ export default function MetaCarousel({
           {/* Porcentagem + prazo */}
           <div className="mt-2 flex justify-between text-xs">
 
-            <span className="font-semibold text-blue-700">
+            <span className="font-semibold text-brand-primary">
               {Math.round(progress)}% alcançado
             </span>
 
             {meta.deadline && (
-              <span className="text-gray-500">
+              <span className="text-brand-text/60">
                 Até{" "}
                 {new Date(meta.deadline).toLocaleDateString("pt-BR")}
               </span>
@@ -180,7 +180,7 @@ export default function MetaCarousel({
 
           <button
             onClick={previousMeta}
-            className="rounded-full border border-gray-200 bg-white px-4 py-2 text-gray-700 shadow-sm transition hover:bg-gray-50"
+            className="rounded-full border border-brand-text/10 bg-brand-surface px-4 py-2 text-brand-text/70 shadow-sm transition hover:bg-brand-sage"
             aria-label="Meta anterior"
           >
             ←
@@ -194,8 +194,8 @@ export default function MetaCarousel({
                 onClick={() => setCurrentIndex(index)}
                 className={`h-2.5 w-2.5 rounded-full transition ${
                   index === currentIndex
-                    ? "w-6 bg-blue-700"
-                    : "bg-gray-300"
+                    ? "w-6 bg-brand-primary"
+                    : "bg-brand-text/20"
                 }`}
                 aria-label={`Ir para a meta ${index + 1}`}
               />
@@ -204,7 +204,7 @@ export default function MetaCarousel({
 
           <button
             onClick={nextMeta}
-            className="rounded-full border border-gray-200 bg-white px-4 py-2 text-gray-700 shadow-sm transition hover:bg-gray-50"
+            className="rounded-full border border-brand-text/10 bg-brand-surface px-4 py-2 text-brand-text/70 shadow-sm transition hover:bg-brand-sage"
             aria-label="Próxima meta"
           >
             →
@@ -215,7 +215,7 @@ export default function MetaCarousel({
 
       {/* Contador */}
       {metas.length > 1 && (
-        <p className="mt-3 text-center text-xs text-gray-400">
+        <p className="mt-3 text-center text-xs text-brand-text/50">
           Meta {currentIndex + 1} de {metas.length}
         </p>
       )}

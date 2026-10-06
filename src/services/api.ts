@@ -1,6 +1,8 @@
 import axios from "axios";
 
-export const API_URL = "http://localhost:3000";
+export const API_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 export const TOKEN_KEY = "access_token";
 
 export const api = axios.create({
@@ -17,14 +19,19 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error),
 );
 
-// Converte "/uploads/avatars/x.png" em "http://localhost:3000/uploads/avatars/x.png"
-export function imagemUrl(path?: string | null) {
+// Monta o endereço das imagens armazenadas no backend.
+export function imagemUrl(path?: string | null): string | null {
   if (!path) return null;
-  if (path.startsWith("http") || path.startsWith("blob:")) return path;
-  return `${API_URL}${path}`;
+
+  if (/^https?:\/\//i.test(path) || path.startsWith("blob:")) {
+    return path;
+  }
+
+  const baseUrl = API_URL.replace(/\/+$/, "");
+  const imagePath = path.replace(/^\/+/, "");
+
+  return `${baseUrl}/${imagePath}`;
 }

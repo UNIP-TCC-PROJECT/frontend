@@ -5,29 +5,41 @@ import Home from "./pages/Home";
 import Ongs from "./pages/Ongs";
 import OngDetails from "./pages/OngDetails";
 import Perfil from "./pages/Perfil";
+import MinhasMetas from "./pages/MinhasMetas";
 
 import Layout from "./components/Layout";
+import { RequireAuth, RequireOng } from "./context/AuthContext";
 
 function App() {
   return (
     <Routes>
-      <Route path="/auth" element={<Auth />} />
-
       <Route
         path="*"
         element={
           <Layout>
             <Routes>
               <Route path="/" element={<Home />} />
-
-              {/* Lista de ONGs */}
+              <Route path="/auth" element={<Auth />} />
               <Route path="/ongs" element={<Ongs />} />
+              <Route path="/ongs/:id" element={<OngDetails />} />
 
-              {/* Detalhes da ONG — usei "singular" para bater com o Home */}
-              <Route path="/ong/:id" element={<OngDetails />} />
+              <Route
+                path="/perfil"
+                element={
+                  <RequireAuth>
+                    <Perfil />
+                  </RequireAuth>
+                }
+              />
 
-              {/* Perfil do usuário logado */}
-              <Route path="/perfil" element={<Perfil />} />
+              <Route
+                path="/minhas-metas"
+                element={
+                  <RequireOng>
+                    <MinhasMetas />
+                  </RequireOng>
+                }
+              />
             </Routes>
           </Layout>
         }

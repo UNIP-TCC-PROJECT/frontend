@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Card } from "../../components/Card/index";
 import { LoginForm } from "./components/LoginForm";
 import { RegisterForm } from "./components/RegisterForm";
@@ -11,28 +12,23 @@ interface LoginForm {
 type AuthMode = "login" | "register";
 
 export default function Auth() {
-  const [authMode, setAuthMode] = useState<AuthMode>("login");
+  const [searchParams] = useSearchParams();
+
+  const [authMode, setAuthMode] = useState<AuthMode>(
+    searchParams.get("modo") === "cadastro" ? "register" : "login",
+  );
 
   return (
-    <div className="bg-brand-background min-h-screen text-brand-text">
-      <div className="flex flex-col mx-auto px-4 py-12 w-full max-w-4xl">
-        <header className="text-center">
-          <h1 className="mt-4 font-semibold text-2xl">DoaFácil</h1>
-          <p className="mt-2 text-slate-500 text-sm">
-            Plataforma segura para ONGs e doadores.
-          </p>
-        </header>
-
-        <Card className="mt-8">
-          <div className="fade-in">
-            {authMode === "login" ? (
-              <LoginForm onCreateAccount={() => setAuthMode("register")} />
-            ) : (
-              <RegisterForm onBackToLogin={() => setAuthMode("login")} />
-            )}
-          </div>
-        </Card>
-      </div>
+    <div className="flex flex-col mx-auto w-full max-w-4xl text-brand-text">
+      <Card className="mt-8">
+        <div className="fade-in">
+          {authMode === "login" ? (
+            <LoginForm onCreateAccount={() => setAuthMode("register")} />
+          ) : (
+            <RegisterForm onBackToLogin={() => setAuthMode("login")} />
+          )}
+        </div>
+      </Card>
     </div>
   );
 }

@@ -1,21 +1,22 @@
 import React, {
   createContext,
   useCallback,
-  useContext,
   useEffect,
   useState,
   type JSX,
 } from "react";
-
+import { isAxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
 
 import { api, TOKEN_KEY } from "../services/api";
+import { useAuth } from "./useAuth";
 
 export interface User {
   id: number;
   name: string;
   email: string;
-  type: "ONG" | "DOADOR";
+  type: string;
+  status: string;
   phone?: string | null;
   cpf?: string | null;
   cnpj?: string | null;
@@ -26,7 +27,10 @@ export interface User {
   pixKey?: string | null;
   category?: string | null;
   profileImage?: string | null;
-  createdAt: string;
+  createdAt?: string;
+
+  // Mantém a compatibilidade com os demais campos do cadastro.
+  [key: string]: any;
 }
 
 interface AuthContextProps {
@@ -42,61 +46,71 @@ interface AuthContextProps {
 
 const USER_KEY = "user";
 
-const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
+export const AuthContext = createContext<AuthContextProps>(
+  {} as AuthContextProps,
+);
 
 function lerUsuarioSalvo(): User | null {
   try {
     const token = localStorage.getItem(TOKEN_KEY);
     const salvo = localStorage.getItem(USER_KEY);
+
     return token && salvo ? JSON.parse(salvo) : null;
   } catch {
     return null;
   }
 }
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const navigate = useNavigate();
 
-  // Já nasce preenchido: evita o RequireAuth te jogar para /auth no F5
   const [user, setUser] = useState<User | null>(lerUsuarioSalvo);
 
-  // Atualiza o estado E o localStorage juntos
-  const salvarUsuario = (u: User | null) => {
-    setUser(u);
-    if (u) localStorage.setItem(USER_KEY, JSON.stringify(u));
-    else localStorage.removeItem(USER_KEY);
-  };
+  const salvarUsuario = useCallback((usuario: User | null) => {
+    setUser(usuario);
 
-  // Busca o usuário atual no backend (traz a profileImage do banco)
-  const refreshUser = useCallback(async () => {
+    if (usuario) {
+      localStorage.setItem(USER_KEY, JSON.stringify(usuario));
+    } else {
+      localStorage.removeItem(USER_KEY);
+    }
+  }, []);
+
+  const refreshUser = useCallback(async (): Promise<void> => {
     if (!localStorage.getItem(TOKEN_KEY)) return;
 
     try {
       const { data } = await api.get<User>("/users/me");
-      setUser(data);
-      localStorage.setItem(USER_KEY, JSON.stringify(data));
-    } catch (err: any) {
-      // Só desloga se o token for inválido/expirado
-      if (err?.response?.status === 401) {
+      salvarUsuario(data);
+    } catch (error: unknown) {
+      // Falhas de conexão não encerram a sessão.
+      if (isAxiosError(error) && error.response?.status === 401) {
         localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(USER_KEY);
-        setUser(null);
+        salvarUsuario(null);
       }
     }
-  }, []);
+  }, [salvarUsuario]);
 
-  // No F5: sincroniza com o banco (é isso que faz a foto voltar)
   useEffect(() => {
-    refreshUser();
+    void refreshUser();
   }, [refreshUser]);
 
   const updateUser = (partial: Partial<User>) => {
     if (!user) return;
+
     salvarUsuario({ ...user, ...partial });
   };
 
   const login = async (email: string, password: string) => {
-    const response = await api.post("/users/login", { email, password });
+    const response = await api.post("/users/login", {
+      email,
+      password,
+    });
+
     const { access_token } = response.data;
 
     localStorage.setItem(TOKEN_KEY, access_token);
@@ -114,13 +128,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = () => {
     localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-    setUser(null);
+    salvarUsuario(null);
     navigate("/");
   };
 
   const getUser = () => user;
-
   const isLoggedIn = !!user;
 
   return (
@@ -141,11 +153,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
-
-export function RequireAuth({ children }: { children: JSX.Element }) {
+export function RequireAuth({
+  children,
+}: {
+  children: JSX.Element;
+}) {
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
@@ -156,4 +168,23 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
   }, [isLoggedIn, navigate]);
 
   return isLoggedIn ? children : null;
+}
+
+export function RequireOng({
+  children,
+}: {
+  children: JSX.Element;
+}) {
+  const { isLoggedIn, user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/auth");
+    } else if (user?.type !== "ONG") {
+      navigate("/");
+    }
+  }, [isLoggedIn, user, navigate]);
+
+  return isLoggedIn && user?.type === "ONG" ? children : null;
 }
