@@ -51,18 +51,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const { access_token } = response.data;
 
-    // Salva o JWT
     localStorage.setItem("access_token", access_token);
 
-    // Busca os dados do usuário autenticado
     const userResponse = await api.get("/users/me");
 
-    // Salva o usuário
     localStorage.setItem("user", JSON.stringify(userResponse.data));
 
     setUser(userResponse.data);
 
-    navigate("/");
+    if (userResponse.data.type === "ADMIN") {
+      navigate("/admin");
+    } else {
+      navigate("/");
+    }
   };
 
   const register = async (data: any) => {
@@ -118,4 +119,20 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
   }, [isLoggedIn, navigate]);
 
   return isLoggedIn ? children : null;
+}
+
+export function RequireAdmin({ children }: { children: JSX.Element }) {
+  const { isLoggedIn, user } = useAuth();
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/auth");
+    } else if (user?.type !== "ADMIN") {
+      navigate("/");
+    }
+  }, [isLoggedIn, user, navigate]);
+
+  return isLoggedIn && user?.type === "ADMIN" ? children : null;
 }
