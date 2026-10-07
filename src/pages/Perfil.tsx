@@ -2,6 +2,8 @@ import { useRef, useState } from "react";
 import { FaCamera } from "react-icons/fa";
 import { api, imagemUrl } from "../services/api";
 import { useAuth } from "../context/useAuth";
+import { NgoProfileForm } from "./Perfil/components/NgoProfileForm";
+import { DonorProfileForm } from "./Perfil/components/DonorProfileForm";
 
 const TIPO_LABEL = {
     ONG: "ONG",
@@ -12,6 +14,7 @@ export default function Perfil() {
     const { user, updateUser } = useAuth();
 
     const [preview, setPreview] = useState<string | null>(null);
+    const [editing, setEditing] = useState(false);
     const [arquivo, setArquivo] = useState<File | null>(null);
     const [salvando, setSalvando] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -74,6 +77,61 @@ export default function Perfil() {
 
     if (!user) {
         return <p className="p-10 text-center">Faça login para ver seu perfil.</p>;
+    }
+
+    if (editing) {
+        const profileParaEdicao = {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            type: user.type,
+            cpf: user.cpf ?? "",
+            cnpj: user.cnpj ?? "",
+            phone: user.phone ?? "",
+            description: user.description ?? "",
+            whatsapp: user.whatsapp ?? "",
+            instagram: user.instagram ?? "",
+            website: user.website ?? "",
+            pixKey: user.pixKey ?? "",
+            category: user.category ?? "",
+        };
+
+        return (
+            <main className="min-h-[calc(100vh-160px)] bg-brand-background px-4 py-10">
+                <section className="mx-auto max-w-3xl rounded-2xl border border-brand-text/10 bg-brand-surface p-8 shadow-sm">
+                    <h1 className="mb-6 font-serif text-3xl text-brand-text">
+                        Editar perfil
+                    </h1>
+
+                    {user.type === "ONG" ? (
+                        <NgoProfileForm
+                            profile={profileParaEdicao}
+                            onSaved={() => setEditing(false)}
+                            onCancel={() => setEditing(false)}
+                        />
+                    ) : user.type === "DOADOR" ? (
+                        <DonorProfileForm
+                            profile={profileParaEdicao}
+                            onSaved={() => setEditing(false)}
+                            onCancel={() => setEditing(false)}
+                        />
+                    ) : (
+                        <div>
+                            <p className="text-brand-text">
+                                A edição não está disponível para este tipo de conta.
+                            </p>
+                            <button
+                                type="button"
+                                onClick={() => setEditing(false)}
+                                className="mt-4 text-brand-primary underline"
+                            >
+                                Voltar ao perfil
+                            </button>
+                        </div>
+                    )}
+                </section>
+            </main>
+        );
     }
 
     const imagemExibida = preview ?? imagemUrl(user.profileImage);
@@ -190,7 +248,12 @@ export default function Perfil() {
                         <h2 className="text-lg font-semibold text-slate-800">
                             Informações da conta
                         </h2>
-                        <button className="text-sm font-medium text-blue-600 hover:text-blue-800">
+                        <button
+                            type="button"
+                            onClick={() => setEditing(true)}
+                            disabled={salvando}
+                            className="text-sm font-medium text-brand-primary hover:underline disabled:opacity-50"
+                        >
                             Editar
                         </button>
                     </div>
