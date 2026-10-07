@@ -5,7 +5,7 @@ import { FaHandHoldingHeart, FaSignOutAlt, FaChevronDown } from "react-icons/fa"
 
 import { useAuth } from "../../context/useAuth";
 import { CATEGORIES } from "../../constants/categories";
-
+import ProfileIcon from "./icons/ProfileIcon";
 import MyAccountModal from "./components/MyAccountModal";
 
 export default function Header() {
@@ -61,11 +61,10 @@ export default function Header() {
           <div className="relative flex items-stretch" ref={categoriesRef}>
             <Link
               to="/ongs"
-              className={`py-2 pl-3.5 rounded-l-full text-xs font-semibold uppercase tracking-wider transition-all ${
-                location.pathname.startsWith("/ongs")
-                  ? "bg-brand-primary text-brand-background"
-                  : "text-brand-text/70 hover:bg-brand-text/5 hover:text-brand-text"
-              }`}
+              className={`py-2 pl-3.5 rounded-l-full text-xs font-semibold uppercase tracking-wider transition-all ${location.pathname.startsWith("/ongs")
+                ? "bg-brand-primary text-brand-background"
+                : "text-brand-text/70 hover:bg-brand-text/5 hover:text-brand-text"
+                }`}
             >
               ONGs
             </Link>
@@ -73,11 +72,10 @@ export default function Header() {
               type="button"
               aria-label="Categorias de ONGs"
               onClick={() => setCategoriesOpen((v) => !v)}
-              className={`flex items-center py-2 pr-3 pl-1.5 rounded-r-full transition-all ${
-                location.pathname.startsWith("/ongs")
-                  ? "bg-brand-primary text-brand-background"
-                  : "text-brand-text/70 hover:bg-brand-text/5 hover:text-brand-text"
-              }`}
+              className={`flex items-center py-2 pr-3 pl-1.5 rounded-r-full transition-all ${location.pathname.startsWith("/ongs")
+                ? "bg-brand-primary text-brand-background"
+                : "text-brand-text/70 hover:bg-brand-text/5 hover:text-brand-text"
+                }`}
             >
               <FaChevronDown className="w-2.5 h-2.5" />
             </button>
@@ -124,8 +122,8 @@ export default function Header() {
                   className="flex items-center gap-2.5 hover:bg-brand-text/5 p-1 pr-3 rounded-full transition-colors"
                   onClick={() => setOpen((v) => !v)}
                 >
-                  <span className="flex justify-center items-center bg-brand-sage rounded-full w-8 h-8 font-serif font-bold text-brand-primary text-sm shrink-0">
-                    {user?.name?.charAt(0).toUpperCase() ?? "?"}
+                  <span className="flex justify-center items-center bg-brand-sage rounded-full w-8 h-8 overflow-hidden font-serif font-bold text-brand-primary text-sm shrink-0">
+                    <ProfileIcon />
                   </span>
                   <span className="hidden sm:flex flex-col items-start">
                     <span className="max-w-[120px] font-semibold text-brand-text text-xs truncate">
