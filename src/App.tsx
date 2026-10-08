@@ -22,6 +22,7 @@ function App() {
               <Route path="/auth" element={<Auth />} />
               <Route path="/ongs" element={<Ongs />} />
               <Route path="/ongs/:id" element={<OngDetails />} />
+
               <Route
                 path="/perfil"
                 element={
@@ -30,6 +31,7 @@ function App() {
                   </RequireAuth>
                 }
               />
+
               <Route
                 path="/minhas-metas"
                 element={

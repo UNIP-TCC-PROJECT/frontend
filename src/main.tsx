@@ -11,7 +11,7 @@ import { BRAND } from "./constants/brand";
 
 import "./index.css";
 
-document.title = `${BRAND.name} — ${BRAND.slogan}`;
+document.title = BRAND.name;
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

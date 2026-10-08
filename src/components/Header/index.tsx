@@ -7,7 +7,7 @@ import { useAuth } from "../../context/useAuth";
 import { CATEGORIES } from "../../constants/categories";
 import { BRAND } from "../../constants/brand";
 import { BrandLogo } from "../BrandLogo";
-
+import ProfileIcon from "./icons/ProfileIcon";
 import MyAccountModal from "./components/MyAccountModal";
 
 export default function Header() {
@@ -116,8 +116,8 @@ export default function Header() {
                   className="flex items-center gap-2.5 hover:bg-brand-text/5 p-1 pr-3 rounded-full transition-colors"
                   onClick={() => setOpen((v) => !v)}
                 >
-                  <span className="flex justify-center items-center bg-brand-champagne rounded-full w-8 h-8 font-sans font-bold text-brand-primaryText text-sm shrink-0">
-                    {user?.name?.charAt(0).toUpperCase() ?? "?"}
+                  <span className="flex justify-center items-center bg-brand-champagne rounded-full w-8 h-8 overflow-hidden font-sans font-bold text-brand-primaryText text-sm shrink-0">
+                    <ProfileIcon />
                   </span>
                   <span className="hidden sm:flex flex-col items-start">
                     <span className="max-w-[120px] font-semibold text-brand-text text-xs truncate">
