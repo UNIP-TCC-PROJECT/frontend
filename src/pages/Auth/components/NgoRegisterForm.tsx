@@ -251,7 +251,7 @@ export function NgoRegisterForm() {
             }}
           />
           {cepStatus === "loading" ? (
-            <p className="mt-1 text-brand-text/50 text-xs">Buscando endereço...</p>
+            <p className="mt-1 text-brand-muted text-xs">Buscando endereço...</p>
           ) : null}
           {cepStatus === "error" ? (
             <p className="mt-1 text-amber-600 text-xs">

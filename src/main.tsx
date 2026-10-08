@@ -7,8 +7,11 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 
 import App from "./App.tsx";
+import { BRAND } from "./constants/brand";
 
 import "./index.css";
+
+document.title = BRAND.name;
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

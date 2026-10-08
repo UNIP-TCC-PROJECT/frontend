@@ -18,7 +18,7 @@ export function Tabs({ tabs, activeId, onChange, ariaLabel }: TabsProps) {
     <div
       role="tablist"
       aria-label={ariaLabel ?? "Tabs"}
-      className="flex bg-brand-sage p-1 rounded-full"
+      className="flex bg-brand-champagne p-1 rounded-full"
     >
       {tabs.map((tab) => {
         const isActive = tab.id === activeId;
@@ -33,8 +33,8 @@ export function Tabs({ tabs, activeId, onChange, ariaLabel }: TabsProps) {
             onClick={() => onChange(tab.id)}
             className={`flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-all ${
               isActive
-                ? "bg-brand-primary text-brand-background shadow-sm"
-                : "text-brand-primary/70 hover:text-brand-primary hover:bg-brand-primary/10"
+                ? "bg-brand-primary text-brand-onPrimary shadow-sm"
+                : "text-brand-primaryText hover:text-brand-text hover:bg-brand-primary/10"
             }`}
           >
             {tab.icon ? <span className="text-sm normal-case tracking-normal">{tab.icon}</span> : null}

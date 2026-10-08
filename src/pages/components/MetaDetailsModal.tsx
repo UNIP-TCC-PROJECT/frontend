@@ -81,7 +81,7 @@ export default function MetaDetailsModal({
               {getTypeIcon()}
             </span>
 
-            <span className="rounded-full bg-brand-sage px-3 py-1 text-xs font-semibold text-brand-primary">
+            <span className="rounded-full bg-brand-champagne px-3 py-1 text-xs font-semibold text-brand-goldText">
               {getTypeLabel()}
             </span>
 
@@ -90,7 +90,7 @@ export default function MetaDetailsModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-2xl text-brand-text/40 transition hover:text-brand-text/80"
+            className="text-2xl text-brand-text/40 transition hover:text-brand-text"
             aria-label="Fechar"
           >
             ×
@@ -99,13 +99,13 @@ export default function MetaDetailsModal({
         </div>
 
         {/* Título */}
-        <h2 className="text-3xl font-serif text-brand-text">
+        <h2 className="text-3xl font-sans text-brand-text">
           {meta.title}
         </h2>
 
         {/* Descrição */}
         {meta.description && (
-          <p className="mt-4 leading-relaxed text-brand-text/70">
+          <p className="mt-4 leading-relaxed text-brand-muted">
             {meta.description}
           </p>
         )}
@@ -121,7 +121,7 @@ export default function MetaDetailsModal({
                   {formatCurrency(meta.currentAmount)}
                 </span>
 
-                <span className="text-brand-text/60">
+                <span className="text-brand-muted">
                   de {formatCurrency(meta.targetAmount ?? 0)}
                 </span>
               </>
@@ -131,7 +131,7 @@ export default function MetaDetailsModal({
                   {meta.currentQuantity} {meta.unit ?? "unidades"}
                 </span>
 
-                <span className="text-brand-text/60">
+                <span className="text-brand-muted">
                   de {meta.targetQuantity ?? 0}{" "}
                   {meta.unit ?? "unidades"}
                 </span>
@@ -141,10 +141,10 @@ export default function MetaDetailsModal({
           </div>
 
           {/* Barra */}
-          <div className="mt-4 h-4 overflow-hidden rounded-full bg-brand-sage">
+          <div className="mt-4 h-4 overflow-hidden rounded-full bg-brand-champagne">
 
             <div
-              className="h-full rounded-full bg-brand-primary transition-all duration-500"
+              className="h-full rounded-full bg-brand-gold transition-all duration-500"
               style={{
                 width: `${progress}%`,
               }}
@@ -152,7 +152,7 @@ export default function MetaDetailsModal({
 
           </div>
 
-          <p className="mt-2 text-sm font-semibold text-brand-primary">
+          <p className="mt-2 text-sm font-semibold text-brand-primaryText">
             {Math.round(progress)}% alcançado
           </p>
 
@@ -160,9 +160,9 @@ export default function MetaDetailsModal({
 
         {/* Prazo */}
         {meta.deadline && (
-          <div className="mt-6 rounded-xl bg-brand-sage p-4">
+          <div className="mt-6 rounded-xl bg-brand-champagne p-4">
 
-            <p className="text-sm text-brand-text/60">
+            <p className="text-sm text-brand-muted">
               Prazo para atingir a meta
             </p>
 
@@ -174,17 +174,17 @@ export default function MetaDetailsModal({
         )}
 
         {/* Futuro botão de ajuda */}
-        <div className="mt-8 border-t border-brand-text/10 pt-6">
+        <div className="mt-8 border-t border-brand-border pt-6">
 
           <button
             type="button"
             disabled
-            className="w-full cursor-not-allowed rounded-lg bg-brand-text/15 px-5 py-3 font-semibold text-brand-text/50"
+            className="w-full cursor-not-allowed rounded-lg bg-brand-text/15 px-5 py-3 font-semibold text-brand-muted"
           >
             Quero ajudar
           </button>
 
-          <p className="mt-2 text-center text-xs text-brand-text/50">
+          <p className="mt-2 text-center text-xs text-brand-muted">
             Em breve você poderá contribuir com esta meta.
           </p>
 

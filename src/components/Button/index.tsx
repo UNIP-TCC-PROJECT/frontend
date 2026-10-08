@@ -9,11 +9,11 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-brand-primary text-brand-background hover:bg-brand-primaryDark focus-visible:ring-brand-primary/50",
+    "bg-brand-primary text-brand-onPrimary hover:bg-brand-primaryDark focus-visible:ring-brand-primaryText",
   success:
     "bg-emerald-700 text-white hover:bg-emerald-800 focus-visible:ring-emerald-700/50",
   ghost:
-    "bg-transparent text-brand-primary hover:bg-brand-primary/10 focus-visible:ring-brand-primary/30",
+    "bg-transparent text-brand-primaryText hover:bg-brand-primary/10 focus-visible:ring-brand-primaryText",
 };
 
 export function Button({
@@ -39,7 +39,7 @@ export function Button({
     >
       {isLoading ? (
         <span className="flex items-center gap-2">
-          <span className="bg-white rounded-full w-2 h-2 animate-pulse" />
+          <span className="bg-current rounded-full w-2 h-2 animate-pulse" />
           Processing...
         </span>
       ) : (

@@ -108,7 +108,7 @@ export function StarRating({
             onMouseEnter={() => showForm && setHover(estrela)}
             onMouseLeave={() => setHover(0)}
             className={`text-3xl transition ${
-              estrela <= shown ? "text-yellow-400" : "text-brand-text/20"
+              estrela <= shown ? "text-brand-gold" : "text-brand-text/20"
             } ${showForm ? "cursor-pointer" : ""}`}
           >
             ★
@@ -125,13 +125,13 @@ export function StarRating({
             rows={3}
             disabled={sending}
             placeholder="Deixe um comentário (opcional)"
-            className="mt-3 w-full rounded-lg border border-brand-text/20 bg-white p-3 text-sm text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
+            className="mt-3 w-full rounded-lg border border-brand-text/20 bg-white p-3 text-sm text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-goldText/30"
           />
           <div className="mt-2 flex gap-2">
             <button
               onClick={handleAskConfirm}
               disabled={sending}
-              className="rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-brand-background hover:bg-brand-primaryDark disabled:opacity-60"
+              className="rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-brand-onPrimary hover:bg-brand-primaryDark disabled:opacity-60"
             >
               {hasReview ? "Salvar alterações" : "Enviar avaliação"}
             </button>
@@ -139,7 +139,7 @@ export function StarRating({
               <button
                 onClick={handleCancelEdit}
                 disabled={sending}
-                className="rounded-lg px-4 py-2 text-sm text-brand-text/70 hover:bg-brand-text/5"
+                className="rounded-lg px-4 py-2 text-sm text-brand-muted hover:bg-brand-text/5"
               >
                 Cancelar
               </button>
@@ -147,14 +147,14 @@ export function StarRating({
           </div>
         </>
       ) : (
-        <div className="mt-3 rounded-lg border border-brand-text/10 bg-brand-sage p-3">
-          <p className="mb-1 text-xs font-medium text-brand-text/60">Sua avaliação</p>
+        <div className="mt-3 rounded-lg border border-brand-border bg-brand-champagne p-3">
+          <p className="mb-1 text-xs font-medium text-brand-muted">Sua avaliação</p>
           {currentUserComment && (
-            <p className="whitespace-pre-line text-sm text-brand-text/70">{currentUserComment}</p>
+            <p className="whitespace-pre-line text-sm text-brand-muted">{currentUserComment}</p>
           )}
           <button
             onClick={handleStartEdit}
-            className="mt-2 text-sm text-brand-primary underline hover:text-brand-primaryDark"
+            className="mt-2 text-sm text-brand-primaryText underline hover:text-brand-text"
           >
             Editar avaliação
           </button>
@@ -171,10 +171,10 @@ export function StarRating({
           aria-modal="true"
         >
           <div className="w-full max-w-sm rounded-2xl bg-brand-surface p-6 shadow-xl">
-            <h2 className="mb-2 text-xl font-serif text-brand-text">
+            <h2 className="mb-2 text-xl font-sans text-brand-text">
               {hasReview ? "Salvar alterações?" : "Enviar avaliação?"}
             </h2>
-            <p className="mb-5 text-sm text-brand-text/70">
+            <p className="mb-5 text-sm text-brand-muted">
               {hasReview
                 ? "Sua nota e seu comentário atuais serão substituídos."
                 : "Sua nota e seu comentário ficarão visíveis no perfil da ONG. Você poderá editá-los depois."}
@@ -183,14 +183,14 @@ export function StarRating({
               <button
                 onClick={() => setConfirming(false)}
                 disabled={sending}
-                className="rounded-lg px-4 py-2 text-brand-text/70 hover:bg-brand-text/5"
+                className="rounded-lg px-4 py-2 text-brand-muted hover:bg-brand-text/5"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleConfirm}
                 disabled={sending}
-                className="rounded-lg bg-brand-primary px-4 py-2 font-medium text-brand-background hover:bg-brand-primaryDark disabled:opacity-60"
+                className="rounded-lg bg-brand-primary px-4 py-2 font-medium text-brand-onPrimary hover:bg-brand-primaryDark disabled:opacity-60"
               >
                 {sending ? "Enviando..." : "Confirmar"}
               </button>

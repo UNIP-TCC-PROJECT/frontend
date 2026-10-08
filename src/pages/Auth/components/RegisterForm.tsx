@@ -26,12 +26,12 @@ export function RegisterForm({ onBackToLogin }: RegisterFormProps) {
         <button
           type="button"
           onClick={onBackToLogin}
-          className="font-semibold text-brand-primary hover:text-brand-primaryDark text-sm transition"
+          className="font-semibold text-brand-primaryText hover:text-brand-text text-sm transition"
         >
           Voltar para o login
         </button>
-        <h2 className="font-serif text-brand-text text-2xl">Criar conta</h2>
-        <p className="text-brand-text/60 text-sm">
+        <h2 className="font-sans text-brand-text text-2xl">Criar conta</h2>
+        <p className="text-brand-muted text-sm">
           Escolha o tipo de cadastro para continuar.
         </p>
       </header>

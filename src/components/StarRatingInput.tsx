@@ -33,11 +33,11 @@ export function StarRatingInput({
           }}
           className={`rounded text-3xl transition
             focus-visible:outline focus-visible:outline-2
-            focus-visible:outline-brand-primary
+            focus-visible:outline-brand-goldText
             disabled:cursor-not-allowed disabled:opacity-50
             ${
               estrela <= ((!disabled && hover) || value)
-                ? "text-yellow-400"
+                ? "text-brand-gold"
                 : "text-gray-300"
             }`}
         >
