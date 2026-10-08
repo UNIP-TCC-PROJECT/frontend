@@ -1,26 +1,21 @@
 import { Link } from "react-router-dom";
-import { FaHandHoldingHeart, FaShieldAlt } from "react-icons/fa";
+import { FaShieldAlt } from "react-icons/fa";
 import { CATEGORIES } from "../../constants/categories";
+import { BRAND } from "../../constants/brand";
+import { BrandLogo } from "../BrandLogo";
 
 export default function Footer() {
   return (
     <footer className="bg-brand-text mt-auto pt-16 pb-10 text-brand-background/70">
       <div className="gap-10 grid grid-cols-1 md:grid-cols-4 mx-auto px-4 max-w-7xl">
         <div className="space-y-4 md:col-span-1">
-          <div className="flex items-center gap-2.5">
-            <div className="flex justify-center items-center bg-brand-primary rounded-full w-8 h-8 text-brand-background shrink-0">
-              <FaHandHoldingHeart className="w-3.5 h-3.5" />
-            </div>
-            <span className="font-serif text-brand-background text-xl tracking-tight">
-              Doa<span className="text-brand-sage italic">Fácil</span>
-            </span>
-          </div>
+          <BrandLogo variant="dark" />
           <p className="text-brand-background/60 text-xs leading-relaxed">
             Plataforma de intermediação entre doadores e ONGs, com foco em
             transparência e segurança para as duas pontas da doação.
           </p>
-          <div className="flex items-center gap-2 pt-1 text-brand-sage text-xs font-medium">
-            <FaShieldAlt className="w-3.5 h-3.5 text-brand-primary" />
+          <div className="flex items-center gap-2 pt-1 text-brand-champagne text-xs font-medium">
+            <FaShieldAlt className="w-3.5 h-3.5 text-brand-goldLight" />
             <span>Cadastro validado via Receita Federal</span>
           </div>
         </div>
@@ -88,7 +83,7 @@ export default function Footer() {
 
       <div className="mx-auto mt-12 px-4 border-brand-background/10 border-t max-w-7xl">
         <p className="pt-6 text-brand-background/40 text-[11px] text-center">
-          &copy; {new Date().getFullYear()} DoaFácil. Todos os direitos reservados.
+          &copy; {new Date().getFullYear()} {BRAND.name}. Todos os direitos reservados.
         </p>
       </div>
     </footer>

@@ -102,7 +102,7 @@ useEffect(() => {
 
   if (loading) {
     return (
-      <p role="status" className="text-sm text-brand-text/60">
+      <p role="status" className="text-sm text-brand-muted">
         Carregando avaliações...
       </p>
     );
@@ -117,7 +117,7 @@ useEffect(() => {
         <button
           type="button"
           onClick={() => setAttempt((previous) => previous + 1)}
-          className="mt-2 text-sm text-brand-primary underline"
+          className="mt-2 text-sm text-brand-primaryText underline"
         >
           Tentar novamente
         </button>
@@ -127,7 +127,7 @@ useEffect(() => {
 
   if (!data || data.total === 0) {
     return (
-      <p className="text-sm text-brand-text/60">
+      <p className="text-sm text-brand-muted">
         Esta ONG ainda não possui avaliações.
       </p>
     );
@@ -143,7 +143,7 @@ return (
         <button
           type="button"
           onClick={() => setAttempt((previous) => previous + 1)}
-          className="mt-2 text-sm text-brand-primary underline"
+          className="mt-2 text-sm text-brand-primaryText underline"
         >
           Tentar novamente
         </button>
@@ -151,7 +151,7 @@ return (
     )}
 
     {data.items.length === 0 ? (
-      <p className="text-sm text-brand-text/60">
+      <p className="text-sm text-brand-muted">
         Não há avaliações nesta página.
       </p>
     ) : (
@@ -159,7 +159,7 @@ return (
         {data.items.map((review) => (
           <li
             key={review.id}
-            className="rounded-xl border border-brand-text/10 bg-brand-sage p-4"
+            className="rounded-xl border border-brand-border bg-brand-champagne p-4"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="font-medium text-brand-text">
@@ -168,9 +168,9 @@ return (
 
               <p
                 aria-label={`Nota ${review.nota} de 5`}
-                className="text-sm text-brand-text/80"
+                className="text-sm text-brand-text"
               >
-                <span aria-hidden="true" className="text-yellow-500">
+                <span aria-hidden="true" className="text-brand-gold">
                   ★
                 </span>{" "}
                 {review.nota}/5
@@ -179,13 +179,13 @@ return (
 
             {review.comentario && (
               <>
-                <p className="mt-2 whitespace-pre-wrap break-words text-brand-text/70">
+                <p className="mt-2 whitespace-pre-wrap break-words text-brand-muted">
                   {review.comentario}
                 </p>
 
                 <div className="mt-2">
                   {myReviewLoaded && review.id === myReviewId ? (
-                    <span className="text-xs text-brand-text/50">
+                    <span className="text-xs text-brand-muted">
                       Seu comentário
                     </span>
                   ) : (
@@ -193,7 +193,7 @@ return (
                       type="button"
                       disabled={!myReviewLoaded}
                       onClick={() => setReportReview(review)}
-                      className="text-xs text-brand-text/50 underline
+                      className="text-xs text-brand-muted underline
                         hover:text-red-600 disabled:cursor-not-allowed
                         disabled:opacity-50"
                     >
@@ -204,7 +204,7 @@ return (
               </>
             )}
 
-            <p className="mt-3 text-xs text-brand-text/60">
+            <p className="mt-3 text-xs text-brand-muted">
               Publicada em{" "}
               <time dateTime={review.createdAt}>
                 {new Date(review.createdAt).toLocaleDateString("pt-BR")}
@@ -240,7 +240,7 @@ return (
           Anterior
         </button>
 
-        <span className="text-sm text-brand-text/70">
+        <span className="text-sm text-brand-muted">
           Página {data.page} de {data.totalPages}
         </span>
 

@@ -63,10 +63,10 @@ export function Input({
   onChange,
   inputProps,
 }: InputProps) {
-  const sharedClassName = `w-full rounded-xl border bg-brand-surface px-4 py-3 text-sm text-brand-text shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40 ${
+  const sharedClassName = `w-full rounded-xl border bg-brand-surface px-4 py-3 text-sm text-brand-text shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-goldText/30 ${
     error
       ? "border-amber-300 focus-visible:ring-amber-400/50"
-      : "border-brand-text/15 focus-visible:border-brand-primary"
+      : "border-brand-text/15 focus-visible:border-brand-goldText"
   }`;
 
   const rawOnChange = inputProps?.onChange ?? onChange;
@@ -80,7 +80,7 @@ export function Input({
 
   return (
     <div className="space-y-2">
-      <label htmlFor={name} className="font-medium text-brand-text/70 text-sm">
+      <label htmlFor={name} className="font-medium text-brand-muted text-sm">
         {label}
         {required ? <span className="text-amber-600"> *</span> : null}
       </label>
@@ -120,7 +120,7 @@ export function Select({
 }: SelectProps) {
   return (
     <div className="space-y-2">
-      <label htmlFor={name} className="font-medium text-brand-text/70 text-sm">
+      <label htmlFor={name} className="font-medium text-brand-muted text-sm">
         {label}
         {required ? <span className="text-amber-600"> *</span> : null}
       </label>
@@ -133,10 +133,10 @@ export function Select({
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${name}-error` : undefined}
         {...selectProps}
-        className={`w-full rounded-xl border bg-brand-surface px-4 py-3 text-sm text-brand-text shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40 ${
+        className={`w-full rounded-xl border bg-brand-surface px-4 py-3 text-sm text-brand-text shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-goldText/30 ${
           error
             ? "border-amber-300 focus-visible:ring-amber-400/50"
-            : "border-brand-text/15 focus-visible:border-brand-primary"
+            : "border-brand-text/15 focus-visible:border-brand-goldText"
         }`}
       >
         <option value="" disabled hidden>
@@ -170,7 +170,7 @@ export function Textarea({
 }: TextareaProps) {
   return (
     <div className="space-y-2">
-      <label htmlFor={name} className="font-medium text-brand-text/70 text-sm">
+      <label htmlFor={name} className="font-medium text-brand-muted text-sm">
         {label}
         {required ? <span className="text-amber-600"> *</span> : null}
       </label>
@@ -185,10 +185,10 @@ export function Textarea({
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${name}-error` : undefined}
         {...textareaProps}
-        className={`w-full rounded-xl border bg-brand-surface px-4 py-3 text-sm text-brand-text shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40 ${
+        className={`w-full rounded-xl border bg-brand-surface px-4 py-3 text-sm text-brand-text shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-goldText/30 ${
           error
             ? "border-amber-300 focus-visible:ring-amber-400/50"
-            : "border-brand-text/15 focus-visible:border-brand-primary"
+            : "border-brand-text/15 focus-visible:border-brand-goldText"
         }`}
       />
       {error ? (

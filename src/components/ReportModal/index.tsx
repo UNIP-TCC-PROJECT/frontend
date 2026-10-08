@@ -67,19 +67,19 @@ export function ReportModal({
     if (!isLoggedIn) {
       return (
         <>
-          <p className="mb-6 text-brand-text/70">
+          <p className="mb-6 text-brand-muted">
             Para enviar uma denúncia, entre na sua conta de doador.
           </p>
           <div className="flex justify-end gap-3">
             <button
               onClick={onClose}
-              className="rounded-lg px-4 py-2 text-brand-text/70 hover:bg-brand-text/5"
+              className="rounded-lg px-4 py-2 text-brand-muted hover:bg-brand-text/5"
             >
               Cancelar
             </button>
             <Link
               to="/auth"
-              className="rounded-lg bg-brand-primary px-4 py-2 font-medium text-brand-background hover:bg-brand-primaryDark"
+              className="rounded-lg bg-brand-primary px-4 py-2 font-medium text-brand-onPrimary hover:bg-brand-primaryDark"
             >
               Entrar
             </Link>
@@ -91,13 +91,13 @@ export function ReportModal({
     if (user?.type !== "DOADOR") {
       return (
         <>
-          <p className="mb-6 text-brand-text/70">
+          <p className="mb-6 text-brand-muted">
             Somente doadores podem enviar denúncias.
           </p>
           <div className="flex justify-end">
             <button
               onClick={onClose}
-              className="rounded-lg bg-brand-primary px-4 py-2 font-medium text-brand-background hover:bg-brand-primaryDark"
+              className="rounded-lg bg-brand-primary px-4 py-2 font-medium text-brand-onPrimary hover:bg-brand-primaryDark"
             >
               Fechar
             </button>
@@ -109,14 +109,14 @@ export function ReportModal({
     if (sent) {
       return (
         <>
-          <p className="mb-6 text-brand-text/70">
+          <p className="mb-6 text-brand-muted">
             Recebemos sua denúncia. Ela será analisada pela nossa equipe e
             nenhuma ação é aplicada automaticamente. Obrigado por contribuir.
           </p>
           <div className="flex justify-end">
             <button
               onClick={onClose}
-              className="rounded-lg bg-brand-primary px-4 py-2 font-medium text-brand-background hover:bg-brand-primaryDark"
+              className="rounded-lg bg-brand-primary px-4 py-2 font-medium text-brand-onPrimary hover:bg-brand-primaryDark"
             >
               Fechar
             </button>
@@ -127,13 +127,13 @@ export function ReportModal({
 
     return (
       <form onSubmit={handleSubmit}>
-        <p className="mb-4 text-sm text-brand-text/60">
+        <p className="mb-4 text-sm text-brand-muted">
           Você está denunciando: <strong>{targetLabel}</strong>
         </p>
 
         <label
           htmlFor="report-motivo"
-          className="mb-1 block text-sm font-medium text-brand-text/80"
+          className="mb-1 block text-sm font-medium text-brand-text"
         >
           Motivo da denúncia
         </label>
@@ -145,9 +145,9 @@ export function ReportModal({
           rows={5}
           disabled={sending}
           placeholder="Explique o que aconteceu"
-          className="w-full rounded-lg border border-brand-text/20 bg-white p-3 text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
+          className="w-full rounded-lg border border-brand-text/20 bg-white p-3 text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-goldText/30"
         />
-        <p className="mt-1 text-right text-xs text-brand-text/50">
+        <p className="mt-1 text-right text-xs text-brand-muted">
           {motivo.length}/{MAX_LENGTH}
         </p>
 
@@ -162,14 +162,14 @@ export function ReportModal({
             type="button"
             onClick={onClose}
             disabled={sending}
-            className="rounded-lg px-4 py-2 text-brand-text/70 hover:bg-brand-text/5 disabled:opacity-50"
+            className="rounded-lg px-4 py-2 text-brand-muted hover:bg-brand-text/5 disabled:opacity-50"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={sending}
-            className="rounded-lg bg-brand-primary px-4 py-2 font-medium text-brand-background hover:bg-brand-primaryDark disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-lg bg-brand-primary px-4 py-2 font-medium text-brand-onPrimary hover:bg-brand-primaryDark disabled:cursor-not-allowed disabled:opacity-60"
           >
             {sending ? "Enviando..." : "Confirmar denúncia"}
           </button>
@@ -186,7 +186,7 @@ export function ReportModal({
       aria-label={title}
     >
       <div className="w-full max-w-md rounded-2xl bg-brand-surface p-6 shadow-xl">
-        <h2 className="mb-4 text-xl font-serif text-brand-text">{title}</h2>
+        <h2 className="mb-4 text-xl font-sans text-brand-text">{title}</h2>
         {renderBody()}
       </div>
     </div>

@@ -54,7 +54,7 @@ export default function Perfil() {
 
   if (loading) {
     return (
-      <div className="py-10 text-brand-text/60 text-center">
+      <div className="py-10 text-brand-muted text-center">
         Carregando perfil...
       </div>
     );
@@ -70,7 +70,7 @@ export default function Perfil() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="mb-6 font-serif text-brand-text text-3xl">
+      <h1 className="mb-6 font-sans text-brand-text text-3xl">
         Meu perfil
       </h1>
 
@@ -93,14 +93,14 @@ export default function Perfil() {
           <div className="space-y-6">
             <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-4">
               <div className="flex items-center gap-4">
-                <div className="flex justify-center items-center bg-brand-sage rounded-full w-16 h-16 font-bold text-brand-primary text-2xl shrink-0">
+                <div className="flex justify-center items-center bg-brand-champagne rounded-full w-16 h-16 font-bold text-brand-primaryText text-2xl shrink-0">
                   {profile.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
                   <h2 className="font-bold text-brand-text text-xl">
                     {profile.name}
                   </h2>
-                  <span className="text-brand-text/60 text-sm">
+                  <span className="text-brand-muted text-sm">
                     {profile.type === "ONG" ? "ONG" : "Doador"}
                   </span>
                 </div>
@@ -110,61 +110,61 @@ export default function Perfil() {
 
             <dl className="gap-x-6 gap-y-4 grid sm:grid-cols-2">
               <div>
-                <dt className="text-brand-text/60 text-xs">Email</dt>
+                <dt className="text-brand-muted text-xs">Email</dt>
                 <dd className="text-brand-text text-sm">{profile.email}</dd>
               </div>
               {profile.phone && (
                 <div>
-                  <dt className="text-brand-text/60 text-xs">Telefone</dt>
+                  <dt className="text-brand-muted text-xs">Telefone</dt>
                   <dd className="text-brand-text text-sm">{profile.phone}</dd>
                 </div>
               )}
               {profile.type === "DOADOR" && profile.cpf && (
                 <div>
-                  <dt className="text-brand-text/60 text-xs">CPF</dt>
+                  <dt className="text-brand-muted text-xs">CPF</dt>
                   <dd className="text-brand-text text-sm">{profile.cpf}</dd>
                 </div>
               )}
               {profile.type === "ONG" && (
                 <>
                   <div>
-                    <dt className="text-brand-text/60 text-xs">CNPJ</dt>
+                    <dt className="text-brand-muted text-xs">CNPJ</dt>
                     <dd className="text-brand-text text-sm">
                       {profile.cnpj || "Não informado"}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-brand-text/60 text-xs">Área de atuação</dt>
+                    <dt className="text-brand-muted text-xs">Área de atuação</dt>
                     <dd className="text-brand-text text-sm">
                       {profile.category || "Não informado"}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-brand-text/60 text-xs">WhatsApp</dt>
+                    <dt className="text-brand-muted text-xs">WhatsApp</dt>
                     <dd className="text-brand-text text-sm">
                       {profile.whatsapp || "Não informado"}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-brand-text/60 text-xs">Instagram</dt>
+                    <dt className="text-brand-muted text-xs">Instagram</dt>
                     <dd className="text-brand-text text-sm">
                       {profile.instagram || "Não informado"}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-brand-text/60 text-xs">Site</dt>
+                    <dt className="text-brand-muted text-xs">Site</dt>
                     <dd className="text-brand-text text-sm">
                       {profile.website || "Não informado"}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-brand-text/60 text-xs">Chave PIX</dt>
+                    <dt className="text-brand-muted text-xs">Chave PIX</dt>
                     <dd className="text-brand-text text-sm">
                       {profile.pixKey || "Não informado"}
                     </dd>
                   </div>
                   <div className="sm:col-span-2">
-                    <dt className="text-brand-text/60 text-xs">Descrição</dt>
+                    <dt className="text-brand-muted text-xs">Descrição</dt>
                     <dd className="text-brand-text text-sm">
                       {profile.description || "Não informado"}
                     </dd>

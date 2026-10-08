@@ -42,8 +42,8 @@ export function LoginForm({ onCreateAccount }: LoginFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <header className="space-y-2 text-center">
-        <h2 className="font-serif text-brand-text text-2xl">Entrar</h2>
-        <p className="text-brand-text/60 text-sm">
+        <h2 className="font-sans text-brand-text text-2xl">Entrar</h2>
+        <p className="text-brand-muted text-sm">
           Acesse sua conta para acompanhar o impacto.
         </p>
       </header>
@@ -82,7 +82,7 @@ export function LoginForm({ onCreateAccount }: LoginFormProps) {
       <div className="flex flex-wrap justify-between items-center gap-4 text-sm">
         <button
           type="button"
-          className="text-brand-primary hover:text-brand-primaryDark transition"
+          className="text-brand-primaryText hover:text-brand-text transition"
         >
           Esqueci minha senha
         </button>
