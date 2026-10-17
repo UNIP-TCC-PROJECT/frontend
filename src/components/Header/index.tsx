@@ -45,7 +45,11 @@ export default function Header() {
   return (
     <header className="top-0 left-0 z-20 fixed bg-brand-background/95 backdrop-blur-md border-b border-brand-border w-full">
       <div className="flex justify-between items-center gap-1 mx-auto px-3 sm:px-6 py-3.5 max-w-7xl">
-        <Link to="/" aria-label={`${BRAND.name} — ${BRAND.slogan}`} className="flex shrink-0 items-center gap-3 group">
+        <Link
+          to="/"
+          aria-label={`${BRAND.name} — ${BRAND.slogan}`}
+          className="flex shrink-0 items-center gap-3 group"
+        >
           <BrandLogo compactOnMobile />
         </Link>
 
@@ -99,6 +103,17 @@ export default function Header() {
               </div>
             )}
           </div>
+
+          <Link
+            to="/publicacoes"
+            className={`px-1 sm:px-3.5 py-2 rounded-full font-semibold text-[11px] sm:text-xs uppercase sm:tracking-wider transition-all ${
+              location.pathname.startsWith("/publicacoes")
+                ? "bg-brand-primary text-brand-onPrimary"
+                : "text-brand-muted hover:bg-brand-text/5 hover:text-brand-text"
+            }`}
+          >
+            Publicações
+          </Link>
 
           <a
             href="/#sobre"

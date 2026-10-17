@@ -13,6 +13,7 @@ import MetaCarousel from "./components/MetaCarousel";
 import MetaDetailsModal from "./components/MetaDetailsModal";
 import { OngReviews } from "../components/OngReviews";
 import { ReportModal } from "../components/ReportModal";
+import PublicacoesList from "../components/PublicacoesList";
 
 interface Ong {
   id: number;
@@ -111,9 +112,7 @@ export default function OngDetails() {
   if (error || !ong) {
     return (
       <div className="py-10 text-center">
-        <p className="mb-4 text-red-500">
-          {error || "ONG não encontrada."}
-        </p>
+        <p className="mb-4 text-red-500">{error || "ONG não encontrada."}</p>
 
         <button
           onClick={() => navigate("/ongs")}
@@ -154,9 +153,7 @@ export default function OngDetails() {
           {/* Informações */}
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-3xl font-sans text-brand-text">
-                {ong.name}
-              </h1>
+              <h1 className="text-3xl font-sans text-brand-text">{ong.name}</h1>
 
               {ong.medalhaVerde && (
                 <span
@@ -184,14 +181,14 @@ export default function OngDetails() {
 
       {/* Sobre */}
       <div className="mb-6 rounded-2xl border border-brand-border bg-brand-surface p-8 shadow-sm">
-        <h2 className="mb-3 text-xl font-sans text-brand-text">
-          Sobre a ONG
-        </h2>
+        <h2 className="mb-3 text-xl font-sans text-brand-text">Sobre a ONG</h2>
 
         <p className="leading-relaxed text-brand-muted">
           {ong.description || "Esta ONG ainda não possui uma descrição."}
         </p>
       </div>
+
+      <PublicacoesList ongId={ong.id} />
 
       {/* Avaliações */}
       <OngReviews
@@ -244,8 +241,8 @@ export default function OngDetails() {
             </h3>
 
             <p className="text-sm leading-relaxed text-brand-muted">
-              Contribua financeiramente para ajudar a ONG a manter seus
-              projetos e atividades.
+              Contribua financeiramente para ajudar a ONG a manter seus projetos
+              e atividades.
             </p>
           </div>
 
@@ -255,8 +252,8 @@ export default function OngDetails() {
             </h3>
 
             <p className="text-sm leading-relaxed text-brand-muted">
-              Doe materiais e itens que a ONG realmente precisa para
-              continuar seu trabalho.
+              Doe materiais e itens que a ONG realmente precisa para continuar
+              seu trabalho.
             </p>
           </div>
         </div>
@@ -313,9 +310,7 @@ export default function OngDetails() {
         </div>
 
         <div className="rounded-2xl border border-brand-border bg-brand-surface p-8 shadow-sm">
-          <h2 className="mb-5 text-xl font-sans text-brand-text">
-            Chave PIX
-          </h2>
+          <h2 className="mb-5 text-xl font-sans text-brand-text">Chave PIX</h2>
 
           {ong.pixKey ? (
             <>
@@ -353,9 +348,7 @@ export default function OngDetails() {
 
         {loadingMetas ? (
           <div className="rounded-2xl border border-brand-border bg-brand-surface p-8 text-center shadow-sm">
-            <p className="text-brand-muted">
-              Carregando metas...
-            </p>
+            <p className="text-brand-muted">Carregando metas...</p>
           </div>
         ) : (
           <MetaCarousel
