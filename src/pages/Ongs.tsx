@@ -1,21 +1,32 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa";
 import { api } from "../services/api";
-const categories = [
-  { label: "Animais", value: "animais" },
-  { label: "Crianças", value: "criancas" },
-  { label: "Alimentos", value: "alimentos" },
-  { label: "Roupas", value: "roupas" },
-];
+import { CATEGORIES as categories } from "../constants/categories";
 
 export default function Ongs() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
   const [ongs, setOngs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const requestedCategory = searchParams.get("categoria") ?? "";
+  const category = categories.some((item) => item.value === requestedCategory)
+    ? requestedCategory
+    : "";
+
+  function selectCategory(value: string) {
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (value) {
+      nextParams.set("categoria", value);
+    } else {
+      nextParams.delete("categoria");
+    }
+
+    setSearchParams(nextParams);
+  }
 
   useEffect(() => {
     async function fetchOngs() {
@@ -44,11 +55,11 @@ export default function Ongs() {
   return (
     <>
       {/* Título */}
-      <h1 className="mb-2 font-extrabold text-gray-900 text-3xl md:text-4xl">
+      <h1 className="mb-2 font-sans text-brand-text text-3xl md:text-4xl">
         ONGs disponíveis
       </h1>
 
-      <p className="mb-8 text-gray-600">
+      <p className="mb-8 text-brand-muted">
         Encontre instituições confiáveis para apoiar
       </p>
 
@@ -59,18 +70,18 @@ export default function Ongs() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar ONG..."
-          className="bg-white shadow-sm px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 w-full md:w-72"
+          className="bg-brand-surface shadow-sm px-4 py-2 border border-brand-text/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-goldText/30 w-full md:w-72"
         />
 
         <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
             <button
               key={cat.value}
-              onClick={() => setCategory(cat.value)}
+              onClick={() => selectCategory(cat.value)}
               className={`px-5 py-2 rounded-full border text-sm font-medium shadow-sm transition ${
                 category === cat.value
-                  ? "bg-blue-700 text-white border-blue-700"
-                  : "bg-white text-blue-700 border-blue-200 hover:bg-blue-50"
+                  ? "bg-brand-primary text-brand-onPrimary border-brand-primary"
+                  : "bg-brand-surface text-brand-primaryText border-brand-text/15 hover:bg-brand-champagne"
               }`}
             >
               {cat.label}
@@ -79,8 +90,8 @@ export default function Ongs() {
 
           {category && (
             <button
-              onClick={() => setCategory("")}
-              className="bg-gray-100 ml-2 px-4 py-2 border border-gray-300 rounded-full text-gray-500 text-xs"
+              onClick={() => selectCategory("")}
+              className="bg-brand-text/10 ml-2 px-4 py-2 border border-brand-text/15 rounded-full text-brand-muted text-xs"
             >
               Limpar filtro
             </button>
@@ -90,7 +101,7 @@ export default function Ongs() {
 
       {/* Loading */}
       {loading && (
-        <div className="py-10 text-gray-500 text-center">
+        <div className="py-10 text-brand-muted text-center">
           Carregando ONGs...
         </div>
       )}
@@ -99,7 +110,7 @@ export default function Ongs() {
       {!loading && (
         <div className="gap-7 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {filteredOngs.length === 0 && (
-            <div className="col-span-full py-12 text-gray-400 text-center">
+            <div className="col-span-full py-12 text-brand-muted text-center">
               Nenhuma ONG encontrada.
             </div>
           )}
@@ -107,36 +118,57 @@ export default function Ongs() {
           {filteredOngs.map((ong: any) => (
             <div
               key={ong.id}
-              className="flex flex-col bg-white shadow p-6 border border-gray-100 rounded-xl"
+              className="group flex flex-col bg-brand-surface shadow-xs hover:shadow-md p-6 border border-brand-border hover:border-brand-text/30 rounded-2xl transition-all"
             >
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-lg">{ong.name}</h3>
-
-                <span className="flex items-center gap-1 ml-2 font-semibold text-green-600 text-xs">
-                  <FaCheckCircle />
-                  Perfil completo
-                </span>
+              <div className="flex items-start gap-3.5 mb-3.5">
+                <div className="flex justify-center items-center bg-brand-champagne rounded-full ring-2 ring-brand-primary/20 w-12 h-12 font-sans font-bold text-brand-primaryText text-lg shrink-0">
+                  {ong.name?.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="font-sans font-bold text-brand-text group-hover:text-brand-primaryText text-base line-clamp-1 transition-colors">
+                      {ong.name}
+                    </h3>
+                    {ong.medalhaVerde && (
+                      <FaCheckCircle
+                        className="text-brand-gold shrink-0"
+                        title="CNPJ verificado na Receita Federal"
+                      />
+                    )}
+                  </div>
+                  {ong?.city && (
+                    <p className="mt-0.5 text-brand-muted text-[11px]">{ong.city}</p>
+                  )}
+                </div>
               </div>
 
-              <div className="flex items-center gap-1 mb-2 text-sm">
-                <span className="text-yellow-500">★</span>
-                <span className="font-medium text-gray-700">
-                  {Number(ong.averageRating ?? 0).toFixed(1)}
-                </span>
-                <span className="text-gray-400">({ong.totalReviews ?? 0})</span>
+              <div className="flex justify-between items-center gap-2 mb-3.5">
+                {ong.category ? (
+                  <span className="bg-brand-champagne px-3 py-1 rounded-full font-semibold text-brand-goldText text-[10px] tracking-wider uppercase">
+                    {ong.category}
+                  </span>
+                ) : (
+                  <span />
+                )}
+
+                <div className="flex items-center gap-1 bg-brand-background px-2.5 py-1 border border-brand-border rounded-full text-xs">
+                  <span className="text-amber-500">★</span>
+                  <span className="font-bold text-brand-text">
+                    {Number(ong.averageRating ?? 0).toFixed(1)}
+                  </span>
+                  <span className="text-brand-muted text-[10px]">
+                    ({ong.totalReviews ?? 0})
+                  </span>
+                </div>
               </div>
 
-              {ong?.city && (
-                <span className="mb-1 text-blue-700 text-sm">{ong.city}</span>
-              )}
-
-              <p className="mb-2 text-gray-600 text-sm line-clamp-2">
+              <p className="flex-1 mb-4 text-brand-muted text-xs leading-relaxed line-clamp-3">
                 {ong.description || "Sem descrição disponível."}
               </p>
 
               <button
                 onClick={() => navigate(`/ongs/${ong.id}`)}
-                className="bg-blue-700 hover:bg-blue-800 shadow mt-auto px-4 py-2 rounded font-medium text-white text-center transition"
+                className="bg-brand-primary hover:bg-brand-primaryDark shadow-xs mt-auto px-4 py-2.5 rounded-full font-semibold text-brand-onPrimary text-xs text-center transition-all"
               >
                 Ver perfil
               </button>

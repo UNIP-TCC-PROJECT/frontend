@@ -15,7 +15,7 @@ export function Toggle({ items, activeId, onChange, ariaLabel }: ToggleProps) {
     <div
       role="radiogroup"
       aria-label={ariaLabel ?? "Toggle"}
-      className="flex bg-slate-100 p-1 rounded-2xl"
+      className="flex bg-brand-champagne p-1 rounded-full"
     >
       {items.map((item) => {
         const isActive = item.id === activeId;
@@ -26,10 +26,10 @@ export function Toggle({ items, activeId, onChange, ariaLabel }: ToggleProps) {
             role="radio"
             aria-checked={isActive}
             onClick={() => onChange(item.id)}
-            className={`flex flex-1 items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition ${
+            className={`flex flex-1 items-center justify-center rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-all ${
               isActive
-                ? "bg-white text-brand-primary shadow-sm"
-                : "text-slate-500 hover:text-slate-700"
+                ? "bg-brand-primary text-brand-onPrimary shadow-sm"
+                : "text-brand-primaryText hover:text-brand-text hover:bg-brand-primary/10"
             }`}
           >
             {item.label}

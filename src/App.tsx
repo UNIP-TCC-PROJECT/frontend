@@ -7,16 +7,22 @@ import OngDetails from "./pages/OngDetails";
 import AdminOngs from "./pages/admin/AdminOngs";
 import AdminOngDetails from "./pages/admin/AdminOngDetails";
 import AdminCreateAdmin from "./pages/admin/AdminCreateAdmin";
+import Perfil from "./pages/Perfil";
+import MinhasMetas from "./pages/MinhasMetas";
 
+import Publicacoes from "./pages/Publicacoes";
+import PublicacaoDetails from "./pages/PublicacaoDetails";
 import Layout from "./components/Layout";
 import AdminLayout from "./components/AdminLayout";
-import { RequireAdmin } from "./context/AuthContext";
+import {
+  RequireAuth,
+  RequireOng,
+  RequireAdmin,
+} from "./context/AuthContext";
 
 function App() {
   return (
     <Routes>
-      <Route path="/auth" element={<Auth />} />
-
       <Route
         path="/admin/*"
         element={
@@ -38,8 +44,28 @@ function App() {
           <Layout>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/auth" element={<Auth />} />
               <Route path="/ongs" element={<Ongs />} />
+              <Route path="/publicacoes" element={<Publicacoes />} />
               <Route path="/ongs/:id" element={<OngDetails />} />
+              <Route path="/publicacoes/:id" element={<PublicacaoDetails />} />
+              <Route
+                path="/perfil"
+                element={
+                  <RequireAuth>
+                    <Perfil />
+                  </RequireAuth>
+                }
+              />
+
+              <Route
+                path="/minhas-metas"
+                element={
+                  <RequireOng>
+                    <MinhasMetas />
+                  </RequireOng>
+                }
+              />
             </Routes>
           </Layout>
         }

@@ -1,4 +1,26 @@
+import { useState } from "react";
+import { useAuth } from "../../../context/useAuth";
+import { imagemUrl } from "../../../services/api";
+
 function ProfileIcon() {
+  const { user } = useAuth();
+  const [erro, setErro] = useState(false);
+
+  const foto = imagemUrl(user?.profileImage);
+
+  // Se tem foto e ela carregou, mostra a foto
+  if (foto && !erro) {
+    return (
+      <img
+        src={foto}
+        alt={user?.name ?? "Perfil"}
+        onError={() => setErro(true)}
+        className="w-full h-full rounded-full object-cover"
+      />
+    );
+  }
+
+  // Senão, o boneco de sempre
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -6,7 +28,7 @@ function ProfileIcon() {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className="w-6 h-6 text-blue-700"
+      className="w-6 h-6 text-brand-primaryText"
     >
       <path
         strokeLinecap="round"
