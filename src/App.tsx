@@ -4,17 +4,40 @@ import Auth from "./pages/Auth/index";
 import Home from "./pages/Home";
 import Ongs from "./pages/Ongs";
 import OngDetails from "./pages/OngDetails";
+import AdminOngs from "./pages/admin/AdminOngs";
+import AdminOngDetails from "./pages/admin/AdminOngDetails";
+import AdminCreateAdmin from "./pages/admin/AdminCreateAdmin";
 import Perfil from "./pages/Perfil";
 import MinhasMetas from "./pages/MinhasMetas";
 
 import Publicacoes from "./pages/Publicacoes";
 import PublicacaoDetails from "./pages/PublicacaoDetails";
 import Layout from "./components/Layout";
-import { RequireAuth, RequireOng } from "./context/AuthContext";
+import AdminLayout from "./components/AdminLayout";
+import {
+  RequireAuth,
+  RequireOng,
+  RequireAdmin,
+} from "./context/AuthContext";
 
 function App() {
   return (
     <Routes>
+      <Route
+        path="/admin/*"
+        element={
+          <RequireAdmin>
+            <AdminLayout>
+              <Routes>
+                <Route path="/" element={<AdminOngs />} />
+                <Route path="/ongs/:id" element={<AdminOngDetails />} />
+                <Route path="/admins/novo" element={<AdminCreateAdmin />} />
+              </Routes>
+            </AdminLayout>
+          </RequireAdmin>
+        }
+      />
+
       <Route
         path="*"
         element={
