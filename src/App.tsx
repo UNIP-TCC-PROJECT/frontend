@@ -9,6 +9,7 @@ import AdminOngDetails from "./pages/admin/AdminOngDetails";
 import AdminCreateAdmin from "./pages/admin/AdminCreateAdmin";
 import Perfil from "./pages/Perfil";
 import MinhasMetas from "./pages/MinhasMetas";
+import OngsFavoritas from "./pages/OngsFavoritas";
 
 import Publicacoes from "./pages/Publicacoes";
 import PublicacaoDetails from "./pages/PublicacaoDetails";
@@ -16,6 +17,7 @@ import Layout from "./components/Layout";
 import AdminLayout from "./components/AdminLayout";
 import {
   RequireAuth,
+  RequireDoador,
   RequireOng,
   RequireAdmin,
 } from "./context/AuthContext";
@@ -46,6 +48,14 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/ongs" element={<Ongs />} />
+              <Route
+                path="/ongs-favoritas"
+                element={
+                  <RequireDoador>
+                    <OngsFavoritas />
+                  </RequireDoador>
+                }
+              />
               <Route path="/publicacoes" element={<Publicacoes />} />
               <Route path="/ongs/:id" element={<OngDetails />} />
               <Route path="/publicacoes/:id" element={<PublicacaoDetails />} />

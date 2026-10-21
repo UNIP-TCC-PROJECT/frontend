@@ -193,6 +193,27 @@ export function RequireOng({
   return isLoggedIn && user?.type === "ONG" ? children : null;
 }
 
+export function RequireDoador({
+  children,
+}: {
+  children: JSX.Element;
+}) {
+  const { isLoggedIn, user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/auth");
+    } else if (user?.type !== "DOADOR" || user.status !== "ATIVO") {
+      navigate("/");
+    }
+  }, [isLoggedIn, user, navigate]);
+
+  return isLoggedIn && user?.type === "DOADOR" && user.status === "ATIVO"
+    ? children
+    : null;
+}
+
 export function RequireAdmin({
   children,
 }: {
