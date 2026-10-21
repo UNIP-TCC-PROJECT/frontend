@@ -93,6 +93,15 @@ export default function Header() {
                     {category.label}
                   </Link>
                 ))}
+                {user?.type === "DOADOR" && user.status === "ATIVO" && (
+                  <Link
+                    to="/ongs-favoritas"
+                    onClick={() => setCategoriesOpen(false)}
+                    className="block hover:bg-brand-champagne mt-1 px-3.5 py-2 border-brand-border border-t rounded-lg font-semibold text-brand-primaryText text-sm transition-colors"
+                  >
+                    Minhas ONGs favoritas
+                  </Link>
+                )}
                 <Link
                   to="/ongs"
                   onClick={() => setCategoriesOpen(false)}
