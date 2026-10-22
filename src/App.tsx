@@ -10,6 +10,8 @@ import AdminCreateAdmin from "./pages/admin/AdminCreateAdmin";
 import Perfil from "./pages/Perfil";
 import MinhasMetas from "./pages/MinhasMetas";
 import OngsFavoritas from "./pages/OngsFavoritas";
+import InteressesOng from "./pages/InteressesOng";
+import Conversas from "./pages/Conversas";
 
 import Publicacoes from "./pages/Publicacoes";
 import PublicacaoDetails from "./pages/PublicacaoDetails";
@@ -54,6 +56,30 @@ function App() {
                   <RequireDoador>
                     <OngsFavoritas />
                   </RequireDoador>
+                }
+              />
+              <Route
+                path="/interesses"
+                element={
+                  <RequireOng>
+                    <InteressesOng />
+                  </RequireOng>
+                }
+              />
+              <Route
+                path="/conversas"
+                element={
+                  <RequireAuth>
+                    <Conversas />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/conversas/:id"
+                element={
+                  <RequireAuth>
+                    <Conversas />
+                  </RequireAuth>
                 }
               />
               <Route path="/publicacoes" element={<Publicacoes />} />

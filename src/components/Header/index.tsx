@@ -158,6 +158,10 @@ export default function Header() {
                     navigate={navigate}
                     logout={logout}
                     isOng={user?.type === "ONG"}
+                    isParticipant={
+                      (user?.type === "ONG" || user?.type === "DOADOR") &&
+                      user.status === "ATIVO"
+                    }
                   />
                 )}
               </div>
