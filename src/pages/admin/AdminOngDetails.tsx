@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../../services/api";
+import { AnaliseMedalhaBranca } from "../../components/MedalhaBranca";
 
 interface Ong {
   id: number;
@@ -98,6 +99,8 @@ export default function AdminOngDetails() {
           <p>{ong.description || "Sem descrição cadastrada."}</p>
         </div>
       </div>
+
+      <AnaliseMedalhaBranca ongId={ong.id} />
 
       {/* Espaço reservado para ações administrativas futuras */}
       <div className="mt-6 rounded-xl border border-dashed border-gray-300 bg-white p-6">
