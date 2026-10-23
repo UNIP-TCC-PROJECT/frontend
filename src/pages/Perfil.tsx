@@ -4,6 +4,7 @@ import { api, imagemUrl } from "../services/api";
 import { useAuth } from "../context/useAuth";
 import { NgoProfileForm } from "./Perfil/components/NgoProfileForm";
 import { DonorProfileForm } from "./Perfil/components/DonorProfileForm";
+import SolicitarMedalhaBranca from "../components/MedalhaBranca";
 
 const TIPO_LABEL = {
     ONG: "ONG",
@@ -54,6 +55,7 @@ export default function Perfil() {
 
         const form = new FormData();
         form.append("file", arquivo); // mesmo nome do FileInterceptor('file')
+        let fotoEnviada = false;
 
         try {
             setSalvando(true);
@@ -63,13 +65,26 @@ export default function Perfil() {
                 "/users/me/avatar",
                 form
             );
+            fotoEnviada = true;
+
+            const fotoUrl = imagemUrl(data.profileImage);
+            if (!fotoUrl) throw new Error("Endereço da foto não recebido");
+
+            await new Promise<void>((resolve, reject) => {
+                const imagem = new Image();
+                imagem.onload = () => resolve();
+                imagem.onerror = () => reject(new Error("Foto indisponível"));
+                imagem.src = fotoUrl;
+            });
 
             // Atualiza o contexto + localStorage: Perfil e Navbar mudam juntos
             updateUser({ profileImage: data.profileImage });
             cancelarSelecao();
         } catch (err) {
             console.error(err);
-            alert("Erro ao salvar a foto. Tente novamente.");
+            alert(fotoEnviada
+                ? "Sua foto foi enviada, mas ainda não pode ser exibida. A prévia foi mantida. Tente novamente em instantes."
+                : "Erro ao salvar a foto. Tente novamente.");
         } finally {
             setSalvando(false);
         }
@@ -273,6 +288,8 @@ export default function Perfil() {
                         />
                     </dl>
                 </section>
+
+                <SolicitarMedalhaBranca />
 
                 {/* Card — Segurança */}
                 <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
