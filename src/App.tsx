@@ -1,3 +1,4 @@
+
 import { Routes, Route } from "react-router-dom";
 
 import Auth from "./pages/Auth/index";
@@ -6,11 +7,16 @@ import Ongs from "./pages/Ongs";
 import OngDetails from "./pages/OngDetails";
 import Perfil from "./pages/Perfil";
 import MinhasMetas from "./pages/MinhasMetas";
-
 import Publicacoes from "./pages/Publicacoes";
 import PublicacaoDetails from "./pages/PublicacaoDetails";
 import Layout from "./components/Layout";
-import { RequireAuth, RequireOng } from "./context/AuthContext";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+
+import {
+  RequireAuth,
+  RequireOng,
+} from "./context/AuthContext";
 
 function App() {
   return (
@@ -26,6 +32,17 @@ function App() {
               <Route path="/publicacoes" element={<Publicacoes />} />
               <Route path="/ongs/:id" element={<OngDetails />} />
               <Route path="/publicacoes/:id" element={<PublicacaoDetails />} />
+
+              {/* Recuperação de senha */}
+              <Route
+                path="/esqueci-senha"
+                element={<ForgotPassword />}
+              />
+              <Route
+                path="/redefinir-senha"
+                element={<ResetPassword />}
+              />
+
               <Route
                 path="/perfil"
                 element={

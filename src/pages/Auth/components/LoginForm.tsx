@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Button } from "../../../components/Button/index";
 import { Input } from "../../../components/Input/index";
@@ -80,12 +81,12 @@ export function LoginForm({ onCreateAccount }: LoginFormProps) {
       </div>
 
       <div className="flex flex-wrap justify-between items-center gap-4 text-sm">
-        <button
-          type="button"
+        <Link
+          to="/esqueci-senha"
           className="text-brand-primaryText hover:text-brand-text transition"
         >
           Esqueci minha senha
-        </button>
+        </Link>
       </div>
 
       {formError ? (
