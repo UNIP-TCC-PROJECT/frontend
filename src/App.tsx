@@ -33,10 +33,26 @@ import {
   RequireAdmin,
 } from "./context/AuthContext";
 
-
 function App() {
   return (
     <Routes>
+      {/* Rotas administrativas */}
+      <Route
+        path="/admin/*"
+        element={
+          <RequireAdmin>
+            <AdminLayout>
+              <Routes>
+                <Route path="/" element={<AdminOngs />} />
+                <Route path="/ongs/:id" element={<AdminOngDetails />} />
+                <Route path="/admins/novo" element={<AdminCreateAdmin />} />
+              </Routes>
+            </AdminLayout>
+          </RequireAdmin>
+        }
+      />
+
+      {/* Rotas públicas e autenticadas */}
       <Route
         path="*"
         element={
@@ -45,9 +61,49 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/ongs" element={<Ongs />} />
+
+              <Route
+                path="/ongs-favoritas"
+                element={
+                  <RequireDoador>
+                    <OngsFavoritas />
+                  </RequireDoador>
+                }
+              />
+
+              <Route
+                path="/interesses"
+                element={
+                  <RequireOng>
+                    <InteressesOng />
+                  </RequireOng>
+                }
+              />
+
+              <Route
+                path="/conversas"
+                element={
+                  <RequireAuth>
+                    <Conversas />
+                  </RequireAuth>
+                }
+              />
+
+              <Route
+                path="/conversas/:id"
+                element={
+                  <RequireAuth>
+                    <Conversas />
+                  </RequireAuth>
+                }
+              />
+
               <Route path="/publicacoes" element={<Publicacoes />} />
               <Route path="/ongs/:id" element={<OngDetails />} />
-              <Route path="/publicacoes/:id" element={<PublicacaoDetails />} />
+              <Route
+                path="/publicacoes/:id"
+                element={<PublicacaoDetails />}
+              />
 
               {/* Recuperação de senha */}
               <Route
