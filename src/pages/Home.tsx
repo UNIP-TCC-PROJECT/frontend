@@ -82,6 +82,8 @@ export default function Home() {
       return Number(b.totalReviews ?? 0) - Number(a.totalReviews ?? 0);
     })
     .slice(0, 3);
+  const isOng = user?.type === "ONG";
+  const isDoador = user?.type === "DOADOR";
 
   return (
     <>
@@ -95,27 +97,33 @@ export default function Home() {
             </div>
 
             <h1 className="font-sans text-brand-text text-4xl md:text-5xl leading-[1.1]">
-              Ajude causas reais com{" "}
-              <span className="text-brand-primaryText italic">transparência</span>
+              {isOng ? "Encontre ajuda real com " : "Ajude causas reais com "}
+              <span className="text-brand-primaryText italic">
+                transparência
+              </span>
             </h1>
 
             <p className="max-w-xl text-brand-muted text-lg">
-              Encontre ONGs verificadas para apoiar com doações, materiais ou
-              trabalho voluntário.
+              {isOng
+                ? "Agora você pode encontrar doadores e ver o interesse deles na sua causa. Para conquistar o selo Medalha Branca, acesse seu perfil e solicite uma verificação adicional."
+                : isDoador
+                  ? "Você agora pode buscar ONGs para ajudar, prestar serviços e demonstrar interesse. Boa jornada."
+                  : "Encontre ONGs verificadas para apoiar com doações, materiais ou trabalho voluntário."}
             </p>
 
             <div className="flex flex-wrap gap-3">
               <Link
-                to="/ongs"
+                to={isOng ? "/interesses" : "/ongs"}
                 className="bg-brand-primary hover:bg-brand-primaryDark shadow-xs px-8 py-3 rounded-full font-semibold text-brand-onPrimary transition-all"
               >
-                Acessar ONGs
+                {isOng ? "Acessar doadores interessados" : "Acessar ONGs"}
               </Link>
+
               <Link
-                to="/auth?modo=cadastro"
+                to={user ? "/publicacoes" : "/auth?modo=cadastro"}
                 className="bg-brand-surface hover:bg-brand-champagne px-8 py-3 border border-brand-text/15 rounded-full font-semibold text-brand-text transition-all"
               >
-                Cadastrar minha ONG
+                {user ? "Publicações" : "Cadastrar minha ONG"}
               </Link>
             </div>
           </div>
