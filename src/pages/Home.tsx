@@ -6,9 +6,8 @@ import {
   FaShieldAlt,
   FaHandSparkles,
 } from "react-icons/fa";
-import { api } from "../services/api";
+import { api, imagemUrl } from "../services/api";
 import { CATEGORIES as categories } from "../constants/categories";
-import FavoritoButton from "../components/FavoritoButton";
 import { useAuth } from "../context/useAuth";
 
 interface Ong {
@@ -23,6 +22,23 @@ interface Ong {
   medalhaVerde?: boolean;
 }
 
+interface PublicacaoResumo {
+  id: number;
+  description: string;
+  imageUrl: string;
+  ongId: number;
+  ong: {
+    id: number;
+    name: string;
+    profileImage: string | null;
+  };
+  createdAt: string;
+}
+
+interface PublicacoesRecentesResponse {
+  items: PublicacaoResumo[];
+}
+
 export default function Home() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -30,6 +46,11 @@ export default function Home() {
   const [ongs, setOngs] = useState<Ong[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [publicacoesRecentes, setPublicacoesRecentes] = useState<
+    PublicacaoResumo[]
+  >([]);
+  const [carregandoPublicacoes, setCarregandoPublicacoes] = useState(false);
+  const [erroPublicacoes, setErroPublicacoes] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -63,6 +84,39 @@ export default function Home() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (user?.type !== "DOADOR" && user?.type !== "ONG") {
+      setPublicacoesRecentes([]);
+      setCarregandoPublicacoes(false);
+      return;
+    }
+
+    let ativo = true;
+
+    setCarregandoPublicacoes(true);
+    setErroPublicacoes("");
+
+    api
+      .get<PublicacoesRecentesResponse>("/publicacoes", {
+        params: { page: 1, limit: 6 },
+      })
+      .then(({ data }) => {
+        if (ativo) setPublicacoesRecentes(data.items);
+      })
+      .catch(() => {
+        if (ativo) {
+          setErroPublicacoes("Não foi possível carregar as publicações.");
+        }
+      })
+      .finally(() => {
+        if (ativo) setCarregandoPublicacoes(false);
+      });
+
+    return () => {
+      ativo = false;
+    };
+  }, [user]);
 
   const handleCategoryClick = (cat: string) => {
     navigate(`/ongs?categoria=${cat}`);
@@ -208,81 +262,163 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ONGs em destaque */}
-      <section className="mx-auto mb-20 px-4 max-w-5xl">
-        <h2 className="mb-6 font-sans text-brand-text text-2xl">
-          ONGs em destaque
-        </h2>
-
-        {loading && (
-          <p className="py-8 text-brand-muted text-center">
-            Carregando ONGs...
-          </p>
-        )}
-
-        {error && (
-          <p role="alert" className="py-8 text-brand-muted text-center">
-            {error}
-          </p>
-        )}
-
-        {!loading && !error && featuredOngs.length === 0 && (
-          <p className="py-8 text-brand-muted text-center">
-            Ainda não há ONGs cadastradas.
-          </p>
-        )}
-
-        {!loading && featuredOngs.length > 0 && (
-          <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
-            {featuredOngs.map((ong) => (
-              <div
-                key={ong.id}
-                className="group relative flex flex-col bg-brand-surface shadow-xs hover:shadow-md p-6 border border-brand-border hover:border-brand-text/30 rounded-2xl transition-all"
-              >
-                {user?.type === "DOADOR" && user.status === "ATIVO" && (
-                  <div className="absolute right-4 top-4 z-10">
-                    <FavoritoButton ongId={ong.id} iconOnly />
-                  </div>
-                )}
-
-                <div className="flex items-center gap-3 mb-3 pr-10">
-                  <div className="flex justify-center items-center bg-brand-champagne rounded-full ring-2 ring-brand-primary/20 w-11 h-11 font-sans font-bold text-brand-primaryText shrink-0">
-                    {ong.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <h3 className="font-sans font-bold text-brand-text group-hover:text-brand-primaryText text-base transition-colors">
-                      {ong.name}
-                    </h3>
-                    {(ong.city || ong.state) && (
-                      <span className="text-brand-muted text-xs">
-                        {[ong.city, ong.state].filter(Boolean).join(" - ")}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 mb-2 text-sm">
-                  <span className="text-brand-gold">★</span>
-                  <span className="font-medium text-brand-text">
-                    {Number(ong.averageRating ?? 0).toFixed(1)}
-                  </span>
-                  <span className="text-brand-text/40">
-                    ({ong.totalReviews ?? 0})
-                  </span>
-                </div>
-                <p className="flex-1 mb-4 text-brand-muted text-sm line-clamp-3 leading-relaxed">
-                  {ong.category || "Categoria não informada."}{" "}
-                </p>
-                <Link
-                  to={`/ongs/${ong.id}`}
-                  className="bg-brand-primary hover:bg-brand-primaryDark shadow-xs mt-auto px-4 py-2.5 rounded-full font-semibold text-brand-onPrimary text-xs text-center transition-all"
-                >
-                  Ver perfil
-                </Link>
-              </div>
-            ))}
+      {(isDoador || isOng) && (
+        <section className="mx-auto mb-20 px-4 max-w-5xl">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="font-sans text-brand-text text-2xl">
+              Publicações recentes
+            </h2>
+            <Link
+              to="/publicacoes"
+              className="font-semibold text-brand-primaryText underline"
+            >
+              Ver todas as publicações
+            </Link>
           </div>
-        )}
-      </section>
+
+          {carregandoPublicacoes && (
+            <p className="py-8 text-center text-brand-muted">
+              Carregando publicações...
+            </p>
+          )}
+
+          {!carregandoPublicacoes && erroPublicacoes && (
+            <p role="alert" className="py-8 text-center text-red-600">
+              {erroPublicacoes}
+            </p>
+          )}
+
+          {!carregandoPublicacoes &&
+            !erroPublicacoes &&
+            publicacoesRecentes.length === 0 && (
+              <p className="py-8 text-center text-brand-muted">
+                Ainda não há publicações recentes.
+              </p>
+            )}
+
+          {!carregandoPublicacoes &&
+            !erroPublicacoes &&
+            publicacoesRecentes.length > 0 && (
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {publicacoesRecentes.map((publicacao) => (
+                  <Link
+                    key={publicacao.id}
+                    to={`/publicacoes/${publicacao.id}`}
+                    aria-label={`Abrir publicação de ${publicacao.ong.name}`}
+                    className="group overflow-hidden rounded-2xl border border-brand-border bg-brand-surface shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
+                  >
+                    <article>
+                      <div className="flex items-center gap-2 p-3">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-champagne font-semibold text-brand-primaryText">
+                          {publicacao.ong.name.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="truncate text-sm font-semibold text-brand-text">
+                          {publicacao.ong.name}
+                        </span>
+                      </div>
+
+                      <img
+                        src={imagemUrl(publicacao.imageUrl) ?? ""}
+                        alt={`Publicação de ${publicacao.ong.name}`}
+                        className="aspect-[4/3] w-full object-cover"
+                      />
+
+                      <div className="p-4">
+                        <p className="line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-brand-text">
+                          {publicacao.description}
+                        </p>
+                        <time
+                          dateTime={publicacao.createdAt}
+                          className="mt-3 block text-xs text-brand-muted"
+                        >
+                          {new Date(publicacao.createdAt).toLocaleDateString(
+                            "pt-BR",
+                          )}
+                        </time>
+                        <span className="mt-3 inline-block text-sm font-semibold text-brand-primaryText underline">
+                          Ver publicação
+                        </span>
+                      </div>
+                    </article>
+                  </Link>
+                ))}
+              </div>
+            )}
+        </section>
+      )}
+
+      {/* ONGs em destaque */}
+      {!user && (
+        <section className="mx-auto mb-20 px-4 max-w-5xl">
+          <h2 className="mb-6 font-sans text-brand-text text-2xl">
+            ONGs em destaque
+          </h2>
+
+          {loading && (
+            <p className="py-8 text-brand-muted text-center">
+              Carregando ONGs...
+            </p>
+          )}
+
+          {error && (
+            <p role="alert" className="py-8 text-brand-muted text-center">
+              {error}
+            </p>
+          )}
+
+          {!loading && !error && featuredOngs.length === 0 && (
+            <p className="py-8 text-brand-muted text-center">
+              Ainda não há ONGs cadastradas.
+            </p>
+          )}
+
+          {!loading && featuredOngs.length > 0 && (
+            <div className="gap-6 grid grid-cols-1 md:grid-cols-3">
+              {featuredOngs.map((ong) => (
+                <div
+                  key={ong.id}
+                  className="group relative flex flex-col bg-brand-surface shadow-xs hover:shadow-md p-6 border border-brand-border hover:border-brand-text/30 rounded-2xl transition-all"
+                >
+
+                  <div className="flex items-center gap-3 mb-3 pr-10">
+                    <div className="flex justify-center items-center bg-brand-champagne rounded-full ring-2 ring-brand-primary/20 w-11 h-11 font-sans font-bold text-brand-primaryText shrink-0">
+                      {ong.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h3 className="font-sans font-bold text-brand-text group-hover:text-brand-primaryText text-base transition-colors">
+                        {ong.name}
+                      </h3>
+                      {(ong.city || ong.state) && (
+                        <span className="text-brand-muted text-xs">
+                          {[ong.city, ong.state].filter(Boolean).join(" - ")}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 mb-2 text-sm">
+                    <span className="text-brand-gold">★</span>
+                    <span className="font-medium text-brand-text">
+                      {Number(ong.averageRating ?? 0).toFixed(1)}
+                    </span>
+                    <span className="text-brand-text/40">
+                      ({ong.totalReviews ?? 0})
+                    </span>
+                  </div>
+                  <p className="flex-1 mb-4 text-brand-muted text-sm line-clamp-3 leading-relaxed">
+                    {ong.category || "Categoria não informada."}{" "}
+                  </p>
+                  <Link
+                    to={`/ongs/${ong.id}`}
+                    className="bg-brand-primary hover:bg-brand-primaryDark shadow-xs mt-auto px-4 py-2.5 rounded-full font-semibold text-brand-onPrimary text-xs text-center transition-all"
+                  >
+                    Ver perfil
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
     </>
   );
 }
