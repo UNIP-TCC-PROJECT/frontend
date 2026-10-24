@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { FaRegClock } from "react-icons/fa";
+
 import { api, imagemUrl } from "../services/api";
 import { useAuth } from "../context/useAuth";
 import PublicacaoForm from "../components/PublicacaoForm";
-import { FaRegClock } from "react-icons/fa";
+import FavoritoButton from "../components/FavoritoButton";
 
 interface Publicacao {
   id: number;
@@ -99,26 +101,32 @@ export default function Publicacoes() {
                 key={publicacao.id}
                 className="mx-auto w-full max-w-xl space-y-6 bg-[#FFBE1F] p-4 sm:p-6"
               >
-                <Link
-                  to={`/ongs/${publicacao.ongId}`}
-                  className="flex items-center gap-2 rounded-2xl border-[2px] border-[#A51645] bg-[#FFD43B] p-2 shadow-[4px_4px_0_#5B4210] sm:p-3"
-                >
-                  {publicacao.ong.profileImage ? (
-                    <img
-                      src={imagemUrl(publicacao.ong.profileImage) ?? ""}
-                      alt=""
-                      className="h-7 w-7 shrink-0 rounded-full border-2 border-[#A51645] bg-white object-cover sm:h-8 sm:w-8"
-                    />
-                  ) : (
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-[#A51645] bg-[#F4EBDD] text-sm font-bold text-black sm:h-8 sm:w-8 sm:text-base">
-                      {publicacao.ong.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border-[2px] border-[#A51645] bg-[#FFD43B] p-2 shadow-[4px_4px_0_#5B4210] sm:p-3">
+                  <Link
+                    to={`/ongs/${publicacao.ongId}`}
+                    className="flex min-w-0 flex-1 items-center gap-2"
+                  >
+                    {publicacao.ong.profileImage ? (
+                      <img
+                        src={imagemUrl(publicacao.ong.profileImage) ?? ""}
+                        alt=""
+                        className="h-7 w-7 shrink-0 rounded-full border-2 border-[#A51645] bg-white object-cover sm:h-8 sm:w-8"
+                      />
+                    ) : (
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-[#A51645] bg-[#F4EBDD] text-sm font-bold text-black sm:h-8 sm:w-8 sm:text-base">
+                        {publicacao.ong.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
 
-                  <span className="break-words text-sm font-bold leading-tight text-black sm:text-base">
-                    {publicacao.ong.name}
-                  </span>
-                </Link>
+                    <span className="break-words text-sm font-bold leading-tight text-black sm:text-base">
+                      {publicacao.ong.name}
+                    </span>
+                  </Link>
+
+                  {user?.type === "DOADOR" && user.status === "ATIVO" && (
+                    <FavoritoButton ongId={publicacao.ongId} />
+                  )}
+                </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-3 text-xl font-extrabold text-black sm:text-3xl">
                   <time dateTime={publicacao.createdAt}>
@@ -183,9 +191,11 @@ export default function Publicacoes() {
               >
                 Anterior
               </button>
+
               <span className="text-sm text-brand-muted">
                 Página {pagina} de {totalPaginas}
               </span>
+
               <button
                 type="button"
                 onClick={() => setPagina((valor) => valor + 1)}

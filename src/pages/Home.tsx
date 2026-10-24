@@ -8,6 +8,8 @@ import {
 } from "react-icons/fa";
 import { api } from "../services/api";
 import { CATEGORIES as categories } from "../constants/categories";
+import FavoritoButton from "../components/FavoritoButton";
+import { useAuth } from "../context/useAuth";
 
 interface Ong {
   id: number;
@@ -23,6 +25,7 @@ interface Ong {
 
 export default function Home() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [ongs, setOngs] = useState<Ong[]>([]);
   const [loading, setLoading] = useState(true);
@@ -226,9 +229,15 @@ export default function Home() {
             {featuredOngs.map((ong) => (
               <div
                 key={ong.id}
-                className="group flex flex-col bg-brand-surface shadow-xs hover:shadow-md p-6 border border-brand-border hover:border-brand-text/30 rounded-2xl transition-all"
+                className="group relative flex flex-col bg-brand-surface shadow-xs hover:shadow-md p-6 border border-brand-border hover:border-brand-text/30 rounded-2xl transition-all"
               >
-                <div className="flex items-center gap-3 mb-3">
+                {user?.type === "DOADOR" && user.status === "ATIVO" && (
+                  <div className="absolute right-4 top-4 z-10">
+                    <FavoritoButton ongId={ong.id} iconOnly />
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3 mb-3 pr-10">
                   <div className="flex justify-center items-center bg-brand-champagne rounded-full ring-2 ring-brand-primary/20 w-11 h-11 font-sans font-bold text-brand-primaryText shrink-0">
                     {ong.name.charAt(0).toUpperCase()}
                   </div>

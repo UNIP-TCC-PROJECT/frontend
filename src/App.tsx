@@ -1,25 +1,20 @@
-
-import { Routes, Route } from "react-router-dom";
+﻿import { Routes, Route } from "react-router-dom";
 
 import Auth from "./pages/Auth/index";
 import Home from "./pages/Home";
 import Ongs from "./pages/Ongs";
 import OngDetails from "./pages/OngDetails";
-
 import AdminOngs from "./pages/admin/AdminOngs";
 import AdminOngDetails from "./pages/admin/AdminOngDetails";
 import AdminCreateAdmin from "./pages/admin/AdminCreateAdmin";
-
 import Perfil from "./pages/Perfil";
 import MinhasMetas from "./pages/MinhasMetas";
-
 import OngsFavoritas from "./pages/OngsFavoritas";
 import InteressesOng from "./pages/InteressesOng";
 import Conversas from "./pages/Conversas";
 
 import Publicacoes from "./pages/Publicacoes";
 import PublicacaoDetails from "./pages/PublicacaoDetails";
-
 import Layout from "./components/Layout";
 import AdminLayout from "./components/AdminLayout";
 
@@ -36,7 +31,6 @@ import {
 function App() {
   return (
     <Routes>
-      {/* Rotas administrativas */}
       <Route
         path="/admin/*"
         element={
@@ -52,7 +46,6 @@ function App() {
         }
       />
 
-      {/* Rotas públicas e autenticadas */}
       <Route
         path="*"
         element={
@@ -60,8 +53,9 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/esqueci-senha" element={<ForgotPassword />} />
+              <Route path="/redefinir-senha" element={<ResetPassword />} />
               <Route path="/ongs" element={<Ongs />} />
-
               <Route
                 path="/ongs-favoritas"
                 element={
@@ -70,7 +64,6 @@ function App() {
                   </RequireDoador>
                 }
               />
-
               <Route
                 path="/interesses"
                 element={
@@ -79,7 +72,6 @@ function App() {
                   </RequireOng>
                 }
               />
-
               <Route
                 path="/conversas"
                 element={
@@ -88,7 +80,6 @@ function App() {
                   </RequireAuth>
                 }
               />
-
               <Route
                 path="/conversas/:id"
                 element={
@@ -97,24 +88,9 @@ function App() {
                   </RequireAuth>
                 }
               />
-
               <Route path="/publicacoes" element={<Publicacoes />} />
               <Route path="/ongs/:id" element={<OngDetails />} />
-              <Route
-                path="/publicacoes/:id"
-                element={<PublicacaoDetails />}
-              />
-
-              {/* Recuperação de senha */}
-              <Route
-                path="/esqueci-senha"
-                element={<ForgotPassword />}
-              />
-              <Route
-                path="/redefinir-senha"
-                element={<ResetPassword />}
-              />
-
+              <Route path="/publicacoes/:id" element={<PublicacaoDetails />} />
               <Route
                 path="/perfil"
                 element={

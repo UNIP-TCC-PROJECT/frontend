@@ -8,12 +8,16 @@ import {
   FaInstagram,
   FaGlobe,
   FaCopy,
+  FaComments,
 } from "react-icons/fa";
 import MetaCarousel from "./components/MetaCarousel";
 import MetaDetailsModal from "./components/MetaDetailsModal";
 import { OngReviews } from "../components/OngReviews";
 import { ReportModal } from "../components/ReportModal";
 import PublicacoesList from "../components/PublicacoesList";
+import FavoritoButton from "../components/FavoritoButton";
+import { useAuth } from "../context/useAuth";
+import InteresseButton from "../components/InteresseButton";
 
 interface Ong {
   id: number;
@@ -52,6 +56,7 @@ interface Meta {
 export default function OngDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [ong, setOng] = useState<Ong | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,6 +66,8 @@ export default function OngDetails() {
   const [metas, setMetas] = useState<Meta[]>([]);
   const [loadingMetas, setLoadingMetas] = useState(true);
   const [reportOpen, setReportOpen] = useState(false);
+  const [erroConversa, setErroConversa] = useState("");
+  const [abrindoConversa, setAbrindoConversa] = useState(false);
 
   useEffect(() => {
     async function fetchOng() {
@@ -101,6 +108,20 @@ export default function OngDetails() {
     }
   }
 
+  async function iniciarConversa() {
+    if (!ong) return;
+    setAbrindoConversa(true);
+    setErroConversa("");
+    try {
+      const { data } = await api.post<{ id: number }>(`/conversas/ongs/${ong.id}`);
+      navigate(`/conversas/${data.id}`);
+    } catch {
+      setErroConversa("Não foi possível iniciar a conversa. Tente novamente.");
+    } finally {
+      setAbrindoConversa(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="py-10 text-center text-brand-muted">
@@ -135,7 +156,13 @@ export default function OngDetails() {
       </button>
 
       {/* Cabeçalho */}
-      <div className="mb-6 rounded-2xl border border-brand-border bg-brand-surface p-8 shadow-sm">
+      <div className="relative mb-6 rounded-2xl border border-brand-border bg-brand-surface p-8 shadow-sm">
+        {user?.type === "DOADOR" && user.status === "ATIVO" && (
+          <div className="absolute right-4 top-4 z-10">
+            <FavoritoButton ongId={ong.id} iconOnly />
+          </div>
+        )}
+
         <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
           {/* Foto */}
           <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-champagne text-3xl font-bold text-brand-primaryText">
@@ -151,7 +178,7 @@ export default function OngDetails() {
           </div>
 
           {/* Informações */}
-          <div>
+          <div className="min-w-0 pr-10 sm:pr-0">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-3xl font-sans text-brand-text">{ong.name}</h1>
 
@@ -178,6 +205,22 @@ export default function OngDetails() {
           </div>
         </div>
       </div>
+
+      {user?.type === "DOADOR" && user.status === "ATIVO" && (
+        <section className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-brand-border bg-brand-surface p-5 shadow-sm">
+          <InteresseButton ongId={ong.id} />
+          <button
+            type="button"
+            onClick={() => void iniciarConversa()}
+            disabled={abrindoConversa}
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-brand-primary px-5 py-3 font-semibold text-brand-primaryText transition hover:bg-brand-champagne disabled:opacity-60"
+          >
+            <FaComments aria-hidden="true" />
+            {abrindoConversa ? "Abrindo conversa..." : "Conversar com a ONG"}
+          </button>
+          {erroConversa && <p role="alert" className="basis-full text-sm text-red-600">{erroConversa}</p>}
+        </section>
+      )}
 
       {/* Sobre */}
       <div className="mb-6 rounded-2xl border border-brand-border bg-brand-surface p-8 shadow-sm">

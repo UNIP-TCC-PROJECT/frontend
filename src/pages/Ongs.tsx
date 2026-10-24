@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { FaCheckCircle } from "react-icons/fa";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { FaCheckCircle, FaStar } from "react-icons/fa";
 import { api } from "../services/api";
 import { CATEGORIES as categories } from "../constants/categories";
+import { useAuth } from "../context/useAuth";
+import FavoritoButton from "../components/FavoritoButton";
 
 export default function Ongs() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useAuth();
 
   const [search, setSearch] = useState("");
   const [ongs, setOngs] = useState([]);
@@ -63,6 +66,18 @@ export default function Ongs() {
         Encontre instituições confiáveis para apoiar
       </p>
 
+      {user?.type === "DOADOR" && user.status === "ATIVO" && (
+        <div className="mb-6">
+          <Link
+            to="/ongs-favoritas"
+            className="inline-flex items-center gap-2 rounded-full border border-brand-primary bg-brand-surface px-5 py-2.5 text-sm font-semibold text-brand-primaryText shadow-sm transition-colors hover:bg-brand-champagne"
+          >
+            <FaStar aria-hidden="true" className="text-brand-gold" />
+            Minhas ONGs favoritas
+          </Link>
+        </div>
+      )}
+
       {/* Filtros */}
       <div className="flex md:flex-row flex-col md:items-center gap-4 mb-8">
         <input
@@ -118,9 +133,15 @@ export default function Ongs() {
           {filteredOngs.map((ong: any) => (
             <div
               key={ong.id}
-              className="group flex flex-col bg-brand-surface shadow-xs hover:shadow-md p-6 border border-brand-border hover:border-brand-text/30 rounded-2xl transition-all"
+              className="group relative flex flex-col bg-brand-surface shadow-xs hover:shadow-md p-6 border border-brand-border hover:border-brand-text/30 rounded-2xl transition-all"
             >
-              <div className="flex items-start gap-3.5 mb-3.5">
+              {user?.type === "DOADOR" && user.status === "ATIVO" && (
+                <div className="absolute right-4 top-4 z-10">
+                  <FavoritoButton ongId={ong.id} iconOnly />
+                </div>
+              )}
+
+              <div className="flex items-start gap-3.5 mb-3.5 pr-10">
                 <div className="flex justify-center items-center bg-brand-champagne rounded-full ring-2 ring-brand-primary/20 w-12 h-12 font-sans font-bold text-brand-primaryText text-lg shrink-0">
                   {ong.name?.charAt(0).toUpperCase()}
                 </div>
