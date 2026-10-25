@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+﻿import { Routes, Route } from "react-router-dom";
 
 import Auth from "./pages/Auth/index";
 import Home from "./pages/Home";
@@ -17,6 +17,10 @@ import Publicacoes from "./pages/Publicacoes";
 import PublicacaoDetails from "./pages/PublicacaoDetails";
 import Layout from "./components/Layout";
 import AdminLayout from "./components/AdminLayout";
+
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+
 import {
   RequireAuth,
   RequireDoador,
@@ -49,6 +53,8 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/esqueci-senha" element={<ForgotPassword />} />
+              <Route path="/redefinir-senha" element={<ResetPassword />} />
               <Route path="/ongs" element={<Ongs />} />
               <Route
                 path="/ongs-favoritas"
