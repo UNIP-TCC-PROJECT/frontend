@@ -12,8 +12,10 @@ import MinhasMetas from "./pages/MinhasMetas";
 import OngsFavoritas from "./pages/OngsFavoritas";
 import InteressesOng from "./pages/InteressesOng";
 import Conversas from "./pages/Conversas";
+import Sobre from "./pages/Sobre";
 
 import Publicacoes from "./pages/Publicacoes";
+
 import PublicacaoDetails from "./pages/PublicacaoDetails";
 import Layout from "./components/Layout";
 import AdminLayout from "./components/AdminLayout";
@@ -52,6 +54,7 @@ function App() {
           <Layout>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/sobre" element={<Sobre />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/esqueci-senha" element={<ForgotPassword />} />
               <Route path="/redefinir-senha" element={<ResetPassword />} />

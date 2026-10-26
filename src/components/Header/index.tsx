@@ -124,12 +124,12 @@ export default function Header() {
             Publicações
           </Link>
 
-          <a
-            href="/#sobre"
+          <Link
+            to="/sobre"
             className="hover:bg-brand-text/5 px-1 sm:px-3.5 py-2 rounded-full font-semibold text-brand-muted hover:text-brand-text text-[11px] sm:text-xs uppercase sm:tracking-wider transition-all"
           >
             Sobre
-          </a>
+          </Link>
 
           {isLoggedIn ? (
             <div className="flex items-center gap-2 pl-2 border-brand-border border-l">
