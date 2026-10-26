@@ -145,8 +145,8 @@ export default function Home() {
       <section className="relative left-1/2 -mx-[50vw] -mt-32 bg-gradient-to-b from-brand-champagne to-brand-background px-4 pt-40 pb-16 w-screen">
         <div className="items-center gap-10 grid grid-cols-1 lg:grid-cols-12 mx-auto max-w-6xl">
           <div className="space-y-6 lg:col-span-7">
-            <div className="inline-flex items-center gap-2 bg-brand-surface px-3.5 py-1 border border-brand-border rounded-full font-semibold text-brand-goldText text-xs uppercase tracking-wider">
-              <FaHandSparkles className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-2 bg-brand-surface px-3.5 py-1 border border-brand-border rounded-full font-semibold text-brand-text text-xs uppercase tracking-wider">
+              <FaHandSparkles className="w-3.5 h-3.5 text-[#DBB24C]" />
               Plataforma de conexão transparente
             </div>
 
@@ -188,7 +188,7 @@ export default function Home() {
             </h3>
             <div className="gap-3 grid grid-cols-2">
               <div className="bg-brand-background p-4 border border-brand-border rounded-2xl">
-                <div className="flex items-center gap-2 mb-1 text-brand-gold">
+                <div className="flex items-center gap-2 mb-1 text-[#DBB24C]">
                   <FaBuilding className="w-4 h-4" />
                   <span className="font-sans font-bold text-brand-text text-2xl">
                     {loading ? "..." : ongs.length}
@@ -199,7 +199,7 @@ export default function Home() {
                 </span>
               </div>
               <div className="bg-brand-background p-4 border border-brand-border rounded-2xl">
-                <div className="flex items-center gap-2 mb-1 text-brand-gold">
+                <div className="flex items-center gap-2 mb-1 text-[#DBB24C]">
                   <FaShieldAlt className="w-4 h-4" />
                   <span className="font-sans font-bold text-brand-text text-2xl">
                     {loading ? "..." : verifiedCount}
@@ -237,7 +237,7 @@ export default function Home() {
             key={i}
             className="flex flex-col items-center bg-brand-surface shadow-xs hover:shadow-md p-6 border border-brand-border hover:border-brand-text/30 rounded-2xl text-center transition-all"
           >
-            <FaCheckCircle className="mb-2 text-brand-gold text-3xl" />
+            <FaCheckCircle className="mb-2 text-[#DBB24C] text-3xl" />
             <h3 className="mb-1 font-semibold text-brand-text text-lg">
               {item.title}
             </h3>
@@ -396,7 +396,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 mb-2 text-sm">
-                    <span className="text-brand-gold">★</span>
+                    <span className="text-[#DBB24C]">★</span>
                     <span className="font-medium text-brand-text">
                       {Number(ong.averageRating ?? 0).toFixed(1)}
                     </span>
