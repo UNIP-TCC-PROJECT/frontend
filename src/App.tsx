@@ -16,6 +16,10 @@ import Sobre from "./pages/Sobre";
 import Ajuda from "./pages/Ajuda";
 
 import Publicacoes from "./pages/Publicacoes";
+import Campanhas from "./pages/Campanhas";
+import CampanhaDetails from "./pages/CampanhaDetails";
+import MinhasDoacoes from "./pages/MinhasDoacoes";
+import MinhasCampanhas from "./pages/MinhasCampanhas";
 import MinhaInstituicao from "./pages/MinhaInstituicao";
 import AdminValidacoes from "./pages/admin/AdminValidacoes";
 import AdminValidacaoDetails from "./pages/admin/AdminValidacaoDetails";
@@ -99,6 +103,24 @@ function App() {
                   <RequireAuth>
                     <Conversas />
                   </RequireAuth>
+                }
+              />
+              <Route path="/campanhas" element={<Campanhas />} />
+              <Route path="/campanhas/:id" element={<CampanhaDetails />} />
+              <Route
+                path="/minhas-doacoes"
+                element={
+                  <RequireDoador>
+                    <MinhasDoacoes />
+                  </RequireDoador>
+                }
+              />
+              <Route
+                path="/minhas-campanhas"
+                element={
+                  <RequireOng>
+                    <MinhasCampanhas />
+                  </RequireOng>
                 }
               />
               <Route path="/publicacoes" element={<Publicacoes />} />

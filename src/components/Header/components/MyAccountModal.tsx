@@ -3,10 +3,11 @@ interface MyAccountModalProps {
   navigate: (path: string) => void;
   logout: () => void;
   isOng?: boolean;
+  isDonor?: boolean;
   isParticipant?: boolean;
 }
 
-function MyAccountModal({ setOpen, navigate, logout, isOng, isParticipant }: MyAccountModalProps) {
+function MyAccountModal({ setOpen, navigate, logout, isOng, isDonor, isParticipant }: MyAccountModalProps) {
   return (
     <div className="right-0 z-30 absolute flex flex-col gap-2 bg-brand-surface shadow-lg mt-2 p-2 border border-brand-border rounded-lg w-48 fade-in">
       <button
@@ -18,6 +19,28 @@ function MyAccountModal({ setOpen, navigate, logout, isOng, isParticipant }: MyA
       >
         Minha conta
       </button>
+      {isDonor && (
+        <button
+          className="hover:bg-brand-champagne px-4 py-2 rounded w-full font-medium text-brand-text text-left"
+          onClick={() => {
+            setOpen(false);
+            navigate("/minhas-doacoes");
+          }}
+        >
+          Minhas doações
+        </button>
+      )}
+      {isOng && (
+        <button
+          className="hover:bg-brand-champagne px-4 py-2 rounded w-full font-medium text-brand-text text-left"
+          onClick={() => {
+            setOpen(false);
+            navigate("/minhas-campanhas");
+          }}
+        >
+          Campanhas e arrecadação
+        </button>
+      )}
       {isOng && (
         <button
           className="hover:bg-brand-champagne px-4 py-2 rounded w-full font-medium text-brand-text text-left"

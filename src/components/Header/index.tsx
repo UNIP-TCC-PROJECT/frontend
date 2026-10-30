@@ -43,12 +43,12 @@ export default function Header() {
   }, [open, categoriesOpen]);
 
   return (
-    <header className="top-0 left-0 z-20 fixed bg-brand-background/95 backdrop-blur-md border-b border-brand-border w-full">
+    <header className="top-0 left-0 z-20 fixed bg-brand-background/95 backdrop-blur-md border-brand-border border-b w-full">
       <div className="flex justify-between items-center gap-1 mx-auto px-3 sm:px-6 py-3.5 max-w-7xl">
         <Link
           to="/"
           aria-label={`${BRAND.name} — ${BRAND.slogan}`}
-          className="flex shrink-0 items-center gap-3 group"
+          className="group flex items-center gap-3 shrink-0"
         >
           <BrandLogo compactOnMobile />
         </Link>
@@ -116,9 +116,20 @@ export default function Header() {
           <Link
             to="/ajuda"
             aria-current={location.pathname === "/ajuda" ? "page" : undefined}
-            className="px-1 sm:px-3.5 py-2 rounded-full font-semibold text-[11px] sm:text-xs uppercase sm:tracking-wider text-brand-muted hover:bg-brand-text/5 aria-[current=page]:bg-brand-primary aria-[current=page]:text-brand-onPrimary"
+            className="aria-[current=page]:bg-brand-primary hover:bg-brand-text/5 px-1 sm:px-3.5 py-2 rounded-full font-semibold text-[11px] text-brand-muted aria-[current=page]:text-brand-onPrimary sm:text-xs uppercase sm:tracking-wider"
           >
             Ajuda
+          </Link>
+
+          <Link
+            to="/campanhas"
+            className={`px-1 sm:px-3.5 py-2 rounded-full font-semibold text-[11px] sm:text-xs uppercase sm:tracking-wider transition-all ${
+              location.pathname.startsWith("/campanhas")
+                ? "bg-brand-primary text-brand-onPrimary"
+                : "text-brand-muted hover:bg-brand-text/5 hover:text-brand-text"
+            }`}
+          >
+            Campanhas
           </Link>
 
           <Link
@@ -134,7 +145,7 @@ export default function Header() {
 
           <Link
             to="/sobre"
-            className="hover:bg-brand-text/5 px-1 sm:px-3.5 py-2 rounded-full font-semibold text-brand-muted hover:text-brand-text text-[11px] sm:text-xs uppercase sm:tracking-wider transition-all"
+            className="hover:bg-brand-text/5 px-1 sm:px-3.5 py-2 rounded-full font-semibold text-[11px] text-brand-muted hover:text-brand-text sm:text-xs uppercase sm:tracking-wider transition-all"
           >
             Sobre
           </Link>
@@ -166,6 +177,7 @@ export default function Header() {
                     navigate={navigate}
                     logout={logout}
                     isOng={user?.type === "ONG"}
+                    isDonor={user?.type === "DOADOR"}
                     isParticipant={
                       (user?.type === "ONG" || user?.type === "DOADOR") &&
                       user.status === "ATIVO"
@@ -187,13 +199,13 @@ export default function Header() {
             <div className="flex items-center gap-1 pl-2 border-brand-border border-l">
               <Link
                 to="/auth"
-                className="hover:bg-brand-text/5 px-2 sm:px-3.5 py-2 rounded-full font-semibold text-brand-text text-[11px] sm:text-xs transition-colors"
+                className="hover:bg-brand-text/5 px-2 sm:px-3.5 py-2 rounded-full font-semibold text-[11px] text-brand-text sm:text-xs transition-colors"
               >
                 Entrar
               </Link>
               <Link
                 to="/auth?modo=cadastro"
-                className="bg-brand-primary hover:bg-brand-primaryDark px-2 sm:px-4 py-2 rounded-full font-semibold text-brand-onPrimary text-[11px] sm:text-xs transition-colors"
+                className="bg-brand-primary hover:bg-brand-primaryDark px-2 sm:px-4 py-2 rounded-full font-semibold text-[11px] text-brand-onPrimary sm:text-xs transition-colors"
               >
                 Cadastrar
               </Link>
