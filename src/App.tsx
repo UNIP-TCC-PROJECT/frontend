@@ -16,6 +16,10 @@ import Sobre from "./pages/Sobre";
 import Ajuda from "./pages/Ajuda";
 
 import Publicacoes from "./pages/Publicacoes";
+import MinhaInstituicao from "./pages/MinhaInstituicao";
+import AdminValidacoes from "./pages/admin/AdminValidacoes";
+import AdminValidacaoDetails from "./pages/admin/AdminValidacaoDetails";
+import AdminMfa from "./pages/admin/AdminMfa";
 
 import PublicacaoDetails from "./pages/PublicacaoDetails";
 import Layout from "./components/Layout";
@@ -43,11 +47,15 @@ function App() {
                 <Route path="/" element={<AdminOngs />} />
                 <Route path="/ongs/:id" element={<AdminOngDetails />} />
                 <Route path="/admins/novo" element={<AdminCreateAdmin />} />
+                <Route path="/validacoes" element={<AdminValidacoes />} />
+                <Route path="/validacoes/:id" element={<AdminValidacaoDetails />} />
               </Routes>
             </AdminLayout>
           </RequireAdmin>
         }
       />
+
+      <Route path="/admin/mfa" element={<RequireAuth><AdminMfa /></RequireAuth>} />
 
       <Route
         path="*"
@@ -102,6 +110,15 @@ function App() {
                   <RequireAuth>
                     <Perfil />
                   </RequireAuth>
+                }
+              />
+
+              <Route
+                path="/minha-instituicao"
+                element={
+                  <RequireOng>
+                    <MinhaInstituicao />
+                  </RequireOng>
                 }
               />
 

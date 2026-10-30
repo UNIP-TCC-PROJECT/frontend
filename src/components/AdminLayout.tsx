@@ -22,6 +22,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             ONGs
           </button>
           <button
+            onClick={() => navigate("/admin/validacoes")}
+            className="text-sm text-gray-300 hover:text-white"
+          >
+            Validação de ONGs
+          </button>
+          <button
             onClick={() => navigate("/admin/admins/novo")}
             className="text-sm text-gray-300 hover:text-white"
           >

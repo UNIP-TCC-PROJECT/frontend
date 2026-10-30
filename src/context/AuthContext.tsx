@@ -35,7 +35,7 @@ export interface User {
 
 interface AuthContextProps {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, otp?: string) => Promise<void>;
   register: (data: any) => Promise<void>;
   logout: () => void;
   isLoggedIn: boolean;
@@ -105,13 +105,14 @@ export const AuthProvider = ({
     salvarUsuario({ ...user, ...partial });
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, otp?: string) => {
     const response = await api.post("/users/login", {
       email,
       password,
+      ...(otp ? { otp } : {}),
     });
 
-    const { access_token } = response.data;
+    const { access_token, mfa_setup_required } = response.data;
 
     localStorage.setItem(TOKEN_KEY, access_token);
 
@@ -119,7 +120,8 @@ export const AuthProvider = ({
     salvarUsuario(userResponse.data);
 
     if (userResponse.data.type === "ADMIN") {
-      navigate("/admin");
+      // Administrador sem MFA ativo só pode concluir o enrolamento.
+      navigate(mfa_setup_required ? "/admin/mfa" : "/admin");
     } else {
       navigate("/");
     }

@@ -8,6 +8,7 @@ import { useAuth } from "../../../context/useAuth";
 interface LoginFormValues {
   email: string;
   password: string;
+  otp?: string;
 }
 
 interface LoginFormProps {
@@ -26,12 +27,14 @@ export function LoginForm({ onCreateAccount }: LoginFormProps) {
   const { login } = useAuth();
 
   const [formError, setFormError] = useState("");
+  const [needsOtp, setNeedsOtp] = useState(false);
 
   async function onSubmit(data: LoginFormValues) {
     try {
       setFormError("");
-      await login(data.email, data.password);
+      await login(data.email, data.password, data.otp);
     } catch (error: any) {
+      if (error?.response?.data?.mfaRequired) setNeedsOtp(true);
       console.error("Erro no login:", error);
       setFormError(
         error?.response?.data?.message ??
@@ -78,6 +81,16 @@ export function LoginForm({ onCreateAccount }: LoginFormProps) {
             required: "A senha é obrigatória.",
           })}
         />
+        {needsOtp && (
+          <Input
+            label="Código do autenticador (MFA)"
+            name="otp"
+            placeholder="000000"
+            required
+            autoComplete="one-time-code"
+            inputProps={register("otp", { required: true, pattern: /^\d{6}$/ })}
+          />
+        )}
       </div>
 
       <div className="flex flex-wrap justify-between items-center gap-4 text-sm">

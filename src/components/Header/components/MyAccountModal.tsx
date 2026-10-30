@@ -23,6 +23,17 @@ function MyAccountModal({ setOpen, navigate, logout, isOng, isParticipant }: MyA
           className="hover:bg-brand-champagne px-4 py-2 rounded w-full font-medium text-brand-text text-left"
           onClick={() => {
             setOpen(false);
+            navigate("/minha-instituicao");
+          }}
+        >
+          Minha instituição
+        </button>
+      )}
+      {isOng && (
+        <button
+          className="hover:bg-brand-champagne px-4 py-2 rounded w-full font-medium text-brand-text text-left"
+          onClick={() => {
+            setOpen(false);
             navigate("/minhas-metas");
           }}
         >
