@@ -4,7 +4,7 @@ import { isAxiosError } from "axios";
 
 import { api } from "../services/api";
 
-const MIN_PASSWORD_LENGTH = 6;
+const MIN_PASSWORD_LENGTH = 8;
 
 function getErrorMessage(error: unknown): string {
   if (isAxiosError(error)) {

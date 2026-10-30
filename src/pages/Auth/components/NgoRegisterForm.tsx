@@ -179,7 +179,7 @@ export function NgoRegisterForm() {
           error={errors.password?.message}
           inputProps={register("password", {
             required: "A senha é obrigatória.",
-            minLength: { value: 6, message: "A senha deve ter pelo menos 6 caracteres." },
+            minLength: { value: 8, message: "A senha deve ter pelo menos 8 caracteres." },
           })}
         />
         <Input
