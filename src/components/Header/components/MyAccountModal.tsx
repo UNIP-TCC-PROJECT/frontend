@@ -46,6 +46,17 @@ function MyAccountModal({ setOpen, navigate, logout, isOng, isDonor, isParticipa
           className="hover:bg-brand-champagne px-4 py-2 rounded w-full font-medium text-brand-text text-left"
           onClick={() => {
             setOpen(false);
+            navigate("/prestacao-de-contas");
+          }}
+        >
+          Prestação de contas
+        </button>
+      )}
+      {isOng && (
+        <button
+          className="hover:bg-brand-champagne px-4 py-2 rounded w-full font-medium text-brand-text text-left"
+          onClick={() => {
+            setOpen(false);
             navigate("/minha-instituicao");
           }}
         >

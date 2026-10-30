@@ -16,6 +16,9 @@ import Sobre from "./pages/Sobre";
 import Ajuda from "./pages/Ajuda";
 
 import Publicacoes from "./pages/Publicacoes";
+import PrestacaoContas from "./pages/PrestacaoContas";
+import Transparencia from "./pages/Transparencia";
+import AdminPrestacao from "./pages/admin/AdminPrestacao";
 import Campanhas from "./pages/Campanhas";
 import CampanhaDetails from "./pages/CampanhaDetails";
 import MinhasDoacoes from "./pages/MinhasDoacoes";
@@ -52,6 +55,7 @@ function App() {
                 <Route path="/ongs/:id" element={<AdminOngDetails />} />
                 <Route path="/admins/novo" element={<AdminCreateAdmin />} />
                 <Route path="/validacoes" element={<AdminValidacoes />} />
+                <Route path="/prestacao-de-contas" element={<AdminPrestacao />} />
                 <Route path="/validacoes/:id" element={<AdminValidacaoDetails />} />
               </Routes>
             </AdminLayout>
@@ -106,6 +110,15 @@ function App() {
                 }
               />
               <Route path="/campanhas" element={<Campanhas />} />
+              <Route path="/transparencia/:id" element={<Transparencia />} />
+              <Route
+                path="/prestacao-de-contas"
+                element={
+                  <RequireOng>
+                    <PrestacaoContas />
+                  </RequireOng>
+                }
+              />
               <Route path="/campanhas/:id" element={<CampanhaDetails />} />
               <Route
                 path="/minhas-doacoes"

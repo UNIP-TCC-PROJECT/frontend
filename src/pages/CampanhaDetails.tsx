@@ -58,7 +58,7 @@ export default function CampanhaDetails() {
       {c.imageUrl && <img src={imagemUrl(c.imageUrl)!} alt="" className="h-64 w-full rounded-2xl object-cover" />}
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold text-brand-text">{c.title}</h1>
-        <p className="text-sm text-brand-muted">{c.organizationName} · instituição validada{c.endsAt ? ` · até ${fmtDate(c.endsAt).split(",")[0]}` : ""}</p>
+        <p className="text-sm text-brand-muted">{c.organizationName} · instituição validada · <Link className="underline" to={`/transparencia/${c.organizationId}`}>prestação de contas</Link>{c.endsAt ? ` · até ${fmtDate(c.endsAt).split(",")[0]}` : ""}</p>
       </header>
       <ProgressBar value={c.raisedCents} goal={c.goalCents} />
       <p className="text-sm">{fmtMoney(c.raisedCents)} arrecadados de {fmtMoney(c.goalCents)} · {c.donationsCount} doação(ões)</p>
