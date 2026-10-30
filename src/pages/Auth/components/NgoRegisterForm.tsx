@@ -1,4 +1,4 @@
-import { useState, type FocusEvent } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "../../../components/Button/index";
@@ -7,6 +7,14 @@ import { Section } from "./Section";
 
 import { useAuth } from "../../../context/useAuth";
 import { CATEGORIES } from "../../../constants/categories";
+import { BANKS, OTHER_BANK } from "../../../constants/banks";
+import { isValidCpf, isValidWebsite, normalizeWebsite } from "../../../utils/validators";
+
+const ACCOUNT_TYPES = [
+  { label: "Conta corrente", value: "Corrente" },
+  { label: "Conta poupança", value: "Poupança" },
+  { label: "Conta de pagamento", value: "Pagamento" },
+];
 
 interface NgoFormValues {
   ngoName: string;
@@ -18,9 +26,11 @@ interface NgoFormValues {
   website: string;
   zip: string;
   street: string;
+  district: string;
   city: string;
   state: string;
-  bank: string;
+  bankCode: string;
+  bankOther: string;
   agency: string;
   account: string;
   accountType: string;
@@ -47,23 +57,24 @@ export function NgoRegisterForm() {
   const { register: registerUser } = useAuth();
 
   const passwordValue = watch("password");
+  const bankCode = watch("bankCode");
 
   const [cepStatus, setCepStatus] = useState<"idle" | "loading" | "error">("idle");
+  const lastCep = useRef("");
 
-  const zipField = register("zip", { required: "O CEP é obrigatório." });
+  const zipField = register("zip", {
+    required: "O CEP é obrigatório.",
+    validate: (v) => v.replace(/\D/g, "").length === 8 || "O CEP deve ter 8 dígitos.",
+  });
 
-  async function handleZipBlur(event: FocusEvent<HTMLInputElement>) {
-    await zipField.onBlur(event);
-
-    const cep = event.target.value.replace(/\D/g, "");
-
-    if (cep.length !== 8) {
-      return;
-    }
+  // Preenche rua, bairro, cidade e UF assim que os 8 dígitos do CEP forem digitados.
+  async function lookupCep(masked: string) {
+    const cep = masked.replace(/\D/g, "");
+    if (cep.length !== 8 || cep === lastCep.current) return;
+    lastCep.current = cep;
 
     try {
       setCepStatus("loading");
-
       const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
       const data = await response.json();
 
@@ -72,14 +83,15 @@ export function NgoRegisterForm() {
         return;
       }
 
-      setValue("street", `${data.logradouro}${data.bairro ? `, ${data.bairro}` : ""}`, {
-        shouldValidate: true,
-      });
-      setValue("city", data.localidade, { shouldValidate: true });
-      setValue("state", data.uf, { shouldValidate: true });
-      clearErrors(["street", "city", "state"]);
+      const opts = { shouldValidate: true } as const;
+      if (data.logradouro) setValue("street", data.logradouro, opts);
+      if (data.bairro) setValue("district", data.bairro, opts);
+      setValue("city", data.localidade, opts);
+      setValue("state", data.uf, opts);
+      clearErrors(["street", "district", "city", "state"]);
       setCepStatus("idle");
     } catch {
+      lastCep.current = "";
       setCepStatus("error");
     }
   }
@@ -95,18 +107,22 @@ export function NgoRegisterForm() {
         phone: data.phone,
         description: data.description,
         category: data.category,
-        website: data.website,
+        website: normalizeWebsite(data.website),
         zip: data.zip,
         street: data.street,
+        district: data.district,
         city: data.city,
         state: data.state,
-        bank: data.bank,
+        // Banco da lista: envia o código (o servidor grava o nome oficial). "Outro": só o nome digitado.
+        ...(data.bankCode === OTHER_BANK
+          ? { bank: data.bankOther.trim() }
+          : { bank: BANKS.find((b) => b.code === data.bankCode)?.name ?? "", bankCode: data.bankCode }),
         agency: data.agency,
         account: data.account,
         accountType: data.accountType,
         pixKey: data.pixKey,
         legalName: data.legalName,
-        legalCpf: data.legalCpf,
+        legalCpf: data.legalCpf.replace(/\D/g, ""),
       });
     } catch (error: any) {
       const apiMessage = error.response?.data?.message;
@@ -230,9 +246,18 @@ export function NgoRegisterForm() {
         <Input
           label="Site"
           name="website"
-          type="url"
-          placeholder="https://"
-          inputProps={register("website")}
+          type="text"
+          placeholder="www.minhaong.org.br"
+          error={errors.website?.message}
+          inputProps={{
+            ...register("website", {
+              validate: (v) => !v || isValidWebsite(v) || "Informe um site válido (ex.: www.minhaong.org.br).",
+            }),
+            inputMode: "url",
+            autoCapitalize: "none",
+            autoCorrect: "off",
+            maxLength: 200,
+          }}
         />
       </Section>
 
@@ -247,7 +272,15 @@ export function NgoRegisterForm() {
             error={errors.zip?.message}
             inputProps={{
               ...zipField,
-              onBlur: handleZipBlur,
+              inputMode: "numeric",
+              onChange: async (event) => {
+                await zipField.onChange(event);
+                void lookupCep(event.target.value);
+              },
+              onBlur: async (event) => {
+                await zipField.onBlur(event);
+                void lookupCep(event.target.value);
+              },
             }}
           />
           {cepStatus === "loading" ? (
@@ -270,6 +303,17 @@ export function NgoRegisterForm() {
           })}
         />
         <Input
+          label="Bairro"
+          name="district"
+          placeholder="Centro"
+          required
+          error={errors.district?.message}
+          inputProps={{
+            ...register("district", { required: "O bairro é obrigatório." }),
+            maxLength: 100,
+          }}
+        />
+        <Input
           label="Cidade"
           name="city"
           placeholder="São Paulo"
@@ -283,9 +327,14 @@ export function NgoRegisterForm() {
           placeholder="SP"
           required
           error={errors.state?.message}
-          inputProps={register("state", {
-            required: "O estado é obrigatório.",
-          })}
+          inputProps={{
+            ...register("state", {
+              required: "O estado é obrigatório.",
+              pattern: { value: /^[A-Za-z]{2}$/, message: "Use a sigla com 2 letras (ex.: SP)." },
+              setValueAs: (v: string) => v.toUpperCase(),
+            }),
+            maxLength: 2,
+          }}
         />
       </Section>
 
@@ -293,23 +342,47 @@ export function NgoRegisterForm() {
         title="Dados bancários"
         description="Informações para recebimento de doações."
       >
-        <Input
+        <Select
           label="Banco"
-          name="bank"
-          placeholder="Nome do banco"
+          name="bankCode"
+          placeholder="Selecione o banco"
+          options={[
+            ...BANKS.map((b) => ({ label: `${b.code} – ${b.name}`, value: b.code })),
+            { label: "Outro (informar o nome)", value: OTHER_BANK },
+          ]}
           required
-          error={errors.bank?.message}
-          inputProps={register("bank", { required: "O banco é obrigatório." })}
+          error={errors.bankCode?.message}
+          selectProps={register("bankCode", { required: "Selecione o banco." })}
         />
+        {bankCode === OTHER_BANK ? (
+          <Input
+            label="Nome do banco"
+            name="bankOther"
+            placeholder="Nome da instituição"
+            required
+            error={errors.bankOther?.message}
+            inputProps={{
+              ...register("bankOther", {
+                validate: (v) => (v ?? "").trim().length >= 2 || "Informe o nome do banco.",
+              }),
+              maxLength: 80,
+            }}
+          />
+        ) : null}
         <Input
           label="Agência"
           name="agency"
           placeholder="0001"
+          mask="9999"
           required
           error={errors.agency?.message}
-          inputProps={register("agency", {
-            required: "A agência é obrigatória.",
-          })}
+          inputProps={{
+            ...register("agency", {
+              required: "A agência é obrigatória.",
+              pattern: { value: /^\d{4}$/, message: "A agência deve ter 4 dígitos." },
+            }),
+            inputMode: "numeric",
+          }}
         />
         <Input
           label="Conta"
@@ -317,17 +390,31 @@ export function NgoRegisterForm() {
           placeholder="12345-6"
           required
           error={errors.account?.message}
-          inputProps={register("account", {
-            required: "A conta é obrigatória.",
-          })}
+          inputProps={(() => {
+            const field = register("account", {
+              required: "A conta é obrigatória.",
+              pattern: { value: /^\d{1,12}-?[\dxX]$/, message: "Use apenas números e o dígito (ex.: 12345-6)." },
+            });
+            return {
+              ...field,
+              inputMode: "numeric" as const,
+              maxLength: 14,
+              // só dígitos, hífen e o dígito verificador "X"
+              onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+                event.target.value = event.target.value.replace(/[^\dxX-]/g, "");
+                return field.onChange(event);
+              },
+            };
+          })()}
         />
-        <Input
+        <Select
           label="Tipo de conta"
           name="accountType"
-          placeholder="Corrente ou poupança"
+          placeholder="Selecione o tipo"
+          options={ACCOUNT_TYPES}
           required
           error={errors.accountType?.message}
-          inputProps={register("accountType", {
+          selectProps={register("accountType", {
             required: "O tipo de conta é obrigatório.",
           })}
         />
@@ -366,9 +453,14 @@ export function NgoRegisterForm() {
           mask="999.999.999-99"
           required
           error={errors.legalCpf?.message}
-          inputProps={register("legalCpf", {
-            required: "O CPF é obrigatório.",
-          })}
+          inputProps={{
+            ...register("legalCpf", {
+              required: "O CPF é obrigatório.",
+              validate: (v) => isValidCpf(v) || "CPF inválido.",
+            }),
+            inputMode: "numeric",
+            maxLength: 14,
+          }}
         />
       </Section>
 

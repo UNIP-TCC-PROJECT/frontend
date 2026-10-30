@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "../../../components/Button/index";
 import { Input } from "../../../components/Input/index";
 import { Section } from "./Section";
+import { isValidCpf } from "../../../utils/validators";
 import { useAuth } from "../../../context/useAuth";
 
 interface DonorFormValues {
@@ -39,7 +40,7 @@ export function DonorRegisterForm() {
         email: data.email,
         password: data.password,
         type: "DOADOR",
-        cpf: data.cpf,
+        cpf: data.cpf ? data.cpf.replace(/\D/g, "") : undefined,
         phone: data.phone,
       });
 
@@ -81,7 +82,14 @@ export function DonorRegisterForm() {
           name="cpf"
           placeholder="000.000.000-00"
           mask="999.999.999-99"
-          inputProps={register("cpf")}
+          error={errors.cpf?.message}
+          inputProps={{
+            ...register("cpf", {
+              validate: (v) => !v || isValidCpf(v) || "CPF inválido.",
+            }),
+            inputMode: "numeric",
+            maxLength: 14,
+          }}
         />
         <Input
           label="Email"

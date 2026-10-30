@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import type {
   ChangeEvent,
   InputHTMLAttributes,
@@ -70,6 +72,8 @@ export function Input({
   }`;
 
   const rawOnChange = inputProps?.onChange ?? onChange;
+  const isPassword = type === "password";
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = mask
     ? (event: ChangeEvent<HTMLInputElement>) => {
@@ -84,20 +88,33 @@ export function Input({
         {label}
         {required ? <span className="text-amber-600"> *</span> : null}
       </label>
-      <input
-        id={name}
-        name={name}
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        required={required}
-        autoComplete={autoComplete}
-        aria-invalid={Boolean(error)}
-        aria-describedby={error ? `${name}-error` : undefined}
-        {...inputProps}
-        onChange={handleChange}
-        className={sharedClassName}
-      />
+      <div className="relative">
+        <input
+          id={name}
+          name={name}
+          type={isPassword && showPassword ? "text" : type}
+          value={value}
+          placeholder={placeholder}
+          required={required}
+          autoComplete={autoComplete}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? `${name}-error` : undefined}
+          {...inputProps}
+          onChange={handleChange}
+          className={`${sharedClassName}${isPassword ? " pr-12" : ""}`}
+        />
+        {isPassword ? (
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+            aria-pressed={showPassword}
+            className="top-1/2 right-3 absolute p-1 text-brand-muted hover:text-brand-text -translate-y-1/2"
+          >
+            {showPassword ? <FaEyeSlash aria-hidden /> : <FaEye aria-hidden />}
+          </button>
+        ) : null}
+      </div>
       {error ? (
         <p id={`${name}-error`} role="alert" className="text-amber-600 text-xs">
           {error}
