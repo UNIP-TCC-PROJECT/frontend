@@ -113,7 +113,7 @@ export default function Perfil() {
 
         return (
             <main className="min-h-[calc(100vh-160px)] bg-brand-background px-4 py-10">
-                <section className="mx-auto max-w-3xl rounded-2xl border border-brand-text/10 bg-brand-surface p-8 shadow-sm">
+                <section className="w-full rounded-2xl border border-brand-text/10 bg-brand-surface p-8 shadow-sm">
                     <h1 className="mb-6 font-serif text-3xl text-brand-text">
                         Editar perfil
                     </h1>
@@ -158,7 +158,7 @@ export default function Perfil() {
 
     return (
         <main className="min-h-[calc(100vh-160px)] bg-slate-50 py-10 px-4">
-            <div className="max-w-3xl mx-auto flex flex-col gap-6">
+            <div className="w-full flex flex-col gap-6">
                 {/* Card do topo — foto + nome */}
                 <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 flex flex-col sm:flex-row items-center sm:items-start gap-6">
                     {/* ===== FOTO ===== */}

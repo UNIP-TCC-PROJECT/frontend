@@ -1,13 +1,18 @@
 import { useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { isAxiosError } from "axios";
 
+import { Card } from "../components/Card/index";
+import { Input } from "../components/Input/index";
+import { Button } from "../components/Button/index";
 import { api } from "../services/api";
 
 // A mensagem é sempre a mesma: a tela não revela se o e-mail tem cadastro.
 const SUCCESS_MESSAGE =
   "Se o e-mail estiver cadastrado, enviaremos um link para redefinir a senha. " +
   "Confira também a caixa de spam.";
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function getErrorMessage(error: unknown): string {
   if (isAxiosError(error)) {
@@ -28,9 +33,12 @@ function getErrorMessage(error: unknown): string {
 }
 
 export default function ForgotPassword() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [fieldError, setFieldError] = useState("");
   const [error, setError] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -38,6 +46,12 @@ export default function ForgotPassword() {
 
     if (loading) return;
 
+    if (!emailRegex.test(email.trim())) {
+      setFieldError("Informe um email válido.");
+      return;
+    }
+
+    setFieldError("");
     setError("");
     setLoading(true);
 
@@ -52,79 +66,82 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-md px-4 py-12">
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-gray-900">
-          Esqueci minha senha
-        </h1>
+    <div className="flex flex-col mx-auto w-full max-w-4xl text-brand-text">
+      <Card className="mt-8">
+        <div className="fade-in">
+          {sent ? (
+            <div className="space-y-6">
+              <header className="space-y-2 text-center">
+                <h2 className="font-sans text-brand-text text-2xl">
+                  Verifique seu e-mail
+                </h2>
+                <p className="text-brand-muted text-sm">
+                  Enviamos as instruções de recuperação.
+                </p>
+              </header>
 
-        {sent ? (
-          <div className="mt-4 space-y-6">
-            <p
-              role="status"
-              className="rounded-md bg-green-50 p-3 text-sm text-green-800"
-            >
-              {SUCCESS_MESSAGE}
-            </p>
-
-            <Link
-              to="/auth"
-              className="inline-block text-sm font-medium text-blue-600 hover:underline"
-            >
-              Voltar para o login
-            </Link>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="mt-4 space-y-4" noValidate>
-            <p className="text-sm text-gray-600">
-              Informe o e-mail da sua conta. Se ele estiver cadastrado, você
-              receberá um link para criar uma nova senha.
-            </p>
-
-            <div>
-              <label
-                htmlFor="email"
-                className="mb-1 block text-sm font-medium text-gray-700"
+              <p
+                role="status"
+                className="bg-emerald-50 p-4 rounded-xl text-emerald-800 text-sm"
               >
-                E-mail
-              </label>
-              <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="seu@email.com"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {error && (
-              <p role="alert" className="text-sm text-red-600">
-                {error}
+                {SUCCESS_MESSAGE}
               </p>
-            )}
 
-            <button
-              type="submit"
-              disabled={loading || email.trim() === ""}
-              className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {loading ? "Enviando..." : "Enviar link de recuperação"}
-            </button>
-
-            <div className="text-center">
-              <Link
-                to="/auth"
-                className="text-sm font-medium text-blue-600 hover:underline"
+              <Button
+                type="button"
+                className="w-full"
+                onClick={() => navigate("/auth")}
               >
                 Voltar para o login
-              </Link>
+              </Button>
             </div>
-          </form>
-        )}
-      </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+              <header className="space-y-2 text-center">
+                <h2 className="font-sans text-brand-text text-2xl">
+                  Esqueci minha senha
+                </h2>
+                <p className="text-brand-muted text-sm">
+                  Informe o e-mail da sua conta e enviaremos um link para criar
+                  uma nova senha.
+                </p>
+              </header>
+
+              <Input
+                label="Email"
+                name="email"
+                type="email"
+                placeholder="voce@email.com"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                error={fieldError}
+                inputProps={{ autoFocus: true }}
+              />
+
+              {error ? (
+                <p role="alert" className="text-amber-600 text-sm">
+                  {error}
+                </p>
+              ) : null}
+
+              <Button type="submit" isLoading={loading} className="w-full">
+                Enviar link de recuperação
+              </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => navigate("/auth")}
+              >
+                Voltar para o login
+              </Button>
+            </form>
+          )}
+        </div>
+      </Card>
     </div>
   );
 }

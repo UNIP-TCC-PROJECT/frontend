@@ -40,7 +40,7 @@ export function Button({
       {isLoading ? (
         <span className="flex items-center gap-2">
           <span className="bg-current rounded-full w-2 h-2 animate-pulse" />
-          Processing...
+          Processando...
         </span>
       ) : (
         children
