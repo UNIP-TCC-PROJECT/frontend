@@ -25,7 +25,7 @@ interface Ong {
 interface PublicacaoResumo {
   id: number;
   description: string;
-  imageUrl: string;
+  imageUrl: string | null;
   ongId: number;
   ong: {
     id: number;
@@ -317,11 +317,13 @@ export default function Home() {
                         </span>
                       </div>
 
-                      <img
-                        src={imagemUrl(publicacao.imageUrl) ?? ""}
-                        alt={`Publicação de ${publicacao.ong.name}`}
-                        className="aspect-[4/3] w-full object-cover"
-                      />
+                      {publicacao.imageUrl && (
+                        <img
+                          src={imagemUrl(publicacao.imageUrl) ?? ""}
+                          alt={`Publicação de ${publicacao.ong.name}`}
+                          className="aspect-[4/3] w-full object-cover"
+                        />
+                      )}
 
                       <div className="p-4">
                         <p className="line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-brand-text">

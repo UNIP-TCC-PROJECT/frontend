@@ -82,7 +82,7 @@ export default function Footer() {
       </div>
 
       <div className="mx-auto mt-12 px-4 border-brand-background/10 border-t max-w-7xl">
-        <p className="pt-6 text-brand-background/40 text-[11px] text-center">
+        <p className="pt-6 text-brand-background/70 text-[11px] text-center">
           &copy; {new Date().getFullYear()} {BRAND.name}. Todos os direitos reservados.
         </p>
       </div>

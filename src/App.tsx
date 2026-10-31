@@ -28,6 +28,7 @@ import AdminValidacoes from "./pages/admin/AdminValidacoes";
 import AdminValidacaoDetails from "./pages/admin/AdminValidacaoDetails";
 import AdminMfa from "./pages/admin/AdminMfa";
 
+import PublicacaoPrestacao from "./pages/PublicacaoPrestacao";
 import PublicacaoDetails from "./pages/PublicacaoDetails";
 import Layout from "./components/Layout";
 import AdminLayout from "./components/AdminLayout";
@@ -100,6 +101,7 @@ function App() {
               <Route path="/publicacoes" element={<Publicacoes />} />
               <Route path="/ongs/:id" element={<OngDetails />} />
               <Route path="/publicacoes/:id" element={<PublicacaoDetails />} />
+              <Route path="/publicacoes/:id/prestacao" element={<PublicacaoPrestacao />} />
 
               {/* Área da conta: navegação lateral (desktop) / dropdown (mobile) */}
               <Route element={<RequireAuth><AccountLayout /></RequireAuth>}>

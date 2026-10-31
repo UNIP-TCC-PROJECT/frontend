@@ -1,0 +1,121 @@
+import { useEffect, useRef, useState } from "react";
+import { FaCheckCircle, FaRegCircle, FaMinusCircle, FaTimes } from "react-icons/fa";
+import {
+  LEVEL_ORDER, dimensionLabel, fmtDateTime, levelIcon, levelNames, levelRequirement, levelStyle,
+} from "../../services/transparency";
+import type { DimensionStatus, TransparencyLevel } from "../../services/transparency";
+
+const statusIcon: Record<DimensionStatus, typeof FaCheckCircle> = { ATENDIDA: FaCheckCircle, PENDENTE: FaRegCircle, NAO_SE_APLICA: FaMinusCircle };
+const statusColor: Record<DimensionStatus, string> = { ATENDIDA: "text-emerald-700", PENDENTE: "text-brand-goldText", NAO_SE_APLICA: "text-brand-muted" };
+
+export function LevelModal({ level, onClose }: { level: TransparencyLevel; onClose: () => void }) {
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const code = level.level ?? "NONE";
+  const Icon = levelIcon[code];
+
+  useEffect(() => {
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div
+        role="dialog" aria-modal="true" aria-labelledby="nivel-titulo"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-brand-surface p-6 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 text-xl ${levelStyle[code]}`}><Icon aria-hidden /></span>
+            <h2 id="nivel-titulo" className="text-xl text-brand-text">{level.levelLabel}</h2>
+          </div>
+          <button ref={closeRef} type="button" onClick={onClose} aria-label="Fechar" className="rounded-full p-2 text-brand-muted hover:bg-brand-champagne"><FaTimes /></button>
+        </div>
+
+        <p className="mt-3 text-sm leading-relaxed text-brand-muted">{level.levelMeaning}</p>
+
+        <h3 className="mt-5 text-sm font-semibold uppercase tracking-wider text-brand-goldText">O que é avaliado</h3>
+        <ul className="mt-2 space-y-3">
+          {level.dimensions.map((d) => {
+            const S = statusIcon[d.status];
+            return (
+              <li key={d.key} className="rounded-xl border border-brand-border bg-brand-background p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <strong className="text-sm text-brand-text">{d.label}</strong>
+                  <span className={`inline-flex items-center gap-1 text-xs font-semibold ${statusColor[d.status]}`}><S aria-hidden />{dimensionLabel[d.status]}</span>
+                </div>
+                <p className="mt-1 text-xs text-brand-muted">{d.question}</p>
+                {d.met.length > 0 && <ul className="mt-2 list-disc pl-5 text-xs text-brand-text">{d.met.map((m) => <li key={m}>{m}</li>)}</ul>}
+                {d.pending.length > 0 && <ul className="mt-1 list-disc pl-5 text-xs text-brand-goldText">{d.pending.map((m) => <li key={m}>Pendente: {m}</li>)}</ul>}
+              </li>
+            );
+          })}
+        </ul>
+
+        {level.nextStep && <p className="mt-4 rounded-xl bg-brand-champagne p-3 text-sm text-brand-primaryText"><strong>Próximo passo:</strong> {level.nextStep}</p>}
+
+        <h3 className="mt-5 text-sm font-semibold uppercase tracking-wider text-brand-goldText">Os quatro níveis</h3>
+        <ol className="mt-2 space-y-1 text-xs text-brand-muted">
+          {LEVEL_ORDER.map((c) => <li key={c}><strong className={level.level === c ? "text-brand-text" : ""}>{levelNames[c]}:</strong> {levelRequirement[c]}</li>)}
+        </ol>
+
+        <p className="mt-5 border-t border-brand-border pt-3 text-xs text-brand-muted">
+          Avaliado em {fmtDateTime(level.evaluatedAt)} (regras versão {level.rulesVersion}). O nível é calculado automaticamente a partir dos registros
+          da plataforma; a instituição não o escolhe. Não é nota de confiança, não mede a segurança técnica do sistema e não garante regularidade permanente.
+          Não há penalidade por a instituição ser pequena: o que ainda não se aplica não conta contra.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/** Medalha clicável do nível atual. */
+export default function LevelBadge({ level, compact = false }: { level: TransparencyLevel; compact?: boolean }) {
+  const [open, setOpen] = useState(false);
+  const code = level.level ?? "NONE";
+  const Icon = levelIcon[code];
+  return (
+    <>
+      <button
+        type="button" onClick={() => setOpen(true)} aria-haspopup="dialog"
+        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-semibold transition hover:-translate-y-0.5 hover:shadow-sm ${levelStyle[code]}`}
+      >
+        <Icon aria-hidden />
+        <span>{level.levelLabel}</span>
+        {!compact && <span className="text-xs font-normal underline">ver critérios</span>}
+      </button>
+      {open && <LevelModal level={level} onClose={() => setOpen(false)} />}
+    </>
+  );
+}
+
+/** Os quatro níveis em sequência, destacando o atual (cada medalha abre o mesmo detalhamento). */
+export function LevelLadder({ level }: { level: TransparencyLevel }) {
+  const [open, setOpen] = useState(false);
+  const idx = level.level ? LEVEL_ORDER.indexOf(level.level) : -1;
+  return (
+    <>
+      <ol className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label="Níveis de transparência">
+        {LEVEL_ORDER.map((c, i) => {
+          const Icon = levelIcon[c];
+          const reached = i <= idx;
+          return (
+            <li key={c}>
+              <button type="button" onClick={() => setOpen(true)} aria-current={i === idx ? "step" : undefined}
+                className={`flex h-full w-full flex-col items-center gap-2 rounded-2xl border p-4 text-center text-xs transition hover:-translate-y-0.5 ${reached ? levelStyle[c] : `${levelStyle.NONE} border-dashed`} ${i === idx ? "ring-2 ring-brand-goldText" : ""}`}>
+                <Icon className="text-2xl" aria-hidden />
+                <span className="font-semibold">{levelNames[c]}</span>
+                {i === idx && <span className="rounded-full bg-brand-surface/70 px-2 py-0.5 text-[10px] font-semibold text-brand-primaryText">Nível atual</span>}
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+      {idx < 0 && <p className="mt-3 text-sm text-brand-muted">Avaliação em andamento: ainda não há dados suficientes para atribuir um nível. Isso não indica irregularidade.</p>}
+      {open && <LevelModal level={level} onClose={() => setOpen(false)} />}
+    </>
+  );
+}

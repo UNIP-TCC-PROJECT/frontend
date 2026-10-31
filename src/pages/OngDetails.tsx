@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../services/api";
 import {
   FaCheckCircle,
@@ -18,6 +18,17 @@ import PublicacoesList from "../components/PublicacoesList";
 import FavoritoButton from "../components/FavoritoButton";
 import { useAuth } from "../context/useAuth";
 import InteresseButton from "../components/InteresseButton";
+import { Tabs } from "../components/Tabs";
+import LevelBadge from "../components/transparency/LevelBadge";
+import ValidationStatus from "../components/transparency/ValidationStatus";
+import TransparenciaTab from "../components/transparency/TransparenciaTab";
+import DocumentosTab from "../components/transparency/DocumentosTab";
+import TimelineTab from "../components/transparency/TimelineTab";
+import SecurityInfo from "../components/transparency/SecurityInfo";
+import { fmtDay, loadProfile, orgIdOfOwner } from "../services/transparency";
+import type { TransparencyProfile } from "../services/transparency";
+import { imagemUrl } from "../services/api";
+import { fmtCnpj } from "../services/organizations";
 
 interface Ong {
   id: number;
@@ -32,6 +43,7 @@ interface Ong {
   website?: string;
   pixKey?: string;
   profileImage?: string;
+  coverImage?: string | null;
   category?: string;
   createdAt: string;
   averageRating?: number | string | null;
@@ -53,6 +65,23 @@ interface Meta {
   ongId: number;
 }
 
+const ABAS = [
+  { id: "sobre", label: "Sobre" },
+  { id: "transparencia", label: "Transparência" },
+  { id: "publicacoes", label: "Publicações" },
+  { id: "documentos", label: "Documentos" },
+  { id: "historico", label: "Linha do tempo" },
+  { id: "seguranca", label: "Segurança" },
+];
+
+function TabEmpty({ state }: { state: "loading" | "ok" | "none" | "error" }) {
+  const text =
+    state === "loading" ? "Carregando…"
+    : state === "error" ? "Não foi possível carregar estas informações agora. Tente novamente em instantes."
+    : "Esta instituição ainda não concluiu a validação da plataforma, por isso não há informações de transparência analisadas para exibir.";
+  return <p className="rounded-2xl border border-brand-border bg-brand-surface p-6 text-brand-muted" aria-live="polite">{text}</p>;
+}
+
 export default function OngDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -68,6 +97,10 @@ export default function OngDetails() {
   const [reportOpen, setReportOpen] = useState(false);
   const [erroConversa, setErroConversa] = useState("");
   const [abrindoConversa, setAbrindoConversa] = useState(false);
+  const [params, setParams] = useSearchParams();
+  const aba = ABAS.some((a) => a.id === params.get("aba")) ? (params.get("aba") as string) : "sobre";
+  const [profile, setProfile] = useState<TransparencyProfile | null>(null);
+  const [profileState, setProfileState] = useState<"loading" | "ok" | "none" | "error">("loading");
 
   useEffect(() => {
     async function fetchOng() {
@@ -92,6 +125,18 @@ export default function OngDetails() {
       fetchOng();
     }
   }, [id]);
+
+  // Perfil de transparência: só existe para ONG com organização aprovada (404 = validação não concluída).
+  useEffect(() => {
+    if (!ong) return;
+    let ativo = true;
+    setProfileState("loading");
+    orgIdOfOwner(ong.id)
+      .then(loadProfile)
+      .then((p) => { if (ativo) { setProfile(p); setProfileState("ok"); } })
+      .catch((e) => { if (ativo) setProfileState(e?.response?.status === 404 ? "none" : "error"); });
+    return () => { ativo = false; };
+  }, [ong]);
 
   async function handleCopyPix() {
     if (!ong?.pixKey) return;
@@ -155,56 +200,53 @@ export default function OngDetails() {
         ← Voltar para ONGs
       </button>
 
-      {/* Cabeçalho */}
-      <div className="relative mb-6 rounded-2xl border border-brand-border bg-brand-surface p-8 shadow-sm">
+      {/* Cabeçalho: capa, foto, status da validação e nível de transparência */}
+      <header className="relative mb-6 overflow-hidden rounded-2xl border border-brand-border bg-brand-surface shadow-sm">
+        <div className="h-36 w-full bg-gradient-to-r from-brand-champagne to-brand-primary/40 sm:h-52">
+          {ong.coverImage && <img src={imagemUrl(ong.coverImage) ?? ""} alt="" className="h-full w-full object-cover" />}
+        </div>
+
         {user?.type === "DOADOR" && user.status === "ATIVO" && (
           <div className="absolute right-4 top-4 z-10">
             <FavoritoButton ongId={ong.id} iconOnly />
           </div>
         )}
 
-        <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
-          {/* Foto */}
-          <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-champagne text-3xl font-bold text-brand-primaryText">
-            {ong.profileImage ? (
-              <img
-                src={ong.profileImage}
-                alt={`Logo da ${ong.name}`}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              ong.name.charAt(0).toUpperCase()
-            )}
-          </div>
-
-          {/* Informações */}
-          <div className="min-w-0 pr-10 sm:pr-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-3xl font-sans text-brand-text">{ong.name}</h1>
-
-              {ong.medalhaVerde && (
-                <span
-                  className="flex items-center gap-1 text-sm font-semibold text-green-600"
-                  title="Dados cadastrais verificados automaticamente"
-                >
-                  <FaCheckCircle />
-                  CNPJ verificado
-                </span>
+        <div className="px-6 pb-6 sm:px-8">
+          <div className="-mt-12 flex flex-col items-start gap-4 sm:flex-row sm:items-end">
+            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-brand-surface bg-brand-champagne text-3xl font-bold text-brand-primaryText shadow-sm">
+              {ong.profileImage ? (
+                <img src={imagemUrl(ong.profileImage) ?? ong.profileImage} alt={`Logo da ${ong.name}`} className="h-full w-full object-cover" />
+              ) : (
+                ong.name.charAt(0).toUpperCase()
               )}
             </div>
 
-            {ong.category && (
-              <p className="mt-2 capitalize text-brand-goldText">
-                {ong.category}
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-3xl font-sans text-brand-text">{ong.name}</h1>
+                {ong.medalhaVerde && (
+                  <span className="flex items-center gap-1 text-sm font-semibold text-green-600" title="Dados cadastrais verificados automaticamente">
+                    <FaCheckCircle />
+                    CNPJ verificado
+                  </span>
+                )}
+              </div>
+              {ong.category && <p className="capitalize text-brand-goldText">{ong.category}</p>}
+              <p className="mt-1 text-sm text-brand-muted">
+                CNPJ: {ong.cnpj ? fmtCnpj(ong.cnpj) : "Não informado"} · Na plataforma desde {fmtDay(ong.createdAt)}
               </p>
-            )}
+            </div>
+          </div>
 
-            <p className="mt-1 text-sm text-brand-muted">
-              CNPJ: {ong.cnpj || "Não informado"}
-            </p>
+          <div className="mt-5 space-y-3">
+            {profile && <LevelBadge level={profile.transparencyLevel} />}
+            {profileState === "loading" && <p className="text-sm text-brand-muted" aria-live="polite">Carregando informações de transparência…</p>}
+            {profileState === "error" && <p role="alert" className="text-sm text-red-600">Não foi possível carregar as informações de transparência agora.</p>}
+            {(profileState === "ok" || profileState === "none") && <ValidationStatus profile={profile} />}
           </div>
         </div>
-      </div>
+      </header>
 
       {user?.type === "DOADOR" && user.status === "ATIVO" && (
         <section className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-brand-border bg-brand-surface p-5 shadow-sm">
@@ -222,6 +264,21 @@ export default function OngDetails() {
         </section>
       )}
 
+      <div className="mb-6 overflow-x-auto">
+        <div className="min-w-[36rem]">
+          <Tabs
+            ariaLabel="Seções do perfil da ONG"
+            activeId={aba}
+            onChange={(id) => setParams(id === "sobre" ? {} : { aba: id }, { replace: true })}
+            tabs={ABAS}
+          />
+        </div>
+      </div>
+
+      <div className="mb-10">
+        <section id="tabpanel-sobre" role="tabpanel" aria-labelledby="tab-sobre" hidden={aba !== "sobre"} className="space-y-6">
+          {aba === "sobre" && (
+            <>
       {/* Sobre */}
       <div className="mb-6 rounded-2xl border border-brand-border bg-brand-surface p-8 shadow-sm">
         <h2 className="mb-3 text-xl font-sans text-brand-text">Sobre a ONG</h2>
@@ -230,8 +287,6 @@ export default function OngDetails() {
           {ong.description || "Esta ONG ainda não possui uma descrição."}
         </p>
       </div>
-
-      <PublicacoesList ongId={ong.id} />
 
       {/* Avaliações */}
       <OngReviews
@@ -251,25 +306,6 @@ export default function OngDetails() {
           )
         }
       />
-
-      {/* Denúncia da ONG */}
-      <div className="mb-6 text-right">
-        <button
-          onClick={() => setReportOpen(true)}
-          className="text-sm text-brand-muted underline hover:text-red-600"
-        >
-          Denunciar ONG
-        </button>
-      </div>
-
-      {reportOpen && (
-        <ReportModal
-          targetType="ONG"
-          targetId={ong.id}
-          targetLabel={ong.name}
-          onClose={() => setReportOpen(false)}
-        />
-      )}
 
       {/* Como ajudar */}
       <div className="mb-6 rounded-2xl border border-brand-border bg-brand-surface p-8 shadow-sm">
@@ -407,6 +443,66 @@ export default function OngDetails() {
           />
         )}
       </div>
+
+            </>
+          )}
+        </section>
+        <section id="tabpanel-transparencia" role="tabpanel" aria-labelledby="tab-transparencia" hidden={aba !== "transparencia"} className="space-y-6">
+          {aba === "transparencia" && (
+            <>
+              {profile ? <TransparenciaTab profile={profile} /> : <TabEmpty state={profileState} />}
+            </>
+          )}
+        </section>
+        <section id="tabpanel-publicacoes" role="tabpanel" aria-labelledby="tab-publicacoes" hidden={aba !== "publicacoes"} className="space-y-6">
+          {aba === "publicacoes" && (
+            <>
+              <PublicacoesList ongId={ong.id} />
+            </>
+          )}
+        </section>
+        <section id="tabpanel-documentos" role="tabpanel" aria-labelledby="tab-documentos" hidden={aba !== "documentos"} className="space-y-6">
+          {aba === "documentos" && (
+            <>
+              {profile ? <DocumentosTab profile={profile} /> : <TabEmpty state={profileState} />}
+            </>
+          )}
+        </section>
+        <section id="tabpanel-historico" role="tabpanel" aria-labelledby="tab-historico" hidden={aba !== "historico"} className="space-y-6">
+          {aba === "historico" && (
+            <>
+              {profile ? <TimelineTab timeline={profile.timeline} /> : <TabEmpty state={profileState} />}
+            </>
+          )}
+        </section>
+        <section id="tabpanel-seguranca" role="tabpanel" aria-labelledby="tab-seguranca" hidden={aba !== "seguranca"} className="space-y-6">
+          {aba === "seguranca" && (
+            <>
+              <SecurityInfo />
+            </>
+          )}
+        </section>
+      </div>
+
+      {/* Denúncia da ONG */}
+      <div className="mb-6 text-right">
+        <button
+          onClick={() => setReportOpen(true)}
+          className="text-sm text-brand-muted underline hover:text-red-600"
+        >
+          Denunciar ONG
+        </button>
+      </div>
+
+      {reportOpen && (
+        <ReportModal
+          targetType="ONG"
+          targetId={ong.id}
+          targetLabel={ong.name}
+          onClose={() => setReportOpen(false)}
+        />
+      )}
+
     </div>
   );
 }

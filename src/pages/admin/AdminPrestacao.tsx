@@ -8,6 +8,7 @@ import { downloadFile, errorMessage } from "../../services/organizations";
 interface Queue { expenses: (Expense & { organizationName: string; campaignTitle: string })[]; evidences: Evidence[] }
 interface ExpenseDetail extends Expense { financials: Financials }
 interface EvidenceDetail extends Evidence { delivery: { itemDescription: string; description: string; region: string; locationDetail: string | null; quantityPurchased: number; quantityDistributed: number; responsibleName: string } | null }
+interface PubFile { id: string; publicacaoId: number; kind: "IMAGEM" | "DOCUMENTO"; name: string; mime: string; size: number; sha256: string; status: AccStatus; imageConsent: boolean; createdAt: string }
 type Action = "INICIAR" | "APROVAR" | "REPROVAR" | "COMPLEMENTAR";
 
 const btn = "rounded px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50";
@@ -17,18 +18,24 @@ export default function AdminPrestacao() {
   const [q, setQ] = useState<Queue | null>(null);
   const [exp, setExp] = useState<ExpenseDetail | null>(null);
   const [ev, setEv] = useState<EvidenceDetail | null>(null);
+  const [pubFiles, setPubFiles] = useState<PubFile[]>([]);
+  const [pf, setPf] = useState<PubFile | null>(null);
   const [reason, setReason] = useState("");
   const [publishable, setPublishable] = useState(false);
   const [erro, setErro] = useState("");
   const [aviso, setAviso] = useState("");
 
   const carregar = useCallback(async () => {
-    try { setQ((await api.get<Queue>("/admin/accountability/queue")).data); } catch (e) { setErro(errorMessage(e)); }
+    try {
+      setQ((await api.get<Queue>("/admin/accountability/queue")).data);
+      setPubFiles((await api.get<PubFile[]>("/admin/publication-attachments")).data);
+    } catch (e) { setErro(errorMessage(e)); }
   }, []);
   useEffect(() => { void carregar(); }, [carregar]);
 
-  const abrirDespesa = async (id: string) => { setEv(null); setReason(""); setExp((await api.get<ExpenseDetail>(`/admin/expenses/${id}`)).data); };
-  const abrirEvidencia = async (id: string) => { setExp(null); setReason(""); setPublishable(false); setEv((await api.get<EvidenceDetail>(`/admin/evidences/${id}`)).data); };
+  const abrirDespesa = async (id: string) => { setPf(null); setEv(null); setReason(""); setExp((await api.get<ExpenseDetail>(`/admin/expenses/${id}`)).data); };
+  const abrirAnexo = (f: PubFile) => { setExp(null); setEv(null); setReason(""); setPublishable(false); setPf(f); };
+  const abrirEvidencia = async (id: string) => { setPf(null); setExp(null); setReason(""); setPublishable(false); setEv((await api.get<EvidenceDetail>(`/admin/evidences/${id}`)).data); };
 
   async function run(path: string, action: Action, ok: string, extra: object = {}, reload?: () => Promise<void>) {
     setErro(""); setAviso("");
@@ -60,12 +67,24 @@ export default function AdminPrestacao() {
         <section className="space-y-2 rounded-lg border bg-white p-4">
           <h2 className="font-semibold">Despesas na fila ({q?.expenses.length ?? 0})</h2>
           {q?.expenses.map((e) => <button key={e.id} className="block w-full rounded border p-2 text-left text-sm hover:bg-gray-50" onClick={() => void abrirDespesa(e.id)}><div className="flex justify-between"><strong>{e.description}</strong><Badge s={e.status} /></div><div className="text-gray-500">{e.organizationName} · {e.campaignTitle} · {fmtMoney(e.amountCents)}</div></button>)}
+          <h2 className="pt-2 font-semibold">Anexos de publicações ({pubFiles.length})</h2>
+          {pubFiles.map((f) => <button key={f.id} className="block w-full rounded border p-2 text-left text-sm hover:bg-gray-50" onClick={() => abrirAnexo(f)}><div className="flex justify-between"><strong>{f.kind === "IMAGEM" ? "Imagem" : "Documento"} — {f.name}</strong><Badge s={f.status} /></div><div className="text-gray-500">Publicação #{f.publicacaoId}{f.kind === "IMAGEM" && !f.imageConsent ? " · SEM autorização de imagem" : ""}</div></button>)}
           <h2 className="pt-2 font-semibold">Evidências na fila ({q?.evidences.length ?? 0})</h2>
           {q?.evidences.map((v) => <button key={v.id} className="block w-full rounded border p-2 text-left text-sm hover:bg-gray-50" onClick={() => void abrirEvidencia(v.id)}><div className="flex justify-between"><strong>{evidenceKinds[v.kind]}</strong><Badge s={v.status} /></div><div className="text-gray-500">{v.description}</div></button>)}
         </section>
 
         <section className="space-y-3 rounded-lg border bg-white p-4 text-sm">
-          {!exp && !ev && <p className="text-gray-500">Selecione um item da fila.</p>}
+          {!exp && !ev && !pf && <p className="text-gray-500">Selecione um item da fila.</p>}
+          {pf && (
+            <>
+              <div className="flex items-center justify-between"><h2 className="font-semibold">{pf.kind === "IMAGEM" ? "Imagem" : "Documento"} de publicação #{pf.publicacaoId}</h2><Badge s={pf.status} /></div>
+              <p className="text-xs text-gray-600">{pf.name} · {(pf.size / 1024).toFixed(0)} KB<br /><span className="break-all font-mono">SHA-256 {pf.sha256}</span></p>
+              {pf.kind === "IMAGEM" && <p className={`rounded p-2 text-xs ${pf.imageConsent ? "bg-green-50" : "bg-red-50 text-red-800"}`}>{pf.imageConsent ? "A ONG declarou ter autorização de uso da imagem." : "A ONG NÃO declarou autorização de imagem: não é possível publicar."}</p>}
+              <button className="text-blue-700 underline" onClick={() => void downloadFile(`/admin/publication-attachments/${pf.id}/file`, pf.name)}>Abrir arquivo</button>
+              <p className="text-xs text-gray-500">Confira rostos de crianças e pessoas vulneráveis, documentos pessoais, endereços e dados bancários: qualquer um deles impede a publicação.</p>
+              {(pf.status === "ENVIADA" || pf.status === "EM_ANALISE") && <Actions path={`/admin/publication-attachments/${pf.id}/review`} canStart={pf.status === "ENVIADA"} withPublish reload={async () => setPf(null)} />}
+            </>
+          )}
           {exp && (
             <>
               <div className="flex items-center justify-between"><h2 className="font-semibold">{exp.description}</h2><Badge s={exp.status} /></div>
