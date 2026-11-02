@@ -1,10 +1,30 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { FaCheckCircle, FaStar } from "react-icons/fa";
+import { FaCheckCircle, FaMedal, FaStar } from "react-icons/fa";
 import { api } from "../services/api";
 import { CATEGORIES as categories } from "../constants/categories";
 import { useAuth } from "../context/useAuth";
 import FavoritoButton from "../components/FavoritoButton";
+
+interface Ong {
+  id: number;
+  name: string;
+  category?: string | null;
+  city?: string | null;
+  description?: string | null;
+  medalhaVerde?: boolean;
+  medalhaBranca?: boolean;
+  averageRating?: number | string | null;
+  totalReviews?: number | null;
+}
+
+// Permite encontrar nomes com ou sem acentos, por exemplo "São" e "Sao".
+function normalizarTexto(texto: string): string {
+  return texto
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR");
+}
 
 export default function Ongs() {
   const navigate = useNavigate();
@@ -12,8 +32,12 @@ export default function Ongs() {
   const { user } = useAuth();
 
   const [search, setSearch] = useState("");
-  const [ongs, setOngs] = useState([]);
+  const [somenteMedalhaVerde, setSomenteMedalhaVerde] = useState(false);
+  const [somenteMedalhaBranca, setSomenteMedalhaBranca] = useState(false);
+  const [ongs, setOngs] = useState<Ong[]>([]);
   const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState(false);
+
   const requestedCategory = searchParams.get("categoria") ?? "";
   const category = categories.some((item) => item.value === requestedCategory)
     ? requestedCategory
@@ -31,33 +55,55 @@ export default function Ongs() {
     setSearchParams(nextParams);
   }
 
+  function limparFiltros() {
+    setSearch("");
+    setSomenteMedalhaVerde(false);
+    setSomenteMedalhaBranca(false);
+    selectCategory("");
+  }
+
   useEffect(() => {
+    let ativo = true;
+
     async function fetchOngs() {
       try {
-        const response = await api.get("/users/ongs");
-
-        setOngs(response.data);
+        const response = await api.get<Ong[]>("/users/ongs");
+        if (ativo) setOngs(response.data);
       } catch (error) {
         console.error("Erro ao buscar ONGs:", error);
+        if (ativo) setErro(true);
       } finally {
-        setLoading(false);
+        if (ativo) setLoading(false);
       }
     }
 
-    fetchOngs();
+    void fetchOngs();
+    return () => {
+      ativo = false;
+    };
   }, []);
 
-  const filteredOngs = ongs.filter((ong: any) => {
-    const matchName = ong?.name?.toLowerCase()?.includes(search.toLowerCase());
+  const buscaNormalizada = normalizarTexto(search.trim());
+  const temFiltros = Boolean(
+    buscaNormalizada || category || somenteMedalhaVerde || somenteMedalhaBranca,
+  );
 
-    const matchCategory = category ? ong?.category === category : true;
+  const filteredOngs = ongs.filter((ong) => {
+    const matchName = normalizarTexto(ong.name ?? "").includes(buscaNormalizada);
+    const matchCategory = !category || ong.category === category;
+    const matchMedalhaVerde = !somenteMedalhaVerde || ong.medalhaVerde === true;
+    const matchMedalhaBranca = !somenteMedalhaBranca || ong.medalhaBranca === true;
 
-    return matchName && matchCategory;
+    return (
+      matchName &&
+      matchCategory &&
+      matchMedalhaVerde &&
+      matchMedalhaBranca
+    );
   });
 
   return (
     <>
-      {/* Título */}
       <h1 className="mb-2 font-sans text-brand-text text-3xl md:text-4xl">
         ONGs disponíveis
       </h1>
@@ -78,62 +124,139 @@ export default function Ongs() {
         </div>
       )}
 
-      {/* Filtros */}
-      <div className="flex md:flex-row flex-col md:items-center gap-4 mb-8">
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar ONG..."
-          className="bg-brand-surface shadow-sm px-4 py-2 border border-brand-text/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-goldText/30 w-full md:w-72"
-        />
+      {/* Os quatro filtros são combinados com a operação E (AND). */}
+      <section
+        aria-label="Filtros de ONGs"
+        className="mb-8 rounded-2xl border border-brand-border bg-brand-surface p-5 shadow-sm"
+      >
+        <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="w-full md:max-w-md">
+            <label htmlFor="buscar-ong" className="mb-2 block text-sm font-semibold text-brand-text">
+              Buscar por nome
+            </label>
+            <input
+              id="buscar-ong"
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Digite o nome da ONG..."
+              className="w-full rounded-lg border border-brand-text/15 bg-brand-surface px-4 py-2.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-goldText/30"
+            />
+          </div>
 
-        <div className="flex flex-wrap gap-2">
-          {categories.map((cat) => (
+          {temFiltros && (
             <button
-              key={cat.value}
-              onClick={() => selectCategory(cat.value)}
-              className={`px-5 py-2 rounded-full border text-sm font-medium shadow-sm transition ${
-                category === cat.value
-                  ? "bg-brand-primary text-brand-onPrimary border-brand-primary"
-                  : "bg-brand-surface text-brand-primaryText border-brand-text/15 hover:bg-brand-champagne"
-              }`}
+              type="button"
+              onClick={limparFiltros}
+              className="rounded-full border border-brand-text/15 px-4 py-2 text-sm font-semibold text-brand-primaryText transition hover:bg-brand-champagne"
             >
-              {cat.label}
-            </button>
-          ))}
-
-          {category && (
-            <button
-              onClick={() => selectCategory("")}
-              className="bg-brand-text/10 ml-2 px-4 py-2 border border-brand-text/15 rounded-full text-brand-muted text-xs"
-            >
-              Limpar filtro
+              Limpar todos os filtros
             </button>
           )}
         </div>
-      </div>
 
-      {/* Loading */}
+        <div className="mb-5">
+          <p className="mb-3 text-sm font-semibold text-brand-text">Área de atuação</p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => selectCategory("")}
+              aria-pressed={!category}
+              className={`rounded-full border px-4 py-2 text-sm font-medium shadow-sm transition ${
+                !category
+                  ? "border-brand-primary bg-brand-primary text-brand-onPrimary"
+                  : "border-brand-text/15 bg-brand-surface text-brand-primaryText hover:bg-brand-champagne"
+              }`}
+            >
+              Todas
+            </button>
+            {categories.map((cat) => (
+              <button
+                type="button"
+                key={cat.value}
+                onClick={() => selectCategory(cat.value)}
+                aria-pressed={category === cat.value}
+                className={`rounded-full border px-4 py-2 text-sm font-medium shadow-sm transition ${
+                  category === cat.value
+                    ? "border-brand-primary bg-brand-primary text-brand-onPrimary"
+                    : "border-brand-text/15 bg-brand-surface text-brand-primaryText hover:bg-brand-champagne"
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-x-7 gap-y-3">
+          <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-brand-text">
+            <input
+              type="checkbox"
+              checked={somenteMedalhaVerde}
+              onChange={(event) => setSomenteMedalhaVerde(event.target.checked)}
+              className="h-4 w-4 accent-brand-primary"
+            />
+            <FaCheckCircle aria-hidden="true" className="text-green-600" />
+            Somente com Medalha Verde
+          </label>
+
+          <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-brand-text">
+            <input
+              type="checkbox"
+              checked={somenteMedalhaBranca}
+              onChange={(event) => setSomenteMedalhaBranca(event.target.checked)}
+              className="h-4 w-4 accent-brand-primary"
+            />
+            <FaMedal aria-hidden="true" className="text-slate-400" />
+            Somente com Medalha Branca
+          </label>
+        </div>
+      </section>
+
+      {!loading && !erro && (
+        <p aria-live="polite" className="mb-5 text-sm text-brand-muted">
+          {filteredOngs.length} {filteredOngs.length === 1 ? "ONG encontrada" : "ONGs encontradas"}
+        </p>
+      )}
+
       {loading && (
-        <div className="py-10 text-brand-muted text-center">
-          Carregando ONGs...
+        <div className="py-10 text-center text-brand-muted">Carregando ONGs...</div>
+      )}
+
+      {!loading && erro && (
+        <div role="alert" className="py-12 text-center text-red-600">
+          Não foi possível carregar as ONGs. Atualize a página para tentar novamente.
         </div>
       )}
 
-      {/* Lista de ONGs */}
-      {!loading && (
-        <div className="gap-7 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredOngs.length === 0 && (
-            <div className="col-span-full py-12 text-brand-muted text-center">
-              Nenhuma ONG encontrada.
-            </div>
+      {!loading && !erro && filteredOngs.length === 0 && (
+        <div className="rounded-2xl border border-brand-border bg-brand-surface px-6 py-12 text-center">
+          <h2 className="mb-2 text-lg font-semibold text-brand-text">
+            {temFiltros ? "Nenhuma ONG encontrada" : "Nenhuma ONG disponível no momento"}
+          </h2>
+          <p className="mb-5 text-sm text-brand-muted">
+            {temFiltros
+              ? "Tente mudar os critérios ou limpar os filtros para ver outras ONGs."
+              : "Ainda não existem ONGs disponíveis para exibir."}
+          </p>
+          {temFiltros && (
+            <button
+              type="button"
+              onClick={limparFiltros}
+              className="rounded-full bg-brand-primary px-5 py-2.5 text-sm font-semibold text-brand-onPrimary transition hover:bg-brand-primaryDark"
+            >
+              Limpar filtros
+            </button>
           )}
+        </div>
+      )}
 
-          {filteredOngs.map((ong: any) => (
+      {!loading && !erro && filteredOngs.length > 0 && (
+        <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredOngs.map((ong) => (
             <div
               key={ong.id}
-              className="group relative flex flex-col bg-brand-surface shadow-xs hover:shadow-md p-6 border border-brand-border hover:border-brand-text/30 rounded-2xl transition-all"
+              className="group relative flex flex-col rounded-2xl border border-brand-border bg-brand-surface p-6 shadow-xs transition-all hover:border-brand-text/30 hover:shadow-md"
             >
               {user?.type === "DOADOR" && user.status === "ATIVO" && (
                 <div className="absolute right-4 top-4 z-10">
@@ -141,55 +264,64 @@ export default function Ongs() {
                 </div>
               )}
 
-              <div className="flex items-start gap-3.5 mb-3.5 pr-10">
-                <div className="flex justify-center items-center bg-brand-champagne rounded-full ring-2 ring-brand-primary/20 w-12 h-12 font-sans font-bold text-brand-primaryText text-lg shrink-0">
+              <div className="mb-3.5 flex items-start gap-3.5 pr-10">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-champagne font-sans text-lg font-bold text-brand-primaryText ring-2 ring-brand-primary/20">
                   {ong.name?.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <h3 className="font-sans font-bold text-brand-text group-hover:text-brand-primaryText text-base line-clamp-1 transition-colors">
+                    <h3 className="line-clamp-1 font-sans text-base font-bold text-brand-text transition-colors group-hover:text-brand-primaryText">
                       {ong.name}
                     </h3>
                     {ong.medalhaVerde && (
                       <FaCheckCircle
-                        className="text-brand-gold shrink-0"
+                        className="shrink-0 text-brand-gold"
                         title="CNPJ verificado na Receita Federal"
+                        aria-label="Medalha Verde"
+                      />
+                    )}
+                    {ong.medalhaBranca && (
+                      <FaMedal
+                        className="shrink-0 text-slate-400"
+                        title="Medalha Branca aprovada"
+                        aria-label="Medalha Branca"
                       />
                     )}
                   </div>
-                  {ong?.city && (
-                    <p className="mt-0.5 text-brand-muted text-[11px]">{ong.city}</p>
+                  {ong.city && (
+                    <p className="mt-0.5 text-[11px] text-brand-muted">{ong.city}</p>
                   )}
                 </div>
               </div>
 
-              <div className="flex justify-between items-center gap-2 mb-3.5">
+              <div className="mb-3.5 flex items-center justify-between gap-2">
                 {ong.category ? (
-                  <span className="bg-brand-champagne px-3 py-1 rounded-full font-semibold text-brand-goldText text-[10px] tracking-wider uppercase">
-                    {ong.category}
+                  <span className="rounded-full bg-brand-champagne px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-brand-goldText">
+                    {categories.find((cat) => cat.value === ong.category)?.label ?? ong.category}
                   </span>
                 ) : (
                   <span />
                 )}
 
-                <div className="flex items-center gap-1 bg-brand-background px-2.5 py-1 border border-brand-border rounded-full text-xs">
+                <div className="flex items-center gap-1 rounded-full border border-brand-border bg-brand-background px-2.5 py-1 text-xs">
                   <span className="text-amber-500">★</span>
                   <span className="font-bold text-brand-text">
                     {Number(ong.averageRating ?? 0).toFixed(1)}
                   </span>
-                  <span className="text-brand-muted text-[10px]">
+                  <span className="text-[10px] text-brand-muted">
                     ({ong.totalReviews ?? 0})
                   </span>
                 </div>
               </div>
 
-              <p className="flex-1 mb-4 text-brand-muted text-xs leading-relaxed line-clamp-3">
+              <p className="mb-4 line-clamp-3 flex-1 text-xs leading-relaxed text-brand-muted">
                 {ong.description || "Sem descrição disponível."}
               </p>
 
               <button
+                type="button"
                 onClick={() => navigate(`/ongs/${ong.id}`)}
-                className="bg-brand-primary hover:bg-brand-primaryDark shadow-xs mt-auto px-4 py-2.5 rounded-full font-semibold text-brand-onPrimary text-xs text-center transition-all"
+                className="mt-auto rounded-full bg-brand-primary px-4 py-2.5 text-center text-xs font-semibold text-brand-onPrimary shadow-xs transition-all hover:bg-brand-primaryDark"
               >
                 Ver perfil
               </button>
