@@ -114,6 +114,14 @@ export default function Header() {
           </div>
 
           <Link
+            to="/ajuda"
+            aria-current={location.pathname === "/ajuda" ? "page" : undefined}
+            className="px-1 sm:px-3.5 py-2 rounded-full font-semibold text-[11px] sm:text-xs uppercase sm:tracking-wider text-brand-muted hover:bg-brand-text/5 aria-[current=page]:bg-brand-primary aria-[current=page]:text-brand-onPrimary"
+          >
+            Ajuda
+          </Link>
+
+          <Link
             to="/publicacoes"
             className={`px-1 sm:px-3.5 py-2 rounded-full font-semibold text-[11px] sm:text-xs uppercase sm:tracking-wider transition-all ${
               location.pathname.startsWith("/publicacoes")
