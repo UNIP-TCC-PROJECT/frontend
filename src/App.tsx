@@ -13,6 +13,7 @@ import OngsFavoritas from "./pages/OngsFavoritas";
 import InteressesOng from "./pages/InteressesOng";
 import Conversas from "./pages/Conversas";
 import Sobre from "./pages/Sobre";
+import Ajuda from "./pages/Ajuda";
 
 import Publicacoes from "./pages/Publicacoes";
 
@@ -55,6 +56,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/sobre" element={<Sobre />} />
+              <Route path="/ajuda" element={<Ajuda />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/esqueci-senha" element={<ForgotPassword />} />
               <Route path="/redefinir-senha" element={<ResetPassword />} />
