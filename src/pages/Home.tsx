@@ -142,7 +142,7 @@ export default function Home() {
   return (
     <>
       {/* Hero */}
-      <section className="relative left-1/2 -mx-[50vw] -mt-32 bg-gradient-to-b from-brand-champagne to-brand-background pt-40 pb-16 w-screen">
+      <section className="left-1/2 relative bg-gradient-to-b from-brand-champagne to-brand-background -mx-[50vw] -mt-32 pt-40 pb-16 w-screen">
         <div className="items-center gap-10 grid grid-cols-1 lg:grid-cols-12 mx-auto px-3 sm:px-6 max-w-7xl">
           <div className="space-y-6 lg:col-span-7">
             <div className="inline-flex items-center gap-2 bg-brand-surface px-3.5 py-1 border border-brand-border rounded-full font-semibold text-brand-text text-xs uppercase tracking-wider">
@@ -182,7 +182,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="space-y-4 bg-brand-surface shadow-xs p-6 border border-brand-border rounded-3xl lg:col-span-5">
+          <div className="space-y-4 lg:col-span-5 bg-brand-surface shadow-xs p-6 border border-brand-border rounded-3xl">
             <h3 className="pb-3 border-brand-border border-b font-semibold text-brand-muted text-xs uppercase tracking-widest">
               Impacto da plataforma
             </h3>
@@ -264,7 +264,7 @@ export default function Home() {
 
       {(isDoador || isOng) && (
         <section className="mb-20">
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
             <h2 className="font-sans text-brand-text text-2xl">
               Publicações recentes
             </h2>
@@ -277,13 +277,13 @@ export default function Home() {
           </div>
 
           {carregandoPublicacoes && (
-            <p className="py-8 text-center text-brand-muted">
+            <p className="py-8 text-brand-muted text-center">
               Carregando publicações...
             </p>
           )}
 
           {!carregandoPublicacoes && erroPublicacoes && (
-            <p role="alert" className="py-8 text-center text-red-600">
+            <p role="alert" className="py-8 text-red-600 text-center">
               {erroPublicacoes}
             </p>
           )}
@@ -291,7 +291,7 @@ export default function Home() {
           {!carregandoPublicacoes &&
             !erroPublicacoes &&
             publicacoesRecentes.length === 0 && (
-              <p className="py-8 text-center text-brand-muted">
+              <p className="py-8 text-brand-muted text-center">
                 Ainda não há publicações recentes.
               </p>
             )}
@@ -299,20 +299,20 @@ export default function Home() {
           {!carregandoPublicacoes &&
             !erroPublicacoes &&
             publicacoesRecentes.length > 0 && (
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="gap-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {publicacoesRecentes.map((publicacao) => (
                   <Link
                     key={publicacao.id}
                     to={`/publicacoes/${publicacao.id}`}
                     aria-label={`Abrir publicação de ${publicacao.ong.name}`}
-                    className="group overflow-hidden rounded-2xl border border-brand-border bg-brand-surface shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
+                    className="group bg-brand-surface shadow-sm hover:shadow-md border border-brand-border rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary overflow-hidden transition hover:-translate-y-1"
                   >
                     <article>
                       <div className="flex items-center gap-2 p-3">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-champagne font-semibold text-brand-primaryText">
+                        <div className="flex justify-center items-center bg-brand-champagne rounded-full w-8 h-8 font-semibold text-brand-primaryText shrink-0">
                           {publicacao.ong.name.charAt(0).toUpperCase()}
                         </div>
-                        <span className="truncate text-sm font-semibold text-brand-text">
+                        <span className="font-semibold text-brand-text text-sm truncate">
                           {publicacao.ong.name}
                         </span>
                       </div>
@@ -321,23 +321,23 @@ export default function Home() {
                         <img
                           src={imagemUrl(publicacao.imageUrl) ?? ""}
                           alt={`Publicação de ${publicacao.ong.name}`}
-                          className="aspect-[4/3] w-full object-cover"
+                          className="w-full object-cover aspect-[4/3]"
                         />
                       )}
 
                       <div className="p-4">
-                        <p className="line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-brand-text">
+                        <p className="text-brand-text text-sm line-clamp-3 leading-relaxed whitespace-pre-wrap">
                           {publicacao.description}
                         </p>
                         <time
                           dateTime={publicacao.createdAt}
-                          className="mt-3 block text-xs text-brand-muted"
+                          className="block mt-3 text-brand-muted text-xs"
                         >
                           {new Date(publicacao.createdAt).toLocaleDateString(
                             "pt-BR",
                           )}
                         </time>
-                        <span className="mt-3 inline-block text-sm font-semibold text-brand-primaryText underline">
+                        <span className="inline-block mt-3 font-semibold text-brand-primaryText text-sm underline">
                           Ver publicação
                         </span>
                       </div>
@@ -381,7 +381,6 @@ export default function Home() {
                   key={ong.id}
                   className="group relative flex flex-col bg-brand-surface shadow-xs hover:shadow-md p-6 border border-brand-border hover:border-brand-text/30 rounded-2xl transition-all"
                 >
-
                   <div className="flex items-center gap-3 mb-3 pr-10">
                     <div className="flex justify-center items-center bg-brand-champagne rounded-full ring-2 ring-brand-primary/20 w-11 h-11 font-sans font-bold text-brand-primaryText shrink-0">
                       {ong.name.charAt(0).toUpperCase()}
