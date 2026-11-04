@@ -97,7 +97,7 @@ export default function MinhasMetas() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div>
       <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-4 mb-6">
         <div>
           <h1 className="font-sans text-brand-text text-3xl">

@@ -35,7 +35,7 @@ export default function Publicacoes() {
     `rounded-full border px-3 py-1.5 text-xs font-semibold transition ${active ? "border-brand-primaryDark bg-brand-primary text-brand-onPrimary" : "border-brand-border bg-brand-surface text-brand-primaryText hover:bg-brand-champagne"}`;
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
+    <main className="py-8">
       <h1 className="mb-2 text-3xl font-sans text-brand-text">Publicações das ONGs</h1>
       <p className="mb-6 text-sm text-brand-muted">Acompanhe o que as instituições validadas estão fazendo. Cada publicação mostra o que já foi analisado pela plataforma.</p>
 
@@ -56,9 +56,9 @@ export default function Publicacoes() {
 
       {!carregando && !erro && data && data.items.length > 0 && (
         <>
-          <div className="space-y-8">
+          <div className="gap-8 grid md:grid-cols-2 xl:grid-cols-3">
             {data.items.map((p) => (
-              <div key={p.id} className="space-y-2">
+              <div key={p.id} className="flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-2 px-1">
                   <Link to={`/ongs/${p.ongId}`} className="flex min-w-0 items-center gap-2">
                     {p.ong?.profileImage ? (

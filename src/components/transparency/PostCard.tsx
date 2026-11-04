@@ -7,7 +7,7 @@ import ClassificationChip from "./ClassificationChip";
 export default function PostCard({ post }: { post: Post }) {
   const images = post.images.length ? post.images : post.imageUrl ? [{ id: "legacy", url: post.imageUrl }] : [];
   return (
-    <article className="overflow-hidden rounded-2xl border border-brand-border bg-brand-surface shadow-xs">
+    <article className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-brand-border bg-brand-surface shadow-xs">
       {images.length > 0 && (
         <div className={`grid gap-0.5 bg-brand-border ${images.length > 1 ? "grid-cols-2" : ""}`}>
           {images.slice(0, 4).map((img) => (
@@ -15,7 +15,7 @@ export default function PostCard({ post }: { post: Post }) {
           ))}
         </div>
       )}
-      <div className="space-y-3 p-5">
+      <div className="flex flex-1 flex-col gap-3 p-5">
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <span className="rounded-full bg-brand-champagne px-2.5 py-1 font-semibold text-brand-goldText">{post.categoryLabel}</span>
           <time dateTime={post.createdAt} className="text-brand-muted">{fmtDay(post.createdAt)}</time>
@@ -44,7 +44,7 @@ export default function PostCard({ post }: { post: Post }) {
           </p>
         )}
 
-        <div className="flex flex-wrap items-center gap-4 pt-1 text-sm">
+        <div className="mt-auto flex flex-wrap items-center gap-4 pt-1 text-sm">
           <Link to={`/publicacoes/${post.id}`} className="font-medium text-brand-primaryText underline">Ver publicação</Link>
           {post.accountability.available && (
             <Link to={`/publicacoes/${post.id}/prestacao`} className="inline-flex items-center gap-1.5 rounded-full bg-brand-primary px-4 py-2 text-xs font-semibold text-brand-onPrimary shadow-sm transition hover:bg-brand-primaryDark">

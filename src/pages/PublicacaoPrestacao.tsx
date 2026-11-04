@@ -21,12 +21,12 @@ export default function PublicacaoPrestacao() {
     return () => { ativo = false; };
   }, [id]);
 
-  if (erro) return <main className="mx-auto max-w-3xl px-4 py-8"><p role="alert" className="text-red-600">{erro}</p><Link to="/publicacoes" className="underline">Voltar</Link></main>;
-  if (!a) return <p className="mx-auto max-w-3xl px-4 py-8 text-brand-muted" aria-live="polite">Carregando…</p>;
+  if (erro) return <main className="mx-auto max-w-3xl py-8"><p role="alert" className="text-red-600">{erro}</p><Link to="/publicacoes" className="underline">Voltar</Link></main>;
+  if (!a) return <p className="mx-auto max-w-3xl py-8 text-brand-muted" aria-live="polite">Carregando…</p>;
 
   const nothing = !a.campaign && !a.expense && !a.delivery;
   return (
-    <main className="mx-auto max-w-3xl space-y-5 px-4 py-8">
+    <main className="mx-auto max-w-3xl space-y-5 py-8">
       <Link to={`/publicacoes/${a.publication.id}`} className="inline-flex items-center gap-2 text-sm font-medium text-brand-primaryText"><FaArrowLeft aria-hidden />Voltar para a publicação</Link>
       <header>
         <h1 className="text-2xl font-sans text-brand-text">Prestação de contas desta ação</h1>

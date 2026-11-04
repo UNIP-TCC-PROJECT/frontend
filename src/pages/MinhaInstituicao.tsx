@@ -80,7 +80,7 @@ export default function MinhaInstituicao() {
   const pendencias = (org.missing?.fields.length ?? 0) + (org.missing?.documents.length ?? 0);
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 px-4 py-8">
+    <div className="space-y-8 py-8">
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold text-brand-text">Minha instituição</h1>
         <p className="text-sm text-brand-muted">

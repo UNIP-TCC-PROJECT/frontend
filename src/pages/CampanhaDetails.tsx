@@ -53,7 +53,7 @@ export default function CampanhaDetails() {
   const pix = donation?.pix;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
+    <div className="space-y-6 py-8">
       <Link to="/campanhas" className="text-sm text-brand-goldText underline">← Campanhas</Link>
       {c.imageUrl && <img src={imagemUrl(c.imageUrl)!} alt="" className="h-64 w-full rounded-2xl object-cover" />}
       <header className="space-y-1">

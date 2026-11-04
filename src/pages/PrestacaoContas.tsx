@@ -72,7 +72,7 @@ export default function PrestacaoContas() {
 
   if (!sum) return <p className="p-8">{erro || "Carregando…"}</p>;
   return (
-    <div className="mx-auto max-w-5xl space-y-8 px-4 py-8">
+    <div className="space-y-8 py-8">
       <h1 className="text-2xl font-semibold">Prestação de contas</h1>
       {erro && <p role="alert" className="text-red-700">{erro}</p>}
       {aviso && <p role="status" className="text-green-800">{aviso}</p>}

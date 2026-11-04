@@ -142,8 +142,8 @@ export default function Home() {
   return (
     <>
       {/* Hero */}
-      <section className="relative left-1/2 -mx-[50vw] -mt-32 bg-gradient-to-b from-brand-champagne to-brand-background px-4 pt-40 pb-16 w-screen">
-        <div className="items-center gap-10 grid grid-cols-1 lg:grid-cols-12 mx-auto max-w-6xl">
+      <section className="relative left-1/2 -mx-[50vw] -mt-32 bg-gradient-to-b from-brand-champagne to-brand-background pt-40 pb-16 w-screen">
+        <div className="items-center gap-10 grid grid-cols-1 lg:grid-cols-12 mx-auto px-3 sm:px-6 max-w-7xl">
           <div className="space-y-6 lg:col-span-7">
             <div className="inline-flex items-center gap-2 bg-brand-surface px-3.5 py-1 border border-brand-border rounded-full font-semibold text-brand-text text-xs uppercase tracking-wider">
               <FaHandSparkles className="w-3.5 h-3.5 text-[#DBB24C]" />
@@ -217,7 +217,7 @@ export default function Home() {
       {/* Confiança */}
       <section
         id="sobre"
-        className="gap-6 grid grid-cols-1 md:grid-cols-3 mx-auto mb-12 px-4 pt-12 max-w-4xl scroll-mt-28"
+        className="gap-6 grid grid-cols-1 md:grid-cols-3 mb-12 pt-12 scroll-mt-28"
       >
         {[
           {
@@ -247,9 +247,9 @@ export default function Home() {
       </section>
 
       {/* Categorias */}
-      <section className="mx-auto mb-16 px-4 max-w-3xl">
+      <section className="mb-16">
         <h2 className="mb-4 font-sans text-brand-text text-2xl">Categorias</h2>
-        <div className="flex flex-wrap justify-center gap-4">
+        <div className="flex flex-wrap gap-4">
           {categories.map((cat) => (
             <button
               key={cat.value}
@@ -263,7 +263,7 @@ export default function Home() {
       </section>
 
       {(isDoador || isOng) && (
-        <section className="mx-auto mb-20 px-4 max-w-5xl">
+        <section className="mb-20">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-sans text-brand-text text-2xl">
               Publicações recentes
@@ -351,7 +351,7 @@ export default function Home() {
 
       {/* ONGs em destaque */}
       {!user && (
-        <section className="mx-auto mb-20 px-4 max-w-5xl">
+        <section className="mb-20">
           <h2 className="mb-6 font-sans text-brand-text text-2xl">
             ONGs em destaque
           </h2>

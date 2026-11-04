@@ -44,12 +44,12 @@ export default function PublicacaoDetails() {
   }, [id]);
 
   if (carregando) {
-    return <p className="mx-auto max-w-3xl px-4 py-8 text-brand-muted">Carregando publicação...</p>;
+    return <p className="mx-auto max-w-3xl py-8 text-brand-muted">Carregando publicação...</p>;
   }
 
   if (erro || !publicacao) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-8">
+      <main className="mx-auto max-w-3xl py-8">
         <p role="alert" className="mb-4 text-red-600">
           {erro || "Publicação não encontrada."}
         </p>
@@ -61,7 +61,7 @@ export default function PublicacaoDetails() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
+    <main className="mx-auto max-w-3xl py-8">
       <Link
         to="/publicacoes"
         className="mb-5 inline-block text-brand-primary underline"

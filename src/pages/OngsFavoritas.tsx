@@ -44,7 +44,7 @@ export default function OngsFavoritas() {
   }, []);
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+    <main className="py-8">
       <div className="mb-6">
         <h1 className="font-sans text-2xl text-brand-text sm:text-3xl">
           Minhas ONGs favoritas

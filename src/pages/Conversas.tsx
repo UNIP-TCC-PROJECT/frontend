@@ -131,7 +131,7 @@ export default function Conversas() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-3 py-6 sm:px-4">
+    <main className="py-6">
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-sans text-3xl text-brand-text">Mensagens</h1>

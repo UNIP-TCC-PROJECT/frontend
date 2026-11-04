@@ -20,21 +20,71 @@ const cores: Record<StatusMedalha, string> = {
 const botao =
   'rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-brand-onPrimary disabled:opacity-50 disabled:cursor-not-allowed';
 
+const rotuloBotao: Record<StatusMedalha, string> = {
+  NaoSolicitado: 'Solicitar Medalha Branca',
+  Pendente: 'Acompanhar solicitação',
+  Aprovado: 'Ver detalhes da solicitação',
+  Recusado: 'Corrigir e reenviar documentos',
+};
+
 export default function SolicitarMedalhaBranca() {
   const { user } = useAuth();
   const [aberto, setAberto] = useState(false);
+  const [status, setStatus] = useState<StatusMedalha | null>(null);
+  const ativa = user?.type === 'ONG' && user.status === 'ATIVO';
+
+  // Só o status resumido (recarrega ao fechar o painel, que pode ter mudado o pedido).
+  useEffect(() => {
+    if (!ativa || aberto) return;
+    let cancelado = false;
+    api
+      .get<ResumoMedalha>('/medalha-branca/minha')
+      .then(({ data }) => !cancelado && setStatus(data.status))
+      .catch(() => undefined);
+    return () => {
+      cancelado = true;
+    };
+  }, [ativa, aberto, user?.id]);
+
   if (user?.type !== 'ONG') return null;
+  const aprovada = status === 'Aprovado';
 
   return (
     <section className="mb-8">
+      {aprovada && (
+        <div
+          role="status"
+          className="mb-3 flex items-start gap-3 rounded-2xl border border-brand-gold bg-brand-champagne p-5"
+        >
+          <span
+            aria-hidden
+            className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-primary text-brand-onPrimary"
+          >
+            ✓
+          </span>
+          <div>
+            <h2 className="text-lg font-semibold text-brand-text">
+              Medalha Branca conquistada
+            </h2>
+            <p className="mt-1 text-sm text-brand-muted">
+              Sua instituição já recebeu a Medalha Branca. Não é preciso fazer
+              uma nova solicitação.
+            </p>
+          </div>
+        </div>
+      )}
       <button
         type="button"
-        className={botao}
+        className={
+          aprovada
+            ? 'text-sm font-semibold text-brand-primaryText underline'
+            : botao
+        }
         aria-expanded={aberto}
         aria-controls="solicitacao-medalha-branca"
         onClick={() => setAberto(!aberto)}
       >
-        {aberto ? 'Fechar Medalha Branca' : 'Solicitar Medalha Branca'}
+        {aberto ? 'Fechar' : rotuloBotao[status ?? 'NaoSolicitado']}
       </button>
       {aberto && (
         <div id="solicitacao-medalha-branca" className="mt-4">

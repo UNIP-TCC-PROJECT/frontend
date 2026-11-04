@@ -191,7 +191,7 @@ export default function OngDetails() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div>
       {/* Voltar */}
       <button
         onClick={() => navigate("/ongs")}

@@ -73,7 +73,7 @@ export default function Transparencia() {
   const { identification: org, validation: v, totals: t, legend } = p;
 
   return (
-    <div className="mx-auto max-w-5xl space-y-10 px-4 py-8">
+    <div className="space-y-10 py-8">
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold text-brand-text">Transparência — {org.name}</h1>
         <nav className="flex flex-wrap gap-3 text-sm text-brand-goldText underline">

@@ -49,7 +49,7 @@ export default function InteressesOng() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8">
+    <main className="py-8">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-sans text-3xl text-brand-text">Doadores interessados</h1>

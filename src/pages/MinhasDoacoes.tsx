@@ -26,7 +26,7 @@ export default function MinhasDoacoes() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-8">
+    <div className="space-y-6 py-8">
       <h1 className="text-2xl font-semibold">Minhas doações</h1>
       {erro && <p role="alert" className="text-red-700">{erro}</p>}
       {sum && (

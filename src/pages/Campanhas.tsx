@@ -13,7 +13,7 @@ export default function Campanhas() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <div className="space-y-6 py-8">
       <h1 className="text-2xl font-semibold text-brand-text">Campanhas</h1>
       <p className="text-sm text-brand-muted">Somente instituições validadas pela nossa equipe publicam campanhas.</p>
       {erro && <p role="alert" className="text-red-700">{erro}</p>}
