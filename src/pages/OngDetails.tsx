@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../services/api";
 import {
-  FaCheckCircle,
   FaEnvelope,
   FaWhatsapp,
   FaInstagram,
@@ -20,7 +19,7 @@ import { useAuth } from "../context/useAuth";
 import InteresseButton from "../components/InteresseButton";
 import { Tabs } from "../components/Tabs";
 import LevelBadge from "../components/transparency/LevelBadge";
-import ValidationStatus from "../components/transparency/ValidationStatus";
+import ValidationStatus, { HistoricoValidacao } from "../components/transparency/ValidationStatus";
 import TransparenciaTab from "../components/transparency/TransparenciaTab";
 import DocumentosTab from "../components/transparency/DocumentosTab";
 import TimelineTab from "../components/transparency/TimelineTab";
@@ -29,11 +28,13 @@ import { fmtDay, loadProfile, orgIdOfOwner } from "../services/transparency";
 import type { TransparencyProfile } from "../services/transparency";
 import { imagemUrl } from "../services/api";
 import { fmtCnpj } from "../services/organizations";
+import { CadastroVerificadoChip, CadastroVerificadoPanel, NivelTransparenciaChip } from "../components/selos/SelosDaOng";
+import { carregarSelos } from "../services/selos";
+import type { SelosOng } from "../services/selos";
 
 interface Ong {
   id: number;
   name: string;
-  medalhaVerde: boolean;
   email: string;
   cnpj?: string;
   phone?: string;
@@ -101,6 +102,7 @@ export default function OngDetails() {
   const aba = ABAS.some((a) => a.id === params.get("aba")) ? (params.get("aba") as string) : "sobre";
   const [profile, setProfile] = useState<TransparencyProfile | null>(null);
   const [profileState, setProfileState] = useState<"loading" | "ok" | "none" | "error">("loading");
+  const [selos, setSelos] = useState<SelosOng | undefined>();
 
   useEffect(() => {
     async function fetchOng() {
@@ -125,6 +127,14 @@ export default function OngDetails() {
       fetchOng();
     }
   }, [id]);
+
+  // Medalhas (cadastro verificado e nível de transparência): endpoint próprio; sem ele o perfil continua funcionando.
+  useEffect(() => {
+    if (!ong) return;
+    let ativo = true;
+    carregarSelos([ong.id]).then((r) => { if (ativo) setSelos(r[ong.id]); }).catch(() => undefined);
+    return () => { ativo = false; };
+  }, [ong]);
 
   // Perfil de transparência: só existe para ONG com organização aprovada (404 = validação não concluída).
   useEffect(() => {
@@ -225,12 +235,6 @@ export default function OngDetails() {
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-3xl font-sans text-brand-text">{ong.name}</h1>
-                {ong.medalhaVerde && (
-                  <span className="flex items-center gap-1 text-sm font-semibold text-green-600" title="Dados cadastrais verificados automaticamente">
-                    <FaCheckCircle />
-                    CNPJ verificado
-                  </span>
-                )}
               </div>
               {ong.category && <p className="capitalize text-brand-goldText">{ong.category}</p>}
               <p className="mt-1 text-sm text-brand-muted">
@@ -240,10 +244,16 @@ export default function OngDetails() {
           </div>
 
           <div className="mt-5 space-y-3">
-            {profile && <LevelBadge level={profile.transparencyLevel} />}
+            <div className="flex flex-wrap items-center gap-2">
+              <CadastroVerificadoChip cadastro={selos?.cadastroVerificado} detalharRessalvas />
+              {profile ? <LevelBadge level={profile.transparencyLevel} compact /> : <NivelTransparenciaChip nivel={selos?.nivelTransparencia} />}
+            </div>
+            <CadastroVerificadoPanel cadastro={selos?.cadastroVerificado}>
+              {profile && <HistoricoValidacao profile={profile} />}
+            </CadastroVerificadoPanel>
             {profileState === "loading" && <p className="text-sm text-brand-muted" aria-live="polite">Carregando informações de transparência…</p>}
             {profileState === "error" && <p role="alert" className="text-sm text-red-600">Não foi possível carregar as informações de transparência agora.</p>}
-            {(profileState === "ok" || profileState === "none") && <ValidationStatus profile={profile} />}
+            {(profileState === "ok" || profileState === "none") && <ValidationStatus profile={profile} cadastro={selos?.cadastroVerificado} />}
           </div>
         </div>
       </header>

@@ -9,6 +9,9 @@ import {
 import { api, imagemUrl } from "../services/api";
 import { CATEGORIES as categories } from "../constants/categories";
 import { useAuth } from "../context/useAuth";
+import SelosDaOng from "../components/selos/SelosDaOng";
+import { carregarSelos, isCadastroVerificado } from "../services/selos";
+import type { SelosPorOng } from "../services/selos";
 
 interface Ong {
   id: number;
@@ -19,7 +22,6 @@ interface Ong {
   description?: string;
   averageRating?: number | string | null;
   totalReviews?: number | null;
-  medalhaVerde?: boolean;
 }
 
 interface PublicacaoResumo {
@@ -44,6 +46,7 @@ export default function Home() {
   const { user } = useAuth();
 
   const [ongs, setOngs] = useState<Ong[]>([]);
+  const [selosPorOng, setSelosPorOng] = useState<SelosPorOng>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [publicacoesRecentes, setPublicacoesRecentes] = useState<
@@ -66,6 +69,10 @@ export default function Home() {
         if (active) {
           setOngs(response.data);
         }
+        // As medalhas vêm de um endpoint próprio; sem elas a Home continua funcionando.
+        carregarSelos(response.data.map((ong) => ong.id))
+          .then((selos) => active && setSelosPorOng(selos))
+          .catch(() => undefined);
       } catch (err) {
         console.error("Erro ao buscar ONGs:", err);
         if (active) {
@@ -122,7 +129,7 @@ export default function Home() {
     navigate(`/ongs?categoria=${cat}`);
   };
 
-  const verifiedCount = ongs.filter((ong) => ong.medalhaVerde).length;
+  const verifiedCount = ongs.filter((ong) => isCadastroVerificado(selosPorOng[ong.id])).length;
 
   const featuredOngs = [...ongs]
     .sort((a, b) => {
@@ -159,7 +166,7 @@ export default function Home() {
 
             <p className="max-w-xl text-brand-muted text-lg">
               {isOng
-                ? "Agora você pode encontrar doadores e ver o interesse deles na sua causa. Para conquistar o selo Medalha Branca, acesse seu perfil e solicite uma verificação adicional."
+                ? "Agora você pode encontrar doadores e ver o interesse deles na sua causa. Para ter o cadastro verificado, mantenha os dados e os documentos da instituição em dia em Minha instituição."
                 : isDoador
                   ? "Você agora pode buscar ONGs para ajudar, prestar serviços e demonstrar interesse. Boa jornada."
                   : "Encontre ONGs verificadas para apoiar com doações, materiais ou trabalho voluntário."}
@@ -206,7 +213,7 @@ export default function Home() {
                   </span>
                 </div>
                 <span className="font-medium text-brand-muted text-xs">
-                  Com CNPJ verificado
+                  Com cadastro verificado
                 </span>
               </div>
             </div>
@@ -395,6 +402,9 @@ export default function Home() {
                         </span>
                       )}
                     </div>
+                  </div>
+                  <div className="mb-3 min-h-[1.75rem]">
+                    <SelosDaOng selos={selosPorOng[ong.id]} />
                   </div>
                   <div className="flex items-center gap-1 mb-2 text-sm">
                     <span className="text-[#DBB24C]">★</span>

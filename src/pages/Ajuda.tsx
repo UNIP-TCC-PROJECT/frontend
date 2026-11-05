@@ -23,12 +23,16 @@ const topicos = [
     titulo: "Medalhas e verificação",
     perguntas: [
       [
-        "O que é a Medalha Branca?",
-        "É o selo que a ONG recebe quando a administração do Donatio analisa e aprova os documentos enviados para verificação.",
+        "O que é o cadastro verificado?",
+        "É a medalha verde. Indica que a instituição passou pela validação institucional da plataforma: foi aprovada pela administração, teve a consulta cadastral na Receita Federal registrada e os documentos obrigatórios analisados e aprovados. É calculada automaticamente e deixa de aparecer se a instituição for suspensa ou deixar de atender a esses requisitos. Quando a aprovação precisou de análise manual por divergências nas conferências, o perfil informa que houve aprovação com ressalvas.",
       ],
       [
-        "Como uma ONG pode solicitar uma verificação?",
-        "Entre com a conta ativa da ONG, abra seu perfil e selecione “Solicitar Medalha Branca”. Envie de 1 a 5 documentos em PDF, JPG ou PNG, com até 5 MB cada. Acompanhe o resultado nessa mesma área.",
+        "O que é o nível de transparência?",
+        "É a medalha dourada, que muda de cor conforme o nível: Inicial, Em desenvolvimento, Avançada ou Exemplar. O nível é calculado a partir dos registros da plataforma (uso dos recursos, comprovantes, entregas com evidência e informações atualizadas). A instituição não escolhe o próprio nível, e clicar na medalha mostra os critérios usados. Ele é independente do cadastro verificado.",
+      ],
+      [
+        "Como uma ONG consegue o cadastro verificado?",
+        "Entre com a conta da ONG, abra “Minha instituição”, preencha os dados e envie os documentos obrigatórios. A administração analisa os documentos e a instituição. O antigo programa da Medalha Branca foi encerrado, e o histórico de quem participou continua disponível no perfil da ONG.",
       ],
     ],
   },
@@ -41,7 +45,7 @@ const topicos = [
       ],
       [
         "Minha doação tem 100% de segurança?",
-        "Não. O Donatio divulga os dados cadastrados pela ONG. Mesmo quando há uma Medalha Branca, a plataforma não garante a transferência nem o uso do valor doado. Confira no banco quem vai receber o Pix e esclareça qualquer divergência com a ONG antes de enviar.",
+        "Não. O Donatio divulga os dados cadastrados pela ONG. Mesmo quando há cadastro verificado ou um nível de transparência alto, a plataforma não garante a transferência nem o uso do valor doado. Confira no banco quem vai receber o Pix e esclareça qualquer divergência com a ONG antes de enviar.",
       ],
     ],
   },

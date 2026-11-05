@@ -4,7 +4,8 @@ import { api, imagemUrl } from "../services/api";
 import { useAuth } from "../context/useAuth";
 import { NgoProfileForm } from "./Perfil/components/NgoProfileForm";
 import { DonorProfileForm } from "./Perfil/components/DonorProfileForm";
-import SolicitarMedalhaBranca from "../components/MedalhaBranca";
+import HistoricoMedalhaBranca from "../components/HistoricoMedalhaBranca";
+import SelosDaInstituicao from "../components/selos/SelosDaInstituicao";
 import CoverUpload from "../components/CoverUpload";
 
 const TIPO_LABEL = {
@@ -301,7 +302,8 @@ export default function Perfil() {
                     </dl>
                 </section>
 
-                <SolicitarMedalhaBranca />
+                <SelosDaInstituicao />
+                {user?.type === "ONG" && <HistoricoMedalhaBranca />}
 
                 {/* Card — Segurança */}
                 <section className="rounded-2xl border border-brand-border bg-brand-surface p-8 shadow-sm">

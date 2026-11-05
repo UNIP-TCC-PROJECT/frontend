@@ -33,13 +33,14 @@ export const levelRequirement: Record<LevelCode, string> = {
   AVANCADA: "Além disso, o uso dos recursos recebidos está registrado e comprovado (nos pontos que já se aplicam).",
   EXEMPLAR: "Tudo atendido, informações atualizadas e ao menos uma entrega com evidência aprovada.",
 };
-// Somente tokens da paleta `brand` do projeto.
+// Somente tokens da paleta `brand`. Cada nível tem identidade própria, em ordem crescente:
+// Inicial = prata (neutro), Em desenvolvimento = bronze (gold), Avançada = dourado (goldLight), Exemplar = ouro especial (primary + anel).
 export const levelStyle: Record<LevelCode | "NONE", string> = {
-  NONE: "border-brand-border bg-brand-background text-brand-muted",
-  INICIAL: "border-brand-border bg-brand-champagne text-brand-goldText",
+  NONE: "border-dashed border-brand-border bg-brand-background text-brand-muted",
+  INICIAL: "border-brand-muted/50 bg-brand-text/5 text-brand-primaryText",
   DESENVOLVIMENTO: "border-brand-gold bg-brand-champagne text-brand-goldText",
-  AVANCADA: "border-brand-goldLight bg-brand-goldLight/30 text-brand-primaryText",
-  EXEMPLAR: "border-brand-primaryDark bg-brand-primary text-brand-onPrimary",
+  AVANCADA: "border-brand-goldLight bg-brand-goldLight/40 text-brand-primaryText",
+  EXEMPLAR: "border-brand-primaryDark bg-brand-primary text-brand-onPrimary ring-2 ring-brand-goldLight/70",
 };
 export const levelIcon: Record<LevelCode | "NONE", ComponentType<{ className?: string; "aria-hidden"?: boolean }>> = {
   NONE: FaSeedling, INICIAL: FaSeedling, DESENVOLVIMENTO: FaChartLine, AVANCADA: FaMedal, EXEMPLAR: FaAward,
