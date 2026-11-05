@@ -177,7 +177,7 @@ export default function Home() {
                 to={user ? "/publicacoes" : "/auth?modo=cadastro"}
                 className="bg-brand-surface hover:bg-brand-champagne px-8 py-3 border border-brand-text/15 rounded-full font-semibold text-brand-text transition-all"
               >
-                {user ? "Publicações" : "Cadastrar minha ONG"}
+                {user ? "Publicações" : "Cadastrar"}
               </Link>
             </div>
           </div>
