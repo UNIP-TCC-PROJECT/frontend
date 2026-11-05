@@ -6,12 +6,14 @@ interface FavoritoButtonProps {
   ongId: number;
   onChange?: (favoritada: boolean) => void;
   iconOnly?: boolean;
+  className?: string;
 }
 
 export default function FavoritoButton({
   ongId,
   onChange,
   iconOnly = false,
+  className,
 }: FavoritoButtonProps) {
   const [favoritada, setFavoritada] = useState(false);
   const [carregando, setCarregando] = useState(true);
@@ -77,7 +79,7 @@ export default function FavoritoButton({
         className={
           iconOnly
             ? "inline-flex h-10 w-10 items-center justify-center rounded-full border-2 border-brand-border bg-brand-surface text-lg text-brand-gold shadow-sm transition-colors hover:bg-brand-champagne disabled:cursor-not-allowed disabled:opacity-60"
-            : "inline-flex items-center gap-2 border-2 border-[#A51645] bg-[#FFD43B] px-3 py-2 font-bold text-[#A51645] shadow-[3px_3px_0_#5B4210] disabled:opacity-60"
+            : className ?? "inline-flex items-center gap-2 border-2 border-[#A51645] bg-[#FFD43B] px-3 py-2 font-bold text-[#A51645] shadow-[3px_3px_0_#5B4210] disabled:opacity-60"
         }
       >
         {favoritada ? (

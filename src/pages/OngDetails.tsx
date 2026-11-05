@@ -349,7 +349,11 @@ export default function OngDetails({ isOwnProfile = false }: { isOwnProfile?: bo
         </p>
       </div>
 
-      <PublicacoesList ongId={ong.id} />
+      <PublicacoesList
+        ongId={ong.id}
+        ongName={ong.name}
+        profileImage={ong.profileImage}
+      />
 
       {/* Avaliações */}
       <OngReviews
