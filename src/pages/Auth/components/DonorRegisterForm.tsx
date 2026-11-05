@@ -4,6 +4,7 @@ import { Button } from "../../../components/Button/index";
 import { Input } from "../../../components/Input/index";
 import { Section } from "./Section";
 import { useAuth } from "../../../context/useAuth";
+import { cpfValido } from "../../../utils/cpf";
 
 interface DonorFormValues {
   fullName: string;
@@ -14,8 +15,14 @@ interface DonorFormValues {
   confirmPassword: string;
 }
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const phoneRegex = /^\(?[1-9]\d\)?\s?\d{4,5}-?\d{4}$/;
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const passwordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9\s])\S{8,}$/;
+
+const passwordMessage =
+  "A senha deve ter ao menos 8 caracteres, uma letra maiúscula, uma minúscula, um número e um caractere especial.";
 export function DonorRegisterForm() {
   const {
     register,
@@ -51,7 +58,8 @@ export function DonorRegisterForm() {
       setSubmitError(
         Array.isArray(apiMessage)
           ? apiMessage.join(" ")
-          : apiMessage || "Não foi possível concluir o cadastro. Tente novamente."
+          : apiMessage ||
+              "Não foi possível concluir o cadastro. Tente novamente.",
       );
     }
   }
@@ -59,7 +67,10 @@ export function DonorRegisterForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {submitError ? (
-        <p role="alert" className="bg-amber-50 p-3 rounded-lg text-amber-700 text-sm">
+        <p
+          role="alert"
+          className="bg-amber-50 p-3 rounded-lg text-amber-700 text-sm"
+        >
           {submitError}
         </p>
       ) : null}
@@ -81,7 +92,12 @@ export function DonorRegisterForm() {
           name="cpf"
           placeholder="000.000.000-00"
           mask="999.999.999-99"
-          inputProps={register("cpf")}
+          required
+          error={errors.cpf?.message}
+          inputProps={register("cpf", {
+            required: "O CPF é obrigatório.",
+            validate: (value) => cpfValido(value) || "Informe um CPF válido.",
+          })}
         />
         <Input
           label="Email"
@@ -103,9 +119,14 @@ export function DonorRegisterForm() {
           label="Telefone"
           name="phone"
           type="tel"
-          placeholder="(11) 99999-9999"
-          mask="(99) 99999-9999"
-          inputProps={register("phone")}
+          placeholder="DDD + número, fixo ou celular"
+          error={errors.phone?.message}
+          inputProps={register("phone", {
+            validate: (value) =>
+              !value?.trim() ||
+              phoneRegex.test(value) ||
+              "Informe um telefone válido com DDD.",
+          })}
         />
       </Section>
 
@@ -120,6 +141,10 @@ export function DonorRegisterForm() {
           error={errors.password?.message}
           inputProps={register("password", {
             required: "Este campo é obrigatório.",
+            pattern: {
+              value: passwordRegex,
+              message: passwordMessage,
+            },
           })}
         />
         <Input

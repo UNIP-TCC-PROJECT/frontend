@@ -1,12 +1,12 @@
 import { useState, type FocusEvent } from "react";
 import { useForm } from "react-hook-form";
-
 import { Button } from "../../../components/Button/index";
 import { Input, Select, Textarea } from "../../../components/Input/index";
 import { Section } from "./Section";
-
 import { useAuth } from "../../../context/useAuth";
 import { CATEGORIES } from "../../../constants/categories";
+import { cpfValido } from "../../../utils/cpf";
+import { pixKeyValida } from "../../../utils/pix-key";
 
 interface NgoFormValues {
   ngoName: string;
@@ -32,6 +32,19 @@ interface NgoFormValues {
 }
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const phoneRegex = /^\(?[1-9]\d\)?\s?\d{4,5}-?\d{4}$/;
+const passwordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9\s])\S{8,}$/;
+const passwordMessage =
+  "A senha deve ter ao menos 8 caracteres, uma letra maiúscula, uma minúscula, um número e um caractere especial.";
+const nameRegex = /^[\p{L}\p{M}0-9][\p{L}\p{M}0-9 .,'’&()\-]{2,99}$/u;
+const nameMessage =
+  "O nome deve ter entre 3 e 100 caracteres e usar letras, números, espaços ou pontuação comum.";
+const websiteRegex =
+  /^(https?:\/\/)?(?:www\.)?(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}(?::\d{1,5})?(?:[/?#][^\s]*)?$/i;
+const agencyRegex = /^\d{1,6}(?:-[0-9X])?$/i;
+const accountRegex = /^\d{1,20}(?:-[0-9X])?$/i;
+const bankRegex = /^[\p{L}\p{M}0-9][\p{L}\p{M}0-9 .,'’&()\/-]{1,79}$/u;
 
 export function NgoRegisterForm() {
   const {
@@ -48,7 +61,9 @@ export function NgoRegisterForm() {
 
   const passwordValue = watch("password");
 
-  const [cepStatus, setCepStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [cepStatus, setCepStatus] = useState<"idle" | "loading" | "error">(
+    "idle",
+  );
 
   const zipField = register("zip", { required: "O CEP é obrigatório." });
 
@@ -72,9 +87,13 @@ export function NgoRegisterForm() {
         return;
       }
 
-      setValue("street", `${data.logradouro}${data.bairro ? `, ${data.bairro}` : ""}`, {
-        shouldValidate: true,
-      });
+      setValue(
+        "street",
+        `${data.logradouro}${data.bairro ? `, ${data.bairro}` : ""}`,
+        {
+          shouldValidate: true,
+        },
+      );
       setValue("city", data.localidade, { shouldValidate: true });
       setValue("state", data.uf, { shouldValidate: true });
       clearErrors(["street", "city", "state"]);
@@ -112,7 +131,8 @@ export function NgoRegisterForm() {
       const apiMessage = error.response?.data?.message;
       const message = Array.isArray(apiMessage)
         ? apiMessage.join(" ")
-        : apiMessage || "Não foi possível concluir o cadastro. Tente novamente.";
+        : apiMessage ||
+          "Não foi possível concluir o cadastro. Tente novamente.";
 
       setError("root.server", { message });
     }
@@ -131,6 +151,10 @@ export function NgoRegisterForm() {
           required
           error={errors.ngoName?.message}
           inputProps={register("ngoName", {
+            pattern: {
+              value: nameRegex,
+              message: nameMessage,
+            },
             required: "O nome da ONG é obrigatório.",
           })}
         />
@@ -138,7 +162,7 @@ export function NgoRegisterForm() {
           label="CNPJ"
           name="cnpj"
           placeholder="00.000.000/0001-00"
-          mask="99.999.999/9999-99"
+          mask="XX.XXX.XXX/XXXX-99"
           required
           error={errors.cnpj?.message}
           inputProps={register("cnpj", { required: "O CNPJ é obrigatório." })}
@@ -153,6 +177,17 @@ export function NgoRegisterForm() {
             error={errors.description?.message}
             textareaProps={register("description", {
               required: "A descrição é obrigatória.",
+              minLength: {
+                value: 20,
+                message: "A descrição deve ter pelo menos 20 caracteres.",
+              },
+              maxLength: {
+                value: 1000,
+                message: "A descrição não pode passar de 1000 caracteres.",
+              },
+              validate: (value) =>
+                /\S/.test(value) ||
+                "A descrição não pode conter apenas espaços.",
             })}
           />
         </div>
@@ -179,7 +214,10 @@ export function NgoRegisterForm() {
           error={errors.password?.message}
           inputProps={register("password", {
             required: "A senha é obrigatória.",
-            minLength: { value: 6, message: "A senha deve ter pelo menos 6 caracteres." },
+            pattern: {
+              value: passwordRegex,
+              message: passwordMessage,
+            },
           })}
         />
         <Input
@@ -218,21 +256,28 @@ export function NgoRegisterForm() {
           label="Telefone"
           name="phone"
           type="tel"
-          placeholder="(11) 99999-9999"
-          mask="(99) 99999-9999"
+          placeholder="DDD + número, fixo ou celular"
           required
           autoComplete="tel"
           error={errors.phone?.message}
           inputProps={register("phone", {
             required: "O telefone é obrigatório.",
+            validate: (value) =>
+              phoneRegex.test(value) || "Informe um telefone válido com DDD.",
           })}
         />
         <Input
           label="Site"
           name="website"
-          type="url"
-          placeholder="https://"
-          inputProps={register("website")}
+          type="text"
+          placeholder="Digite o endereço do seu site"
+          error={errors.website?.message}
+          inputProps={register("website", {
+            validate: (value) =>
+              !value?.trim() ||
+              websiteRegex.test(value) ||
+              "Informe um site válido, como meusite.com.",
+          })}
         />
       </Section>
 
@@ -251,7 +296,9 @@ export function NgoRegisterForm() {
             }}
           />
           {cepStatus === "loading" ? (
-            <p className="mt-1 text-brand-muted text-xs">Buscando endereço...</p>
+            <p className="mt-1 text-brand-muted text-xs">
+              Buscando endereço...
+            </p>
           ) : null}
           {cepStatus === "error" ? (
             <p className="mt-1 text-amber-600 text-xs">
@@ -299,7 +346,21 @@ export function NgoRegisterForm() {
           placeholder="Nome do banco"
           required
           error={errors.bank?.message}
-          inputProps={register("bank", { required: "O banco é obrigatório." })}
+          inputProps={register("bank", {
+            minLength: {
+              value: 2,
+              message: "Informe o nome do banco com pelo menos 2 caracteres.",
+            },
+            maxLength: {
+              value: 80,
+              message: "O nome do banco não pode passar de 80 caracteres.",
+            },
+            pattern: {
+              value: bankRegex,
+              message: "Informe um nome de banco válido.",
+            },
+            required: "O banco é obrigatório.",
+          })}
         />
         <Input
           label="Agência"
@@ -308,6 +369,11 @@ export function NgoRegisterForm() {
           required
           error={errors.agency?.message}
           inputProps={register("agency", {
+            pattern: {
+              value: agencyRegex,
+              message:
+                "Informe até 6 dígitos; se houver dígito verificador, separe-o com hífen.",
+            },
             required: "A agência é obrigatória.",
           })}
         />
@@ -318,28 +384,40 @@ export function NgoRegisterForm() {
           required
           error={errors.account?.message}
           inputProps={register("account", {
+            pattern: {
+              value: accountRegex,
+              message:
+                "Informe até 20 dígitos; se houver dígito verificador, separe-o com hífen.",
+            },
             required: "A conta é obrigatória.",
           })}
         />
-        <Input
+        <Select
           label="Tipo de conta"
           name="accountType"
-          placeholder="Corrente ou poupança"
+          placeholder="Selecione o tipo de conta"
+          options={[
+            { label: "Conta corrente", value: "corrente" },
+            { label: "Conta poupança", value: "poupanca" },
+          ]}
           required
           error={errors.accountType?.message}
-          inputProps={register("accountType", {
-            required: "O tipo de conta é obrigatório.",
+          selectProps={register("accountType", {
+            required: "Selecione o tipo de conta.",
           })}
         />
         <div className="md:col-span-2">
           <Input
             label="Chave PIX"
             name="pixKey"
-            placeholder="Email, telefone ou chave aleatória"
+            placeholder="CPF, CNPJ, e-mail, celular com DDD ou chave aleatória"
             required
             error={errors.pixKey?.message}
             inputProps={register("pixKey", {
               required: "A chave PIX é obrigatória.",
+              validate: (value) =>
+                pixKeyValida(value) ||
+                "Informe uma chave PIX válida: CPF, CNPJ, e-mail ou celular com DDD.",
             })}
           />
         </div>
@@ -368,6 +446,7 @@ export function NgoRegisterForm() {
           error={errors.legalCpf?.message}
           inputProps={register("legalCpf", {
             required: "O CPF é obrigatório.",
+            validate: (value) => cpfValido(value) || "Informe um CPF válido.",
           })}
         />
       </Section>
