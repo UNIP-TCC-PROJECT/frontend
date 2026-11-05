@@ -1,14 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { api, imagemUrl } from "../services/api";
+import { api } from "../services/api";
+import PublicationCard, { type PublicationCardData } from "./PublicationCard";
 
-interface Publicacao {
-  id: number;
-  description: string;
-  imageUrl: string;
-  ongId: number;
-  createdAt: string;
-}
+type Publicacao = Omit<PublicationCardData, "ong">;
 
 interface PublicacoesResponse {
   items: Publicacao[];
@@ -20,9 +14,11 @@ interface PublicacoesResponse {
 
 interface PublicacoesListProps {
   ongId: number;
+  ongName: string;
+  profileImage?: string;
 }
 
-export default function PublicacoesList({ ongId }: PublicacoesListProps) {
+export default function PublicacoesList({ ongId, ongName, profileImage }: PublicacoesListProps) {
   const [publicacoes, setPublicacoes] = useState<Publicacao[]>([]);
   const [pagina, setPagina] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(0);
@@ -57,8 +53,8 @@ export default function PublicacoesList({ ongId }: PublicacoesListProps) {
   }, [ongId, pagina]);
 
   return (
-    <section className="mb-6 rounded-2xl border border-brand-border bg-brand-surface p-8 shadow-sm">
-      <h2 className="mb-5 text-xl font-sans text-brand-text">
+    <section className="mb-8">
+      <h2 className="mb-5 text-2xl font-sans text-brand-text">
         Publicações da ONG
       </h2>
 
@@ -80,39 +76,15 @@ export default function PublicacoesList({ ongId }: PublicacoesListProps) {
 
       {!carregando && !erro && publicacoes.length > 0 && (
         <>
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="space-y-8">
             {publicacoes.map((publicacao) => (
-              <Link
+              <PublicationCard
                 key={publicacao.id}
-                to={`/publicacoes/${publicacao.id}`}
-                aria-label={`Ver publicação: ${publicacao.description}`}
-                className="group block overflow-hidden rounded-xl border border-brand-border transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
-              >
-                <article>
-                  <img
-                    src={imagemUrl(publicacao.imageUrl) ?? ""}
-                    alt="Imagem da publicação da ONG"
-                    className="h-56 w-full object-cover transition group-hover:brightness-95"
-                  />
-
-                  <div className="p-4">
-                    <p className="whitespace-pre-wrap text-brand-text">
-                      {publicacao.description}
-                    </p>
-                    <time
-                      dateTime={publicacao.createdAt}
-                      className="mt-3 block text-sm text-brand-muted"
-                    >
-                      {new Date(publicacao.createdAt).toLocaleDateString(
-                        "pt-BR",
-                      )}
-                    </time>
-                    <span className="mt-3 inline-block font-medium text-brand-primaryText underline">
-                      Ver publicação
-                    </span>
-                  </div>
-                </article>
-              </Link>
+                publication={{
+                  ...publicacao,
+                  ong: { id: ongId, name: ongName, profileImage },
+                }}
+              />
             ))}
           </div>
 
