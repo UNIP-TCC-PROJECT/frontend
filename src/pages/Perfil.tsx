@@ -5,6 +5,7 @@ import { useAuth } from "../context/useAuth";
 import { NgoProfileForm } from "./Perfil/components/NgoProfileForm";
 import { DonorProfileForm } from "./Perfil/components/DonorProfileForm";
 import SolicitarMedalhaBranca from "../components/MedalhaBranca";
+import OngDetails from "./OngDetails";
 
 const TIPO_LABEL = {
     ONG: "ONG",
@@ -92,6 +93,11 @@ export default function Perfil() {
 
     if (!user) {
         return <p className="p-10 text-center">Faça login para ver seu perfil.</p>;
+    }
+
+    // A página da ONG também é seu espaço de gerenciamento.
+    if (user.type === "ONG") {
+        return <OngDetails isOwnProfile />;
     }
 
     if (editing) {
