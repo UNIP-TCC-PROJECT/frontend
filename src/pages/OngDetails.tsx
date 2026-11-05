@@ -1,15 +1,17 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { api } from "../services/api";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   FaCheckCircle,
+  FaCamera,
   FaEnvelope,
   FaWhatsapp,
   FaInstagram,
   FaGlobe,
   FaCopy,
   FaComments,
+  FaPhone,
 } from "react-icons/fa";
+import { api, imagemUrl } from "../services/api";
 import MetaCarousel from "./components/MetaCarousel";
 import MetaDetailsModal from "./components/MetaDetailsModal";
 import { OngReviews } from "../components/OngReviews";
@@ -18,6 +20,8 @@ import PublicacoesList from "../components/PublicacoesList";
 import FavoritoButton from "../components/FavoritoButton";
 import { useAuth } from "../context/useAuth";
 import InteresseButton from "../components/InteresseButton";
+import { NgoProfileForm } from "./Perfil/components/NgoProfileForm";
+import SolicitarMedalhaBranca from "../components/MedalhaBranca";
 
 interface Ong {
   id: number;
@@ -53,10 +57,12 @@ interface Meta {
   ongId: number;
 }
 
-export default function OngDetails() {
+export default function OngDetails({ isOwnProfile = false }: { isOwnProfile?: boolean }) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
+  const profileId = isOwnProfile ? user?.id : id ? Number(id) : undefined;
+  const avatarInput = useRef<HTMLInputElement>(null);
 
   const [ong, setOng] = useState<Ong | null>(null);
   const [loading, setLoading] = useState(true);
@@ -68,13 +74,18 @@ export default function OngDetails() {
   const [reportOpen, setReportOpen] = useState(false);
   const [erroConversa, setErroConversa] = useState("");
   const [abrindoConversa, setAbrindoConversa] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [savingAvatar, setSavingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState("");
+
+  const isOwner = user?.type === "ONG" && ong?.id === user.id;
 
   useEffect(() => {
     async function fetchOng() {
       try {
         const [ongResponse, metasResponse] = await Promise.all([
-          api.get(`/users/ongs/${id}`),
-          api.get(`/metas/ong/${id}`),
+          api.get(`/users/ongs/${profileId}`),
+          api.get(`/metas/ong/${profileId}`),
         ]);
 
         setOng(ongResponse.data);
@@ -88,10 +99,39 @@ export default function OngDetails() {
       }
     }
 
-    if (id) {
+    if (profileId) {
       fetchOng();
     }
-  }, [id]);
+  }, [profileId]);
+
+  async function handleAvatarChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !isOwner) return;
+    setAvatarError("");
+    if (!/^image\/(jpe?g|png|webp)$/.test(file.type)) {
+      setAvatarError("Selecione uma imagem JPG, PNG ou WEBP.");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarError("A imagem deve ter no máximo 2 MB.");
+      return;
+    }
+
+    const form = new FormData();
+    form.append("file", file);
+    setSavingAvatar(true);
+    try {
+      const { data } = await api.post<{ profileImage: string }>("/users/me/avatar", form);
+      updateUser({ profileImage: data.profileImage });
+      setOng((previous) => previous ? { ...previous, profileImage: data.profileImage } : previous);
+    } catch (error) {
+      console.error("Erro ao atualizar a imagem da ONG:", error);
+      setAvatarError("Não foi possível atualizar a imagem. Tente novamente.");
+    } finally {
+      setSavingAvatar(false);
+    }
+  }
 
   async function handleCopyPix() {
     if (!ong?.pixKey) return;
@@ -147,13 +187,14 @@ export default function OngDetails() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      {/* Voltar */}
-      <button
-        onClick={() => navigate("/ongs")}
-        className="mb-6 font-medium text-brand-primaryText hover:text-brand-text"
-      >
-        ← Voltar para ONGs
-      </button>
+      {!isOwner && (
+        <button
+          onClick={() => navigate("/ongs")}
+          className="mb-6 font-medium text-brand-primaryText hover:text-brand-text"
+        >
+          ← Voltar para ONGs
+        </button>
+      )}
 
       {/* Cabeçalho */}
       <div className="relative mb-6 rounded-2xl border border-brand-border bg-brand-surface p-8 shadow-sm">
@@ -165,15 +206,38 @@ export default function OngDetails() {
 
         <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
           {/* Foto */}
-          <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-champagne text-3xl font-bold text-brand-primaryText">
-            {ong.profileImage ? (
-              <img
-                src={ong.profileImage}
-                alt={`Logo da ${ong.name}`}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              ong.name.charAt(0).toUpperCase()
+          <div className="relative h-24 w-24 shrink-0">
+            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-brand-champagne text-3xl font-bold text-brand-primaryText">
+              {ong.profileImage ? (
+                <img
+                  src={imagemUrl(ong.profileImage) ?? ""}
+                  alt={`Logo da ${ong.name}`}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                ong.name.charAt(0).toUpperCase()
+              )}
+            </div>
+            {isOwner && (
+              <>
+                <input
+                  ref={avatarInput}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={handleAvatarChange}
+                />
+                <button
+                  type="button"
+                  aria-label="Alterar imagem da ONG"
+                  title="Alterar imagem da ONG"
+                  disabled={savingAvatar}
+                  onClick={() => avatarInput.current?.click()}
+                  className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-brand-primary text-brand-onPrimary shadow disabled:opacity-60"
+                >
+                  <FaCamera className="text-xs" />
+                </button>
+              </>
             )}
           </div>
 
@@ -205,6 +269,60 @@ export default function OngDetails() {
           </div>
         </div>
       </div>
+
+      {isOwner && (
+        <>
+          <section className="mb-6 rounded-2xl border border-brand-border bg-brand-surface p-5 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="font-semibold text-brand-text">Gerenciar perfil da ONG</h2>
+                <p className="mt-1 text-sm text-brand-muted">
+                  Atualize as informações públicas e acesse as ferramentas da sua organização.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingProfile((current) => !current)}
+                className="rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-brand-onPrimary hover:bg-brand-primaryDark"
+              >
+                {editingProfile ? "Fechar edição" : "Editar informações"}
+              </button>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                to="/publicacoes"
+                className="rounded-lg border border-brand-border px-4 py-2 text-sm font-medium text-brand-primaryText hover:bg-brand-champagne"
+              >
+                Criar publicação
+              </Link>
+              <Link
+                to="/minhas-metas"
+                className="rounded-lg border border-brand-border px-4 py-2 text-sm font-medium text-brand-primaryText hover:bg-brand-champagne"
+              >
+                Gerenciar metas
+              </Link>
+            </div>
+            {avatarError && <p role="alert" className="mt-3 text-sm text-red-600">{avatarError}</p>}
+            {savingAvatar && <p role="status" className="mt-3 text-sm text-brand-muted">Atualizando imagem...</p>}
+          </section>
+
+          {editingProfile && (
+            <section className="mb-6 rounded-2xl border border-brand-border bg-brand-surface p-6 shadow-sm sm:p-8">
+              <h2 className="mb-5 text-xl font-sans text-brand-text">Editar informações da ONG</h2>
+              <NgoProfileForm
+                profile={{ ...ong, type: "ONG" }}
+                onSaved={(updated) => {
+                  setOng((previous) => previous ? { ...previous, ...updated } : previous);
+                  setEditingProfile(false);
+                }}
+                onCancel={() => setEditingProfile(false)}
+              />
+            </section>
+          )}
+
+          <SolicitarMedalhaBranca />
+        </>
+      )}
 
       {user?.type === "DOADOR" && user.status === "ATIVO" && (
         <section className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-brand-border bg-brand-surface p-5 shadow-sm">
@@ -253,14 +371,16 @@ export default function OngDetails() {
       />
 
       {/* Denúncia da ONG */}
-      <div className="mb-6 text-right">
-        <button
-          onClick={() => setReportOpen(true)}
-          className="text-sm text-brand-muted underline hover:text-red-600"
-        >
-          Denunciar ONG
-        </button>
-      </div>
+      {!isOwner && (
+        <div className="mb-6 text-right">
+          <button
+            onClick={() => setReportOpen(true)}
+            className="text-sm text-brand-muted underline hover:text-red-600"
+          >
+            Denunciar ONG
+          </button>
+        </div>
+      )}
 
       {reportOpen && (
         <ReportModal
@@ -271,36 +391,6 @@ export default function OngDetails() {
         />
       )}
 
-      {/* Como ajudar */}
-      <div className="mb-6 rounded-2xl border border-brand-border bg-brand-surface p-8 shadow-sm">
-        <h2 className="mb-6 text-xl font-sans text-brand-text">
-          Como você pode ajudar
-        </h2>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-xl border border-brand-border bg-brand-champagne p-5">
-            <h3 className="mb-2 font-bold text-brand-text">
-              💰 Doação financeira
-            </h3>
-
-            <p className="text-sm leading-relaxed text-brand-muted">
-              Contribua financeiramente para ajudar a ONG a manter seus projetos
-              e atividades.
-            </p>
-          </div>
-
-          <div className="rounded-xl border border-brand-border bg-brand-champagne p-5">
-            <h3 className="mb-2 font-bold text-brand-text">
-              📦 Doação de materiais
-            </h3>
-
-            <p className="text-sm leading-relaxed text-brand-muted">
-              Doe materiais e itens que a ONG realmente precisa para continuar
-              seu trabalho.
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* Contato e PIX */}
       <div className="mb-6 grid gap-6 md:grid-cols-2">
@@ -317,7 +407,7 @@ export default function OngDetails() {
 
             {ong.phone && (
               <div className="flex items-center gap-3">
-                <span>☎️</span>
+              <FaPhone className="phone" />
                 <span>{ong.phone}</span>
               </div>
             )}
