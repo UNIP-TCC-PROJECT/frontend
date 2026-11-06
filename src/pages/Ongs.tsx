@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { FaCheckCircle, FaMedal, FaStar } from "react-icons/fa";
+import { FaCheckCircle, FaStar } from "react-icons/fa";
 import { api } from "../services/api";
 import { CATEGORIES as categories } from "../constants/categories";
 import { useAuth } from "../context/useAuth";
 import FavoritoButton from "../components/FavoritoButton";
+import SelosDaOng from "../components/selos/SelosDaOng";
+import { carregarSelos, isCadastroVerificado, posicaoNivelTransparencia } from "../services/selos";
+import type { SelosPorOng } from "../services/selos";
+import { LEVEL_ORDER, levelNames } from "../services/transparency";
+import type { LevelCode } from "../services/transparency";
 
 interface Ong {
   id: number;
@@ -12,8 +17,6 @@ interface Ong {
   category?: string | null;
   city?: string | null;
   description?: string | null;
-  medalhaVerde?: boolean;
-  medalhaBranca?: boolean;
   averageRating?: number | string | null;
   totalReviews?: number | null;
 }
@@ -32,9 +35,10 @@ export default function Ongs() {
   const { user } = useAuth();
 
   const [search, setSearch] = useState("");
-  const [somenteMedalhaVerde, setSomenteMedalhaVerde] = useState(false);
-  const [somenteMedalhaBranca, setSomenteMedalhaBranca] = useState(false);
+  const [somenteCadastroVerificado, setSomenteCadastroVerificado] = useState(false);
+  const [nivelMinimoTransparencia, setNivelMinimoTransparencia] = useState<LevelCode | "">("");
   const [ongs, setOngs] = useState<Ong[]>([]);
+  const [selosPorOng, setSelosPorOng] = useState<SelosPorOng>({});
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(false);
 
@@ -57,8 +61,8 @@ export default function Ongs() {
 
   function limparFiltros() {
     setSearch("");
-    setSomenteMedalhaVerde(false);
-    setSomenteMedalhaBranca(false);
+    setSomenteCadastroVerificado(false);
+    setNivelMinimoTransparencia("");
     selectCategory("");
   }
 
@@ -69,6 +73,10 @@ export default function Ongs() {
       try {
         const response = await api.get<Ong[]>("/users/ongs");
         if (ativo) setOngs(response.data);
+        // As medalhas vêm de um endpoint próprio; se ele falhar, a lista continua funcionando sem elas.
+        carregarSelos(response.data.map((ong) => ong.id))
+          .then((selos) => ativo && setSelosPorOng(selos))
+          .catch(() => undefined);
       } catch (error) {
         console.error("Erro ao buscar ONGs:", error);
         if (ativo) setErro(true);
@@ -85,21 +93,18 @@ export default function Ongs() {
 
   const buscaNormalizada = normalizarTexto(search.trim());
   const temFiltros = Boolean(
-    buscaNormalizada || category || somenteMedalhaVerde || somenteMedalhaBranca,
+    buscaNormalizada || category || somenteCadastroVerificado || nivelMinimoTransparencia,
   );
 
   const filteredOngs = ongs.filter((ong) => {
     const matchName = normalizarTexto(ong.name ?? "").includes(buscaNormalizada);
     const matchCategory = !category || ong.category === category;
-    const matchMedalhaVerde = !somenteMedalhaVerde || ong.medalhaVerde === true;
-    const matchMedalhaBranca = !somenteMedalhaBranca || ong.medalhaBranca === true;
+    const selos = selosPorOng[ong.id];
+    const matchCadastroVerificado = !somenteCadastroVerificado || isCadastroVerificado(selos);
+    const matchNivelTransparencia =
+      !nivelMinimoTransparencia || posicaoNivelTransparencia(selos) >= LEVEL_ORDER.indexOf(nivelMinimoTransparencia);
 
-    return (
-      matchName &&
-      matchCategory &&
-      matchMedalhaVerde &&
-      matchMedalhaBranca
-    );
+    return matchName && matchCategory && matchCadastroVerificado && matchNivelTransparencia;
   });
 
   return (
@@ -124,7 +129,7 @@ export default function Ongs() {
         </div>
       )}
 
-      {/* Os quatro filtros são combinados com a operação E (AND). */}
+      {/* Os filtros são combinados com a operação E (AND). */}
       <section
         aria-label="Filtros de ONGs"
         className="mb-8 rounded-2xl border border-brand-border bg-brand-surface p-5 shadow-sm"
@@ -188,27 +193,32 @@ export default function Ongs() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-x-7 gap-y-3">
+        <div className="flex flex-wrap items-center gap-x-7 gap-y-3">
           <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-brand-text">
             <input
               type="checkbox"
-              checked={somenteMedalhaVerde}
-              onChange={(event) => setSomenteMedalhaVerde(event.target.checked)}
+              checked={somenteCadastroVerificado}
+              onChange={(event) => setSomenteCadastroVerificado(event.target.checked)}
               className="h-4 w-4 accent-brand-primary"
             />
-            <FaCheckCircle aria-hidden="true" className="text-green-600" />
-            Somente com Medalha Verde
+            <FaCheckCircle aria-hidden="true" className="text-emerald-600" />
+            Somente com cadastro verificado
           </label>
 
-          <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-brand-text">
-            <input
-              type="checkbox"
-              checked={somenteMedalhaBranca}
-              onChange={(event) => setSomenteMedalhaBranca(event.target.checked)}
-              className="h-4 w-4 accent-brand-primary"
-            />
-            <FaMedal aria-hidden="true" className="text-slate-400" />
-            Somente com Medalha Branca
+          <label className="inline-flex items-center gap-2 text-sm text-brand-text">
+            Transparência mínima
+            <select
+              value={nivelMinimoTransparencia}
+              onChange={(event) => setNivelMinimoTransparencia(event.target.value as LevelCode | "")}
+              className="rounded-lg border border-brand-text/15 bg-brand-surface px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-goldText/30"
+            >
+              <option value="">Qualquer nível</option>
+              {LEVEL_ORDER.map((nivel) => (
+                <option key={nivel} value={nivel}>
+                  {levelNames[nivel]} ou superior
+                </option>
+              ))}
+            </select>
           </label>
         </div>
       </section>
@@ -273,25 +283,15 @@ export default function Ongs() {
                     <h3 className="line-clamp-1 font-sans text-base font-bold text-brand-text transition-colors group-hover:text-brand-primaryText">
                       {ong.name}
                     </h3>
-                    {ong.medalhaVerde && (
-                      <FaCheckCircle
-                        className="shrink-0 text-brand-gold"
-                        title="CNPJ verificado na Receita Federal"
-                        aria-label="Medalha Verde"
-                      />
-                    )}
-                    {ong.medalhaBranca && (
-                      <FaMedal
-                        className="shrink-0 text-slate-400"
-                        title="Medalha Branca aprovada"
-                        aria-label="Medalha Branca"
-                      />
-                    )}
                   </div>
                   {ong.city && (
                     <p className="mt-0.5 text-[11px] text-brand-muted">{ong.city}</p>
                   )}
                 </div>
+              </div>
+
+              <div className="mb-3.5 min-h-[1.75rem]">
+                <SelosDaOng selos={selosPorOng[ong.id]} />
               </div>
 
               <div className="mb-3.5 flex items-center justify-between gap-2">

@@ -16,10 +16,23 @@ import Sobre from "./pages/Sobre";
 import Ajuda from "./pages/Ajuda";
 
 import Publicacoes from "./pages/Publicacoes";
+import PrestacaoContas from "./pages/PrestacaoContas";
+import Transparencia from "./pages/Transparencia";
+import AdminPrestacao from "./pages/admin/AdminPrestacao";
+import Campanhas from "./pages/Campanhas";
+import CampanhaDetails from "./pages/CampanhaDetails";
+import MinhasDoacoes from "./pages/MinhasDoacoes";
+import MinhasCampanhas from "./pages/MinhasCampanhas";
+import MinhaInstituicao from "./pages/MinhaInstituicao";
+import AdminValidacoes from "./pages/admin/AdminValidacoes";
+import AdminValidacaoDetails from "./pages/admin/AdminValidacaoDetails";
+import AdminMfa from "./pages/admin/AdminMfa";
 
+import PublicacaoPrestacao from "./pages/PublicacaoPrestacao";
 import PublicacaoDetails from "./pages/PublicacaoDetails";
 import Layout from "./components/Layout";
 import AdminLayout from "./components/AdminLayout";
+import AccountLayout from "./components/AccountLayout";
 
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -43,11 +56,16 @@ function App() {
                 <Route path="/" element={<AdminOngs />} />
                 <Route path="/ongs/:id" element={<AdminOngDetails />} />
                 <Route path="/admins/novo" element={<AdminCreateAdmin />} />
+                <Route path="/validacoes" element={<AdminValidacoes />} />
+                <Route path="/prestacao-de-contas" element={<AdminPrestacao />} />
+                <Route path="/validacoes/:id" element={<AdminValidacaoDetails />} />
               </Routes>
             </AdminLayout>
           </RequireAdmin>
         }
       />
+
+      <Route path="/admin/mfa" element={<RequireAuth><AdminMfa /></RequireAuth>} />
 
       <Route
         path="*"
@@ -61,22 +79,6 @@ function App() {
               <Route path="/esqueci-senha" element={<ForgotPassword />} />
               <Route path="/redefinir-senha" element={<ResetPassword />} />
               <Route path="/ongs" element={<Ongs />} />
-              <Route
-                path="/ongs-favoritas"
-                element={
-                  <RequireDoador>
-                    <OngsFavoritas />
-                  </RequireDoador>
-                }
-              />
-              <Route
-                path="/interesses"
-                element={
-                  <RequireOng>
-                    <InteressesOng />
-                  </RequireOng>
-                }
-              />
               <Route
                 path="/conversas"
                 element={
@@ -93,26 +95,82 @@ function App() {
                   </RequireAuth>
                 }
               />
+              <Route path="/campanhas" element={<Campanhas />} />
+              <Route path="/transparencia/:id" element={<Transparencia />} />
+              <Route path="/campanhas/:id" element={<CampanhaDetails />} />
               <Route path="/publicacoes" element={<Publicacoes />} />
               <Route path="/ongs/:id" element={<OngDetails />} />
               <Route path="/publicacoes/:id" element={<PublicacaoDetails />} />
-              <Route
-                path="/perfil"
-                element={
-                  <RequireAuth>
-                    <Perfil />
-                  </RequireAuth>
-                }
-              />
+              <Route path="/publicacoes/:id/prestacao" element={<PublicacaoPrestacao />} />
 
-              <Route
-                path="/minhas-metas"
-                element={
-                  <RequireOng>
-                    <MinhasMetas />
-                  </RequireOng>
-                }
-              />
+              {/* Área da conta: navegação lateral (desktop) / dropdown (mobile) */}
+              <Route element={<RequireAuth><AccountLayout /></RequireAuth>}>
+                <Route
+                  path="/ongs-favoritas"
+                  element={
+                    <RequireDoador>
+                      <OngsFavoritas />
+                    </RequireDoador>
+                  }
+                />
+                <Route
+                  path="/interesses"
+                  element={
+                    <RequireOng>
+                      <InteressesOng />
+                    </RequireOng>
+                  }
+                />
+                <Route
+                  path="/prestacao-de-contas"
+                  element={
+                    <RequireOng>
+                      <PrestacaoContas />
+                    </RequireOng>
+                  }
+                />
+                <Route
+                  path="/minhas-doacoes"
+                  element={
+                    <RequireDoador>
+                      <MinhasDoacoes />
+                    </RequireDoador>
+                  }
+                />
+                <Route
+                  path="/minhas-campanhas"
+                  element={
+                    <RequireOng>
+                      <MinhasCampanhas />
+                    </RequireOng>
+                  }
+                />
+                <Route
+                  path="/perfil"
+                  element={
+                    <RequireAuth>
+                      <Perfil />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/minha-instituicao"
+                  element={
+                    <RequireOng>
+                      <MinhaInstituicao />
+                    </RequireOng>
+                  }
+                />
+                <Route
+                  path="/minhas-metas"
+                  element={
+                    <RequireOng>
+                      <MinhasMetas />
+                    </RequireOng>
+                  }
+                />
+              </Route>
+
             </Routes>
           </Layout>
         }

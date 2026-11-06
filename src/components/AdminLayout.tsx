@@ -22,6 +22,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             ONGs
           </button>
           <button
+            onClick={() => navigate("/admin/validacoes")}
+            className="text-sm text-gray-300 hover:text-white"
+          >
+            Validação de ONGs
+          </button>
+          <button
+            onClick={() => navigate("/admin/prestacao-de-contas")}
+            className="text-sm text-gray-300 hover:text-white"
+          >
+            Prestação de contas
+          </button>
+          <button
             onClick={() => navigate("/admin/admins/novo")}
             className="text-sm text-gray-300 hover:text-white"
           >
@@ -40,7 +52,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+      <main className="mx-auto max-w-7xl px-3 py-8 sm:px-6">{children}</main>
     </div>
   );
 }

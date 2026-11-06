@@ -3,51 +3,37 @@ interface MyAccountModalProps {
   navigate: (path: string) => void;
   logout: () => void;
   isOng?: boolean;
+  isDonor?: boolean;
   isParticipant?: boolean;
 }
 
-function MyAccountModal({ setOpen, navigate, logout, isOng, isParticipant }: MyAccountModalProps) {
+const itemClass =
+  "hover:bg-brand-champagne px-4 py-2 rounded w-full font-medium text-brand-text text-left";
+
+// Só o essencial: o resto fica na navegação lateral da própria área da conta (AccountLayout).
+function MyAccountModal({ setOpen, navigate, logout, isOng, isDonor, isParticipant }: MyAccountModalProps) {
+  const go = (path: string) => {
+    setOpen(false);
+    navigate(path);
+  };
+
   return (
-    <div className="right-0 z-30 absolute flex flex-col gap-2 bg-brand-surface shadow-lg mt-2 p-2 border border-brand-border rounded-lg w-48 fade-in">
-      <button
-        className="hover:bg-brand-champagne px-4 py-2 rounded w-full font-medium text-brand-text text-left"
-        onClick={() => {
-          setOpen(false);
-          navigate("/perfil");
-        }}
-      >
+    <div className="right-0 z-30 absolute flex flex-col gap-1 bg-brand-surface shadow-lg mt-2 p-2 border border-brand-border rounded-lg w-52 fade-in">
+      <button className={itemClass} onClick={() => go("/perfil")}>
         Minha conta
       </button>
-      {isOng && (
-        <button
-          className="hover:bg-brand-champagne px-4 py-2 rounded w-full font-medium text-brand-text text-left"
-          onClick={() => {
-            setOpen(false);
-            navigate("/minhas-metas");
-          }}
-        >
-          Minhas metas
+      {isDonor && (
+        <button className={itemClass} onClick={() => go("/minhas-doacoes")}>
+          Minhas doações
         </button>
       )}
       {isOng && (
-        <button
-          className="hover:bg-brand-champagne px-4 py-2 rounded w-full font-medium text-brand-text text-left"
-          onClick={() => {
-            setOpen(false);
-            navigate("/interesses");
-          }}
-        >
-          Doadores interessados
+        <button className={itemClass} onClick={() => go("/minhas-campanhas")}>
+          Campanhas e arrecadação
         </button>
       )}
       {isParticipant && (
-        <button
-          className="hover:bg-brand-champagne px-4 py-2 rounded w-full font-medium text-brand-text text-left"
-          onClick={() => {
-            setOpen(false);
-            navigate("/conversas");
-          }}
-        >
+        <button className={itemClass} onClick={() => go("/conversas")}>
           Mensagens
         </button>
       )}

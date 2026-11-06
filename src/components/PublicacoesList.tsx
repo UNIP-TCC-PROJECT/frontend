@@ -1,116 +1,136 @@
 import { useEffect, useState } from "react";
 import { api } from "../services/api";
-import PublicationCard, { type PublicationCardData } from "./PublicationCard";
-
-type Publicacao = Omit<PublicationCardData, "ong">;
-
-interface PublicacoesResponse {
-  items: Publicacao[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
+import { CATEGORIES } from "../services/transparency";
+import type { PostsPage } from "../services/transparency";
+import PostCard from "./transparency/PostCard";
 
 interface PublicacoesListProps {
   ongId: number;
-  ongName: string;
-  profileImage?: string;
 }
 
-export default function PublicacoesList({ ongId, ongName, profileImage }: PublicacoesListProps) {
-  const [publicacoes, setPublicacoes] = useState<Publicacao[]>([]);
+/** Feed de publicações da ONG: cards, filtro por categoria e paginação. */
+export default function PublicacoesList({ ongId }: PublicacoesListProps) {
+  const [data, setData] = useState<PostsPage | null>(null);
   const [pagina, setPagina] = useState(1);
-  const [totalPaginas, setTotalPaginas] = useState(0);
+  const [categoria, setCategoria] = useState("");
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
 
   useEffect(() => {
     let ativo = true;
-
     setCarregando(true);
     setErro("");
-
     api
-      .get<PublicacoesResponse>(`/publicacoes/ong/${ongId}`, {
-        params: { page: pagina, limit: 5 },
+      .get<PostsPage>(`/publicacoes/ong/${ongId}`, {
+        params: {
+          page: pagina,
+          limit: 5,
+          ...(categoria ? { category: categoria } : {}),
+        },
       })
-      .then(({ data }) => {
-        if (!ativo) return;
-        setPublicacoes(data.items);
-        setTotalPaginas(data.totalPages);
-      })
-      .catch(() => {
-        if (ativo) setErro("Não foi possível carregar as publicações.");
-      })
-      .finally(() => {
-        if (ativo) setCarregando(false);
-      });
-
+      .then(({ data }) => ativo && setData(data))
+      .catch(
+        () => ativo && setErro("Não foi possível carregar as publicações."),
+      )
+      .finally(() => ativo && setCarregando(false));
     return () => {
       ativo = false;
     };
-  }, [ongId, pagina]);
+  }, [ongId, pagina, categoria]);
+
+  const chip = (active: boolean) =>
+    `rounded-full border px-3 py-1.5 text-xs font-semibold transition ${active ? "border-brand-primaryDark bg-brand-primary text-brand-onPrimary" : "border-brand-border bg-brand-surface text-brand-primaryText hover:bg-brand-champagne"}`;
 
   return (
-    <section className="mb-8">
-      <h2 className="mb-5 text-2xl font-sans text-brand-text">
+    <section aria-labelledby="pub-titulo" className="space-y-4">
+      <h2 id="pub-titulo" className="font-sans text-brand-text text-xl">
         Publicações da ONG
       </h2>
 
-      {carregando && (
-        <p className="text-brand-muted">Carregando publicações...</p>
-      )}
+      <div
+        className="flex flex-wrap gap-2"
+        role="group"
+        aria-label="Filtrar por categoria"
+      >
+        <button
+          type="button"
+          className={chip(categoria === "")}
+          aria-pressed={categoria === ""}
+          onClick={() => {
+            setCategoria("");
+            setPagina(1);
+          }}
+        >
+          Todas
+        </button>
+        {CATEGORIES.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            className={chip(categoria === c.id)}
+            aria-pressed={categoria === c.id}
+            onClick={() => {
+              setCategoria(c.id);
+              setPagina(1);
+            }}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
 
+      <p className="text-brand-muted text-xs">
+        Publicações são conteúdo da própria instituição. Apenas arquivos
+        analisados pela plataforma aparecem como evidências; o selo de cada
+        publicação mostra o que já foi analisado.
+      </p>
+
+      {carregando && (
+        <p className="text-brand-muted" aria-live="polite">
+          Carregando publicações...
+        </p>
+      )}
       {!carregando && erro && (
         <p role="alert" className="text-red-600">
           {erro}
         </p>
       )}
-
-      {!carregando && !erro && publicacoes.length === 0 && (
-        <p className="text-brand-muted">
-          Esta ONG ainda não publicou nada.
+      {!carregando && !erro && data?.items.length === 0 && (
+        <p className="bg-brand-surface p-6 border border-brand-border rounded-2xl text-brand-muted">
+          {categoria
+            ? "Nenhuma publicação nesta categoria."
+            : "Esta ONG ainda não publicou nada."}
         </p>
       )}
 
-      {!carregando && !erro && publicacoes.length > 0 && (
+      {!carregando && !erro && data && data.items.length > 0 && (
         <>
-          <div className="space-y-8">
-            {publicacoes.map((publicacao) => (
-              <PublicationCard
-                key={publicacao.id}
-                publication={{
-                  ...publicacao,
-                  ong: { id: ongId, name: ongName, profileImage },
-                }}
-              />
+          <div className="space-y-5">
+            {data.items.map((p) => (
+              <PostCard key={p.id} post={p} />
             ))}
           </div>
-
-          {totalPaginas > 1 && (
+          {data.totalPages > 1 && (
             <nav
               aria-label="Paginação das publicações"
-              className="mt-6 flex items-center justify-center gap-4"
+              className="flex justify-center items-center gap-4"
             >
               <button
                 type="button"
-                onClick={() => setPagina((atual) => atual - 1)}
+                onClick={() => setPagina((a) => a - 1)}
                 disabled={pagina === 1}
-                className="rounded-lg border border-brand-border px-4 py-2 text-brand-text disabled:cursor-not-allowed disabled:opacity-50"
+                className="disabled:opacity-50 px-4 py-2 border border-brand-border rounded-full text-brand-text text-sm disabled:cursor-not-allowed"
               >
                 Anterior
               </button>
-
-              <span className="text-sm text-brand-muted">
-                Página {pagina} de {totalPaginas}
+              <span className="text-brand-muted text-sm">
+                Página {pagina} de {data.totalPages}
               </span>
-
               <button
                 type="button"
-                onClick={() => setPagina((atual) => atual + 1)}
-                disabled={pagina === totalPaginas}
-                className="rounded-lg border border-brand-border px-4 py-2 text-brand-text disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => setPagina((a) => a + 1)}
+                disabled={pagina === data.totalPages}
+                className="disabled:opacity-50 px-4 py-2 border border-brand-border rounded-full text-brand-text text-sm disabled:cursor-not-allowed"
               >
                 Próxima
               </button>

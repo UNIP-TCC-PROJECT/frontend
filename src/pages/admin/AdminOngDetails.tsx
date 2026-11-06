@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../../services/api";
-import { AnaliseMedalhaBranca } from "../../components/MedalhaBranca";
+import HistoricoMedalhaBranca from "../../components/HistoricoMedalhaBranca";
 
 interface Ong {
   id: number;
@@ -40,12 +40,12 @@ export default function AdminOngDetails() {
   }, [id]);
 
   if (loading) {
-    return <div className="py-10 text-center text-gray-500">Carregando...</div>;
+    return <div className="py-10 text-gray-500 text-center">Carregando...</div>;
   }
 
   if (error || !ong) {
     return (
-      <div className="py-10 text-center text-gray-500">
+      <div className="py-10 text-gray-500 text-center">
         {error || "ONG não encontrada."}
       </div>
     );
@@ -60,13 +60,13 @@ export default function AdminOngDetails() {
         ← Voltar para lista
       </button>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-8">
-        <h1 className="mb-1 text-2xl font-bold text-gray-900">{ong.name}</h1>
+      <div className="bg-white p-8 border border-gray-200 rounded-xl">
+        <h1 className="mb-1 font-bold text-gray-900 text-2xl">{ong.name}</h1>
         {ong.category && (
-          <p className="mb-4 capitalize text-blue-700">{ong.category}</p>
+          <p className="mb-4 text-blue-700 capitalize">{ong.category}</p>
         )}
 
-        <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+        <dl className="gap-4 grid grid-cols-1 sm:grid-cols-2 text-sm">
           <div>
             <dt className="text-gray-500">Email</dt>
             <dd className="text-gray-900">{ong.email}</dd>
@@ -100,37 +100,39 @@ export default function AdminOngDetails() {
         </div>
       </div>
 
-      <AnaliseMedalhaBranca ongId={ong.id} />
+      <div className="mt-6"><HistoricoMedalhaBranca ongId={ong.id} /></div>
 
       {/* Espaço reservado para ações administrativas futuras */}
-      <div className="mt-6 rounded-xl border border-dashed border-gray-300 bg-white p-6">
-        <h2 className="mb-3 font-semibold text-gray-900">Ações administrativas</h2>
-        <p className="mb-4 text-sm text-gray-500">
-          Funcionalidades de moderação (restrição, suspensão, banimento e denúncias)
-          serão adicionadas aqui.
+      <div className="bg-white mt-6 p-6 border border-gray-300 border-dashed rounded-xl">
+        <h2 className="mb-3 font-semibold text-gray-900">
+          Ações administrativas
+        </h2>
+        <p className="mb-4 text-gray-500 text-sm">
+          Funcionalidades de moderação (restrição, suspensão, banimento e
+          denúncias) serão adicionadas aqui.
         </p>
         <div className="flex flex-wrap gap-3">
           <button
             disabled
-            className="cursor-not-allowed rounded-lg bg-gray-100 px-4 py-2 text-sm text-gray-400"
+            className="bg-gray-100 px-4 py-2 rounded-lg text-gray-400 text-sm cursor-not-allowed"
           >
             Restringir
           </button>
           <button
             disabled
-            className="cursor-not-allowed rounded-lg bg-gray-100 px-4 py-2 text-sm text-gray-400"
+            className="bg-gray-100 px-4 py-2 rounded-lg text-gray-400 text-sm cursor-not-allowed"
           >
             Suspender
           </button>
           <button
             disabled
-            className="cursor-not-allowed rounded-lg bg-gray-100 px-4 py-2 text-sm text-gray-400"
+            className="bg-gray-100 px-4 py-2 rounded-lg text-gray-400 text-sm cursor-not-allowed"
           >
             Banir
           </button>
           <button
             disabled
-            className="cursor-not-allowed rounded-lg bg-gray-100 px-4 py-2 text-sm text-gray-400"
+            className="bg-gray-100 px-4 py-2 rounded-lg text-gray-400 text-sm cursor-not-allowed"
           >
             Ver denúncias
           </button>

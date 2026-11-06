@@ -36,32 +36,32 @@ export default function AdminOngs() {
   }, []);
 
   const filteredOngs = ongs.filter((ong) =>
-    ong.name.toLowerCase().includes(search.toLowerCase())
+    ong.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">
+      <h1 className="mb-6 font-bold text-gray-900 text-2xl">
         Organizações cadastradas
       </h1>
 
       {/* Estrutura para filtros */}
-      <div className="mb-6 flex flex-wrap items-center gap-4 rounded-xl border border-gray-200 bg-white p-4">
+      <div className="flex flex-wrap items-center gap-4 bg-white mb-6 p-4 border border-gray-200 rounded-xl">
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar por nome..."
-          className="w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+          className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 w-full max-w-xs text-sm"
         />
         {/* Espaço reservado para futuros filtros: categoria, status, data */}
       </div>
 
       {loading ? (
-        <div className="py-10 text-center text-gray-500">Carregando...</div>
+        <div className="py-10 text-gray-500 text-center">Carregando...</div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-          <table className="w-full text-left text-sm">
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <table className="w-full text-sm text-left">
             <thead className="bg-gray-50 text-gray-600">
               <tr>
                 <th className="px-4 py-3">Nome</th>
@@ -74,14 +74,12 @@ export default function AdminOngs() {
             </thead>
             <tbody>
               {filteredOngs.map((ong) => (
-                <tr key={ong.id} className="border-t border-gray-100">
+                <tr key={ong.id} className="border-gray-100 border-t">
                   <td className="px-4 py-3 font-medium text-gray-900">
                     {ong.name}
                   </td>
                   <td className="px-4 py-3 text-gray-600">{ong.email}</td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {ong.cnpj || "—"}
-                  </td>
+                  <td className="px-4 py-3 text-gray-600">{ong.cnpj || "—"}</td>
                   <td className="px-4 py-3 text-gray-600">
                     ★ {Number(ong.averageRating ?? 0).toFixed(1)} (
                     {ong.totalReviews ?? 0})
@@ -102,7 +100,10 @@ export default function AdminOngs() {
 
               {filteredOngs.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                  <td
+                    colSpan={6}
+                    className="px-4 py-8 text-gray-400 text-center"
+                  >
                     Nenhuma ONG encontrada.
                   </td>
                 </tr>

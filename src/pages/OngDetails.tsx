@@ -1,17 +1,14 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { api } from "../services/api";
 import {
-  FaCheckCircle,
-  FaCamera,
   FaEnvelope,
   FaWhatsapp,
   FaInstagram,
   FaGlobe,
   FaCopy,
   FaComments,
-  FaPhone,
 } from "react-icons/fa";
-import { api, imagemUrl } from "../services/api";
 import MetaCarousel from "./components/MetaCarousel";
 import MetaDetailsModal from "./components/MetaDetailsModal";
 import { OngReviews } from "../components/OngReviews";
@@ -20,13 +17,30 @@ import PublicacoesList from "../components/PublicacoesList";
 import FavoritoButton from "../components/FavoritoButton";
 import { useAuth } from "../context/useAuth";
 import InteresseButton from "../components/InteresseButton";
-import { NgoProfileForm } from "./Perfil/components/NgoProfileForm";
-import SolicitarMedalhaBranca from "../components/MedalhaBranca";
+import { Tabs } from "../components/Tabs";
+import LevelBadge from "../components/transparency/LevelBadge";
+import ValidationStatus, {
+  HistoricoValidacao,
+} from "../components/transparency/ValidationStatus";
+import TransparenciaTab from "../components/transparency/TransparenciaTab";
+import DocumentosTab from "../components/transparency/DocumentosTab";
+import TimelineTab from "../components/transparency/TimelineTab";
+import SecurityInfo from "../components/transparency/SecurityInfo";
+import { fmtDay, loadProfile, orgIdOfOwner } from "../services/transparency";
+import type { TransparencyProfile } from "../services/transparency";
+import { imagemUrl } from "../services/api";
+import { fmtCnpj } from "../services/organizations";
+import {
+  CadastroVerificadoChip,
+  CadastroVerificadoPanel,
+  NivelTransparenciaChip,
+} from "../components/selos/SelosDaOng";
+import { carregarSelos } from "../services/selos";
+import type { SelosOng } from "../services/selos";
 
 interface Ong {
   id: number;
   name: string;
-  medalhaVerde: boolean;
   email: string;
   cnpj?: string;
   phone?: string;
@@ -36,6 +50,7 @@ interface Ong {
   website?: string;
   pixKey?: string;
   profileImage?: string;
+  coverImage?: string | null;
   category?: string;
   createdAt: string;
   averageRating?: number | string | null;
@@ -57,12 +72,36 @@ interface Meta {
   ongId: number;
 }
 
-export default function OngDetails({ isOwnProfile = false }: { isOwnProfile?: boolean }) {
+const ABAS = [
+  { id: "sobre", label: "Sobre" },
+  { id: "transparencia", label: "Transparência" },
+  { id: "publicacoes", label: "Publicações" },
+  { id: "documentos", label: "Documentos" },
+  { id: "historico", label: "Linha do tempo" },
+  { id: "seguranca", label: "Segurança" },
+];
+
+function TabEmpty({ state }: { state: "loading" | "ok" | "none" | "error" }) {
+  const text =
+    state === "loading"
+      ? "Carregando…"
+      : state === "error"
+        ? "Não foi possível carregar estas informações agora. Tente novamente em instantes."
+        : "Esta instituição ainda não concluiu a validação da plataforma, por isso não há informações de transparência analisadas para exibir.";
+  return (
+    <p
+      className="bg-brand-surface p-6 border border-brand-border rounded-2xl text-brand-muted"
+      aria-live="polite"
+    >
+      {text}
+    </p>
+  );
+}
+
+export default function OngDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, updateUser } = useAuth();
-  const profileId = isOwnProfile ? user?.id : id ? Number(id) : undefined;
-  const avatarInput = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
 
   const [ong, setOng] = useState<Ong | null>(null);
   const [loading, setLoading] = useState(true);
@@ -74,18 +113,22 @@ export default function OngDetails({ isOwnProfile = false }: { isOwnProfile?: bo
   const [reportOpen, setReportOpen] = useState(false);
   const [erroConversa, setErroConversa] = useState("");
   const [abrindoConversa, setAbrindoConversa] = useState(false);
-  const [editingProfile, setEditingProfile] = useState(false);
-  const [savingAvatar, setSavingAvatar] = useState(false);
-  const [avatarError, setAvatarError] = useState("");
-
-  const isOwner = user?.type === "ONG" && ong?.id === user.id;
+  const [params, setParams] = useSearchParams();
+  const aba = ABAS.some((a) => a.id === params.get("aba"))
+    ? (params.get("aba") as string)
+    : "sobre";
+  const [profile, setProfile] = useState<TransparencyProfile | null>(null);
+  const [profileState, setProfileState] = useState<
+    "loading" | "ok" | "none" | "error"
+  >("loading");
+  const [selos, setSelos] = useState<SelosOng | undefined>();
 
   useEffect(() => {
     async function fetchOng() {
       try {
         const [ongResponse, metasResponse] = await Promise.all([
-          api.get(`/users/ongs/${profileId}`),
-          api.get(`/metas/ong/${profileId}`),
+          api.get(`/users/ongs/${id}`),
+          api.get(`/metas/ong/${id}`),
         ]);
 
         setOng(ongResponse.data);
@@ -99,39 +142,46 @@ export default function OngDetails({ isOwnProfile = false }: { isOwnProfile?: bo
       }
     }
 
-    if (profileId) {
+    if (id) {
       fetchOng();
     }
-  }, [profileId]);
+  }, [id]);
 
-  async function handleAvatarChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file || !isOwner) return;
-    setAvatarError("");
-    if (!/^image\/(jpe?g|png|webp)$/.test(file.type)) {
-      setAvatarError("Selecione uma imagem JPG, PNG ou WEBP.");
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      setAvatarError("A imagem deve ter no máximo 2 MB.");
-      return;
-    }
+  // Medalhas (cadastro verificado e nível de transparência): endpoint próprio; sem ele o perfil continua funcionando.
+  useEffect(() => {
+    if (!ong) return;
+    let ativo = true;
+    carregarSelos([ong.id])
+      .then((r) => {
+        if (ativo) setSelos(r[ong.id]);
+      })
+      .catch(() => undefined);
+    return () => {
+      ativo = false;
+    };
+  }, [ong]);
 
-    const form = new FormData();
-    form.append("file", file);
-    setSavingAvatar(true);
-    try {
-      const { data } = await api.post<{ profileImage: string }>("/users/me/avatar", form);
-      updateUser({ profileImage: data.profileImage });
-      setOng((previous) => previous ? { ...previous, profileImage: data.profileImage } : previous);
-    } catch (error) {
-      console.error("Erro ao atualizar a imagem da ONG:", error);
-      setAvatarError("Não foi possível atualizar a imagem. Tente novamente.");
-    } finally {
-      setSavingAvatar(false);
-    }
-  }
+  // Perfil de transparência: só existe para ONG com organização aprovada (404 = validação não concluída).
+  useEffect(() => {
+    if (!ong) return;
+    let ativo = true;
+    setProfileState("loading");
+    orgIdOfOwner(ong.id)
+      .then(loadProfile)
+      .then((p) => {
+        if (ativo) {
+          setProfile(p);
+          setProfileState("ok");
+        }
+      })
+      .catch((e) => {
+        if (ativo)
+          setProfileState(e?.response?.status === 404 ? "none" : "error");
+      });
+    return () => {
+      ativo = false;
+    };
+  }, [ong]);
 
   async function handleCopyPix() {
     if (!ong?.pixKey) return;
@@ -153,7 +203,9 @@ export default function OngDetails({ isOwnProfile = false }: { isOwnProfile?: bo
     setAbrindoConversa(true);
     setErroConversa("");
     try {
-      const { data } = await api.post<{ id: number }>(`/conversas/ongs/${ong.id}`);
+      const { data } = await api.post<{ id: number }>(
+        `/conversas/ongs/${ong.id}`,
+      );
       navigate(`/conversas/${data.id}`);
     } catch {
       setErroConversa("Não foi possível iniciar a conversa. Tente novamente.");
@@ -164,7 +216,7 @@ export default function OngDetails({ isOwnProfile = false }: { isOwnProfile?: bo
 
   if (loading) {
     return (
-      <div className="py-10 text-center text-brand-muted">
+      <div className="py-10 text-brand-muted text-center">
         Carregando perfil da ONG...
       </div>
     );
@@ -177,7 +229,7 @@ export default function OngDetails({ isOwnProfile = false }: { isOwnProfile?: bo
 
         <button
           onClick={() => navigate("/ongs")}
-          className="rounded-lg bg-brand-primary px-5 py-2 font-medium text-brand-onPrimary hover:bg-brand-primaryDark"
+          className="bg-brand-primary hover:bg-brand-primaryDark px-5 py-2 rounded-lg font-medium text-brand-onPrimary"
         >
           Voltar para ONGs
         </button>
@@ -186,205 +238,401 @@ export default function OngDetails({ isOwnProfile = false }: { isOwnProfile?: bo
   }
 
   return (
-    <div className="mx-auto max-w-5xl">
-      {!isOwner && (
-        <button
-          onClick={() => navigate("/ongs")}
-          className="mb-6 font-medium text-brand-primaryText hover:text-brand-text"
-        >
-          ← Voltar para ONGs
-        </button>
-      )}
+    <div>
+      {/* Voltar */}
+      <button
+        onClick={() => navigate("/ongs")}
+        className="mb-6 font-medium text-brand-primaryText hover:text-brand-text"
+      >
+        ← Voltar para ONGs
+      </button>
 
-      {/* Cabeçalho */}
-      <div className="relative mb-6 rounded-2xl border border-brand-border bg-brand-surface p-8 shadow-sm">
+      {/* Cabeçalho: capa, foto, status da validação e nível de transparência */}
+      <header className="relative bg-brand-surface shadow-sm mb-6 border border-brand-border rounded-2xl overflow-hidden">
+        <div className="bg-gradient-to-r from-brand-champagne to-brand-primary/40 w-full h-36 sm:h-52">
+          {ong.coverImage && (
+            <img
+              src={imagemUrl(ong.coverImage) ?? ""}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          )}
+        </div>
+
         {user?.type === "DOADOR" && user.status === "ATIVO" && (
-          <div className="absolute right-4 top-4 z-10">
+          <div className="top-4 right-4 z-10 absolute">
             <FavoritoButton ongId={ong.id} iconOnly />
           </div>
         )}
 
-        <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
-          {/* Foto */}
-          <div className="relative h-24 w-24 shrink-0">
-            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-brand-champagne text-3xl font-bold text-brand-primaryText">
+        <div className="px-6 sm:px-8 pb-6">
+          <div className="flex sm:flex-row flex-col items-start sm:items-end gap-4 -mt-12">
+            <div className="flex justify-center items-center bg-brand-champagne shadow-sm border-4 border-brand-surface rounded-full w-24 h-24 overflow-hidden font-bold text-brand-primaryText text-3xl shrink-0">
               {ong.profileImage ? (
                 <img
-                  src={imagemUrl(ong.profileImage) ?? ""}
+                  src={imagemUrl(ong.profileImage) ?? ong.profileImage}
                   alt={`Logo da ${ong.name}`}
-                  className="h-full w-full object-cover"
+                  className="w-full h-full object-cover"
                 />
               ) : (
                 ong.name.charAt(0).toUpperCase()
               )}
             </div>
-            {isOwner && (
-              <>
-                <input
-                  ref={avatarInput}
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  className="hidden"
-                  onChange={handleAvatarChange}
-                />
-                <button
-                  type="button"
-                  aria-label="Alterar imagem da ONG"
-                  title="Alterar imagem da ONG"
-                  disabled={savingAvatar}
-                  onClick={() => avatarInput.current?.click()}
-                  className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-brand-primary text-brand-onPrimary shadow disabled:opacity-60"
-                >
-                  <FaCamera className="text-xs" />
-                </button>
-              </>
-            )}
+
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="font-sans text-brand-text text-3xl">
+                  {ong.name}
+                </h1>
+              </div>
+              {ong.category && (
+                <p className="text-brand-goldText capitalize">{ong.category}</p>
+              )}
+              <p className="mt-1 text-brand-muted text-sm">
+                CNPJ: {ong.cnpj ? fmtCnpj(ong.cnpj) : "Não informado"} · Na
+                plataforma desde {fmtDay(ong.createdAt)}
+              </p>
+            </div>
           </div>
 
-          {/* Informações */}
-          <div className="min-w-0 pr-10 sm:pr-0">
+          <div className="space-y-3 mt-5">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-3xl font-sans text-brand-text">{ong.name}</h1>
-
-              {ong.medalhaVerde && (
-                <span
-                  className="flex items-center gap-1 text-sm font-semibold text-green-600"
-                  title="Dados cadastrais verificados automaticamente"
-                >
-                  <FaCheckCircle />
-                  CNPJ verificado
-                </span>
+              <CadastroVerificadoChip
+                cadastro={selos?.cadastroVerificado}
+                detalharRessalvas
+              />
+              {profile ? (
+                <LevelBadge level={profile.transparencyLevel} compact />
+              ) : (
+                <NivelTransparenciaChip nivel={selos?.nivelTransparencia} />
               )}
             </div>
-
-            {ong.category && (
-              <p className="mt-2 capitalize text-brand-goldText">
-                {ong.category}
+            <CadastroVerificadoPanel cadastro={selos?.cadastroVerificado}>
+              {profile && <HistoricoValidacao profile={profile} />}
+            </CadastroVerificadoPanel>
+            {profileState === "loading" && (
+              <p className="text-brand-muted text-sm" aria-live="polite">
+                Carregando informações de transparência…
               </p>
             )}
-
-            <p className="mt-1 text-sm text-brand-muted">
-              CNPJ: {ong.cnpj || "Não informado"}
-            </p>
+            {profileState === "error" && (
+              <p role="alert" className="text-red-600 text-sm">
+                Não foi possível carregar as informações de transparência agora.
+              </p>
+            )}
+            {(profileState === "ok" || profileState === "none") && (
+              <ValidationStatus
+                profile={profile}
+                cadastro={selos?.cadastroVerificado}
+              />
+            )}
           </div>
         </div>
-      </div>
-
-      {isOwner && (
-        <>
-          <section className="mb-6 rounded-2xl border border-brand-border bg-brand-surface p-5 shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="font-semibold text-brand-text">Gerenciar perfil da ONG</h2>
-                <p className="mt-1 text-sm text-brand-muted">
-                  Atualize as informações públicas e acesse as ferramentas da sua organização.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setEditingProfile((current) => !current)}
-                className="rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-brand-onPrimary hover:bg-brand-primaryDark"
-              >
-                {editingProfile ? "Fechar edição" : "Editar informações"}
-              </button>
-            </div>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <Link
-                to="/publicacoes"
-                className="rounded-lg border border-brand-border px-4 py-2 text-sm font-medium text-brand-primaryText hover:bg-brand-champagne"
-              >
-                Criar publicação
-              </Link>
-              <Link
-                to="/minhas-metas"
-                className="rounded-lg border border-brand-border px-4 py-2 text-sm font-medium text-brand-primaryText hover:bg-brand-champagne"
-              >
-                Gerenciar metas
-              </Link>
-            </div>
-            {avatarError && <p role="alert" className="mt-3 text-sm text-red-600">{avatarError}</p>}
-            {savingAvatar && <p role="status" className="mt-3 text-sm text-brand-muted">Atualizando imagem...</p>}
-          </section>
-
-          {editingProfile && (
-            <section className="mb-6 rounded-2xl border border-brand-border bg-brand-surface p-6 shadow-sm sm:p-8">
-              <h2 className="mb-5 text-xl font-sans text-brand-text">Editar informações da ONG</h2>
-              <NgoProfileForm
-                profile={{ ...ong, type: "ONG" }}
-                onSaved={(updated) => {
-                  setOng((previous) => previous ? { ...previous, ...updated } : previous);
-                  setEditingProfile(false);
-                }}
-                onCancel={() => setEditingProfile(false)}
-              />
-            </section>
-          )}
-
-          <SolicitarMedalhaBranca />
-        </>
-      )}
+      </header>
 
       {user?.type === "DOADOR" && user.status === "ATIVO" && (
-        <section className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-brand-border bg-brand-surface p-5 shadow-sm">
+        <section className="flex flex-wrap items-center gap-3 bg-brand-surface shadow-sm mb-6 p-5 border border-brand-border rounded-2xl">
           <InteresseButton ongId={ong.id} />
           <button
             type="button"
             onClick={() => void iniciarConversa()}
             disabled={abrindoConversa}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-brand-primary px-5 py-3 font-semibold text-brand-primaryText transition hover:bg-brand-champagne disabled:opacity-60"
+            className="inline-flex justify-center items-center gap-2 hover:bg-brand-champagne disabled:opacity-60 px-5 py-3 border border-brand-primary rounded-xl font-semibold text-brand-primaryText transition"
           >
             <FaComments aria-hidden="true" />
             {abrindoConversa ? "Abrindo conversa..." : "Conversar com a ONG"}
           </button>
-          {erroConversa && <p role="alert" className="basis-full text-sm text-red-600">{erroConversa}</p>}
+          {erroConversa && (
+            <p role="alert" className="text-red-600 text-sm basis-full">
+              {erroConversa}
+            </p>
+          )}
         </section>
       )}
 
-      {/* Sobre */}
-      <div className="mb-6 rounded-2xl border border-brand-border bg-brand-surface p-8 shadow-sm">
-        <h2 className="mb-3 text-xl font-sans text-brand-text">Sobre a ONG</h2>
-
-        <p className="leading-relaxed text-brand-muted">
-          {ong.description || "Esta ONG ainda não possui uma descrição."}
-        </p>
+      <div className="mb-6 overflow-x-auto">
+        <div className="min-w-[36rem]">
+          <Tabs
+            ariaLabel="Seções do perfil da ONG"
+            activeId={aba}
+            onChange={(id) =>
+              setParams(id === "sobre" ? {} : { aba: id }, { replace: true })
+            }
+            tabs={ABAS}
+          />
+        </div>
       </div>
 
-      <PublicacoesList
-        ongId={ong.id}
-        ongName={ong.name}
-        profileImage={ong.profileImage}
-      />
+      <div className="mb-10">
+        <section
+          id="tabpanel-sobre"
+          role="tabpanel"
+          aria-labelledby="tab-sobre"
+          hidden={aba !== "sobre"}
+          className="space-y-6"
+        >
+          {aba === "sobre" && (
+            <>
+              {/* Sobre */}
+              <div className="bg-brand-surface shadow-sm mb-6 p-8 border border-brand-border rounded-2xl">
+                <h2 className="mb-3 font-sans text-brand-text text-xl">
+                  Sobre a ONG
+                </h2>
 
-      {/* Avaliações */}
-      <OngReviews
-        key={ong.id}
-        ongId={ong.id}
-        averageRating={ong.averageRating}
-        totalReviews={ong.totalReviews}
-        onSaved={(result) =>
-          setOng((previous) =>
-            previous && previous.id === result.id
-              ? {
-                  ...previous,
-                  averageRating: result.averageRating,
-                  totalReviews: result.totalReviews,
+                <p className="text-brand-muted leading-relaxed">
+                  {ong.description ||
+                    "Esta ONG ainda não possui uma descrição."}
+                </p>
+              </div>
+
+              {/* Avaliações */}
+              <OngReviews
+                key={ong.id}
+                ongId={ong.id}
+                averageRating={ong.averageRating}
+                totalReviews={ong.totalReviews}
+                onSaved={(result) =>
+                  setOng((previous) =>
+                    previous && previous.id === result.id
+                      ? {
+                          ...previous,
+                          averageRating: result.averageRating,
+                          totalReviews: result.totalReviews,
+                        }
+                      : previous,
+                  )
                 }
-              : previous,
-          )
-        }
-      />
+              />
+
+              {/* Como ajudar */}
+              <div className="bg-brand-surface shadow-sm mb-6 p-8 border border-brand-border rounded-2xl">
+                <h2 className="mb-6 font-sans text-brand-text text-xl">
+                  Como você pode ajudar
+                </h2>
+
+                <div className="gap-4 grid md:grid-cols-2">
+                  <div className="bg-brand-champagne p-5 border border-brand-border rounded-xl">
+                    <h3 className="mb-2 font-bold text-brand-text">
+                      💰 Doação financeira
+                    </h3>
+
+                    <p className="text-brand-muted text-sm leading-relaxed">
+                      Contribua financeiramente para ajudar a ONG a manter seus
+                      projetos e atividades.
+                    </p>
+                  </div>
+
+                  <div className="bg-brand-champagne p-5 border border-brand-border rounded-xl">
+                    <h3 className="mb-2 font-bold text-brand-text">
+                      📦 Doação de materiais
+                    </h3>
+
+                    <p className="text-brand-muted text-sm leading-relaxed">
+                      Doe materiais e itens que a ONG realmente precisa para
+                      continuar seu trabalho.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contato e PIX */}
+              <div className="gap-6 grid md:grid-cols-2 mb-6">
+                <div className="bg-brand-surface shadow-sm p-8 border border-brand-border rounded-2xl">
+                  <h2 className="mb-5 font-sans text-brand-text text-xl">
+                    Informações de contato
+                  </h2>
+
+                  <div className="space-y-4 text-brand-muted">
+                    <div className="flex items-center gap-3">
+                      <FaEnvelope className="text-brand-gold" />
+                      <span>{ong.email}</span>
+                    </div>
+
+                    {ong.phone && (
+                      <div className="flex items-center gap-3">
+                        <span>☎️</span>
+                        <span>{ong.phone}</span>
+                      </div>
+                    )}
+
+                    {ong.whatsapp && (
+                      <div className="flex items-center gap-3">
+                        <FaWhatsapp className="text-green-600" />
+                        <span>{ong.whatsapp}</span>
+                      </div>
+                    )}
+
+                    {ong.instagram && (
+                      <div className="flex items-center gap-3">
+                        <FaInstagram className="text-pink-600" />
+                        <span>{ong.instagram}</span>
+                      </div>
+                    )}
+
+                    {ong.website && (
+                      <div className="flex items-center gap-3">
+                        <FaGlobe className="text-brand-gold" />
+                        <a
+                          href={ong.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-brand-primaryText hover:underline"
+                        >
+                          Site da instituição
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-brand-surface shadow-sm p-8 border border-brand-border rounded-2xl">
+                  <h2 className="mb-5 font-sans text-brand-text text-xl">
+                    Chave PIX
+                  </h2>
+
+                  {ong.pixKey ? (
+                    <>
+                      <div className="bg-brand-champagne mb-4 p-4 rounded-lg font-mono text-brand-text text-sm break-all">
+                        {ong.pixKey}
+                      </div>
+
+                      <button
+                        onClick={handleCopyPix}
+                        className="flex justify-center items-center gap-2 bg-brand-primary hover:bg-brand-primaryDark px-4 py-3 rounded-lg w-full font-medium text-brand-onPrimary transition"
+                      >
+                        <FaCopy />
+                        {copied ? "Chave copiada!" : "Copiar chave PIX"}
+                      </button>
+                    </>
+                  ) : (
+                    <p className="text-brand-muted">
+                      Esta ONG ainda não cadastrou uma chave PIX.
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Metas */}
+              <div className="mb-10">
+                <div className="mb-6">
+                  <h2 className="font-sans text-brand-text text-2xl">
+                    Como você pode ajudar
+                  </h2>
+
+                  <p className="mt-1 text-brand-muted">
+                    Veja as necessidades atuais desta ONG.
+                  </p>
+                </div>
+
+                {loadingMetas ? (
+                  <div className="bg-brand-surface shadow-sm p-8 border border-brand-border rounded-2xl text-center">
+                    <p className="text-brand-muted">Carregando metas...</p>
+                  </div>
+                ) : (
+                  <MetaCarousel
+                    metas={metas}
+                    onSelectMeta={(meta) => setSelectedMeta(meta)}
+                  />
+                )}
+
+                {selectedMeta && (
+                  <MetaDetailsModal
+                    meta={selectedMeta}
+                    onClose={() => setSelectedMeta(null)}
+                  />
+                )}
+              </div>
+            </>
+          )}
+        </section>
+        <section
+          id="tabpanel-transparencia"
+          role="tabpanel"
+          aria-labelledby="tab-transparencia"
+          hidden={aba !== "transparencia"}
+          className="space-y-6"
+        >
+          {aba === "transparencia" && (
+            <>
+              {profile ? (
+                <TransparenciaTab profile={profile} />
+              ) : (
+                <TabEmpty state={profileState} />
+              )}
+            </>
+          )}
+        </section>
+        <section
+          id="tabpanel-publicacoes"
+          role="tabpanel"
+          aria-labelledby="tab-publicacoes"
+          hidden={aba !== "publicacoes"}
+          className="space-y-6"
+        >
+          {aba === "publicacoes" && (
+            <>
+              <PublicacoesList ongId={ong.id} />
+            </>
+          )}
+        </section>
+        <section
+          id="tabpanel-documentos"
+          role="tabpanel"
+          aria-labelledby="tab-documentos"
+          hidden={aba !== "documentos"}
+          className="space-y-6"
+        >
+          {aba === "documentos" && (
+            <>
+              {profile ? (
+                <DocumentosTab profile={profile} />
+              ) : (
+                <TabEmpty state={profileState} />
+              )}
+            </>
+          )}
+        </section>
+        <section
+          id="tabpanel-historico"
+          role="tabpanel"
+          aria-labelledby="tab-historico"
+          hidden={aba !== "historico"}
+          className="space-y-6"
+        >
+          {aba === "historico" && (
+            <>
+              {profile ? (
+                <TimelineTab timeline={profile.timeline} />
+              ) : (
+                <TabEmpty state={profileState} />
+              )}
+            </>
+          )}
+        </section>
+        <section
+          id="tabpanel-seguranca"
+          role="tabpanel"
+          aria-labelledby="tab-seguranca"
+          hidden={aba !== "seguranca"}
+          className="space-y-6"
+        >
+          {aba === "seguranca" && (
+            <>
+              <SecurityInfo />
+            </>
+          )}
+        </section>
+      </div>
 
       {/* Denúncia da ONG */}
-      {!isOwner && (
-        <div className="mb-6 text-right">
-          <button
-            onClick={() => setReportOpen(true)}
-            className="text-sm text-brand-muted underline hover:text-red-600"
-          >
-            Denunciar ONG
-          </button>
-        </div>
-      )}
+      <div className="mb-6 text-right">
+        <button
+          onClick={() => setReportOpen(true)}
+          className="text-brand-muted hover:text-red-600 text-sm underline"
+        >
+          Denunciar ONG
+        </button>
+      </div>
 
       {reportOpen && (
         <ReportModal
@@ -394,113 +642,6 @@ export default function OngDetails({ isOwnProfile = false }: { isOwnProfile?: bo
           onClose={() => setReportOpen(false)}
         />
       )}
-
-
-      {/* Contato e PIX */}
-      <div className="mb-6 grid gap-6 md:grid-cols-2">
-        <div className="rounded-2xl border border-brand-border bg-brand-surface p-8 shadow-sm">
-          <h2 className="mb-5 text-xl font-sans text-brand-text">
-            Informações de contato
-          </h2>
-
-          <div className="space-y-4 text-brand-muted">
-            <div className="flex items-center gap-3">
-              <FaEnvelope className="text-brand-gold" />
-              <span>{ong.email}</span>
-            </div>
-
-            {ong.phone && (
-              <div className="flex items-center gap-3">
-              <FaPhone className="phone" />
-                <span>{ong.phone}</span>
-              </div>
-            )}
-
-            {ong.whatsapp && (
-              <div className="flex items-center gap-3">
-                <FaWhatsapp className="text-green-600" />
-                <span>{ong.whatsapp}</span>
-              </div>
-            )}
-
-            {ong.instagram && (
-              <div className="flex items-center gap-3">
-                <FaInstagram className="text-pink-600" />
-                <span>{ong.instagram}</span>
-              </div>
-            )}
-
-            {ong.website && (
-              <div className="flex items-center gap-3">
-                <FaGlobe className="text-brand-gold" />
-                <a
-                  href={ong.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-brand-primaryText hover:underline"
-                >
-                  Site da instituição
-                </a>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-brand-border bg-brand-surface p-8 shadow-sm">
-          <h2 className="mb-5 text-xl font-sans text-brand-text">Chave PIX</h2>
-
-          {ong.pixKey ? (
-            <>
-              <div className="mb-4 break-all rounded-lg bg-brand-champagne p-4 font-mono text-sm text-brand-text">
-                {ong.pixKey}
-              </div>
-
-              <button
-                onClick={handleCopyPix}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-primary px-4 py-3 font-medium text-brand-onPrimary transition hover:bg-brand-primaryDark"
-              >
-                <FaCopy />
-                {copied ? "Chave copiada!" : "Copiar chave PIX"}
-              </button>
-            </>
-          ) : (
-            <p className="text-brand-muted">
-              Esta ONG ainda não cadastrou uma chave PIX.
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Metas */}
-      <div className="mb-10">
-        <div className="mb-6">
-          <h2 className="text-2xl font-sans text-brand-text">
-            Como você pode ajudar
-          </h2>
-
-          <p className="mt-1 text-brand-muted">
-            Veja as necessidades atuais desta ONG.
-          </p>
-        </div>
-
-        {loadingMetas ? (
-          <div className="rounded-2xl border border-brand-border bg-brand-surface p-8 text-center shadow-sm">
-            <p className="text-brand-muted">Carregando metas...</p>
-          </div>
-        ) : (
-          <MetaCarousel
-            metas={metas}
-            onSelectMeta={(meta) => setSelectedMeta(meta)}
-          />
-        )}
-
-        {selectedMeta && (
-          <MetaDetailsModal
-            meta={selectedMeta}
-            onClose={() => setSelectedMeta(null)}
-          />
-        )}
-      </div>
     </div>
   );
 }

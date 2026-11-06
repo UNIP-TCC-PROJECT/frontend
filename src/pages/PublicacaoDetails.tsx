@@ -5,7 +5,9 @@ import { api, imagemUrl } from "../services/api";
 interface Publicacao {
   id: number;
   description: string;
-  imageUrl: string;
+  imageUrl: string | null;
+  categoryLabel?: string;
+  accountability?: { available: boolean };
   ongId: number;
   ong: {
     id: number;
@@ -42,12 +44,12 @@ export default function PublicacaoDetails() {
   }, [id]);
 
   if (carregando) {
-    return <p className="mx-auto max-w-3xl px-4 py-8 text-brand-muted">Carregando publicação...</p>;
+    return <p className="mx-auto max-w-3xl py-8 text-brand-muted">Carregando publicação...</p>;
   }
 
   if (erro || !publicacao) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-8">
+      <main className="mx-auto max-w-3xl py-8">
         <p role="alert" className="mb-4 text-red-600">
           {erro || "Publicação não encontrada."}
         </p>
@@ -59,7 +61,7 @@ export default function PublicacaoDetails() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
+    <main className="mx-auto max-w-3xl py-8">
       <Link
         to="/publicacoes"
         className="mb-5 inline-block text-brand-primary underline"
@@ -88,11 +90,13 @@ export default function PublicacaoDetails() {
           </span>
         </Link>
 
-        <img
-          src={imagemUrl(publicacao.imageUrl) ?? ""}
-          alt={`Publicação de ${publicacao.ong.name}`}
-          className="max-h-[600px] w-full object-contain"
-        />
+        {publicacao.imageUrl && (
+          <img
+            src={imagemUrl(publicacao.imageUrl) ?? ""}
+            alt={`Publicação de ${publicacao.ong.name}`}
+            className="max-h-[600px] w-full object-contain"
+          />
+        )}
 
         <div className="p-5">
           <p className="whitespace-pre-wrap text-brand-text">
@@ -102,8 +106,13 @@ export default function PublicacaoDetails() {
             dateTime={publicacao.createdAt}
             className="mt-4 block text-sm text-brand-muted"
           >
-            {new Date(publicacao.createdAt).toLocaleDateString("pt-BR")}
+            {publicacao.categoryLabel ? `${publicacao.categoryLabel} · ` : ""}{new Date(publicacao.createdAt).toLocaleDateString("pt-BR")}
           </time>
+          {publicacao.accountability?.available && (
+            <Link to={`/publicacoes/${publicacao.id}/prestacao`} className="mt-4 inline-block rounded-full bg-brand-primary px-5 py-2 text-sm font-semibold text-brand-onPrimary shadow-sm hover:bg-brand-primaryDark">
+              Ver prestação de contas desta ação
+            </Link>
+          )}
         </div>
       </article>
     </main>

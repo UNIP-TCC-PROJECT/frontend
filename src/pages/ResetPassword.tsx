@@ -1,10 +1,15 @@
 import { useState, type FormEvent, type ReactNode } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { isAxiosError } from "axios";
+import { FaCheckCircle, FaRegCircle } from "react-icons/fa";
 
+import { Card } from "../components/Card/index";
+import { Input } from "../components/Input/index";
+import { Button } from "../components/Button/index";
 import { api } from "../services/api";
 
-const MIN_PASSWORD_LENGTH = 6;
+const MIN_PASSWORD_LENGTH = 8;
+const MAX_PASSWORD_LENGTH = 72; // limite do bcrypt, igual ao do backend
 
 function getErrorMessage(error: unknown): string {
   if (isAxiosError(error)) {
@@ -27,23 +32,31 @@ function getErrorMessage(error: unknown): string {
 }
 
 export default function ResetPassword() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") ?? "";
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPasswords, setShowPasswords] = useState(false);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
+
+  const longEnough = password.length >= MIN_PASSWORD_LENGTH;
+  const matches = confirmPassword !== "" && password === confirmPassword;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (loading) return;
 
-    if (password.length < MIN_PASSWORD_LENGTH) {
+    if (!longEnough) {
       setError(`A senha deve ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`);
+      return;
+    }
+
+    if (password.length > MAX_PASSWORD_LENGTH) {
+      setError(`A senha deve ter no máximo ${MAX_PASSWORD_LENGTH} caracteres.`);
       return;
     }
 
@@ -68,130 +81,157 @@ export default function ResetPassword() {
   // Link sem token (por exemplo, o endereço foi copiado incompleto).
   if (!token) {
     return (
-      <Container>
-        <h1 className="text-2xl font-semibold text-gray-900">Link inválido</h1>
-        <p className="mt-4 text-sm text-gray-600">
-          Este link de recuperação está incompleto ou é inválido. Solicite um
-          novo link.
-        </p>
-        <Link
-          to="/esqueci-senha"
-          className="mt-6 inline-block text-sm font-medium text-blue-600 hover:underline"
+      <Shell
+        title="Link inválido"
+        subtitle="Este link de recuperação está incompleto ou é inválido."
+      >
+        <Button
+          type="button"
+          className="w-full"
+          onClick={() => navigate("/esqueci-senha")}
         >
           Solicitar novo link
-        </Link>
-      </Container>
+        </Button>
+      </Shell>
     );
   }
 
   if (done) {
     return (
-      <Container>
-        <h1 className="text-2xl font-semibold text-gray-900">Senha alterada</h1>
+      <Shell title="Senha alterada" subtitle="Tudo certo com a sua conta.">
         <p
           role="status"
-          className="mt-4 rounded-md bg-green-50 p-3 text-sm text-green-800"
+          className="bg-emerald-50 p-4 rounded-xl text-emerald-800 text-sm"
         >
           Sua senha foi redefinida com sucesso. Use a nova senha para entrar.
         </p>
-        <Link
-          to="/auth"
-          className="mt-6 inline-block w-full rounded-md bg-blue-600 px-4 py-2 text-center font-medium text-white hover:bg-blue-700"
-        >
+        <Button type="button" className="w-full" onClick={() => navigate("/auth")}>
           Ir para o login
-        </Link>
-      </Container>
+        </Button>
+      </Shell>
     );
   }
 
-  const inputType = showPasswords ? "text" : "password";
-
   return (
-    <Container>
-      <h1 className="text-2xl font-semibold text-gray-900">
-        Criar nova senha
-      </h1>
+    <Shell
+      title="Criar nova senha"
+      subtitle="Escolha uma senha forte que você não use em outros sites."
+      onSubmit={handleSubmit}
+    >
+      <div className="space-y-4">
+        <Input
+          label="Nova senha"
+          name="password"
+          type="password"
+          placeholder="Sua nova senha"
+          required
+          autoComplete="new-password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          inputProps={{ autoFocus: true, maxLength: MAX_PASSWORD_LENGTH }}
+        />
+        <Input
+          label="Confirmar nova senha"
+          name="confirmPassword"
+          type="password"
+          placeholder="Repita a nova senha"
+          required
+          autoComplete="new-password"
+          value={confirmPassword}
+          onChange={(event) => setConfirmPassword(event.target.value)}
+          inputProps={{ maxLength: MAX_PASSWORD_LENGTH }}
+        />
+      </div>
 
-      <form onSubmit={handleSubmit} className="mt-4 space-y-4" noValidate>
-        <div>
-          <label
-            htmlFor="password"
-            className="mb-1 block text-sm font-medium text-gray-700"
+      <ul className="space-y-1.5 text-sm" aria-label="Requisitos da senha">
+        <Requirement ok={longEnough}>
+          Pelo menos {MIN_PASSWORD_LENGTH} caracteres
+        </Requirement>
+        <Requirement ok={matches}>As duas senhas são iguais</Requirement>
+        <li className="pl-6 text-brand-muted text-xs">
+          Evite senhas comuns ou repetitivas (como 12345678).
+        </li>
+      </ul>
+
+      {error ? (
+        <div role="alert" className="space-y-1 text-amber-600 text-sm">
+          <p>{error}</p>
+          <button
+            type="button"
+            onClick={() => navigate("/esqueci-senha")}
+            className="font-medium text-brand-primaryText hover:text-brand-text underline transition"
           >
-            Nova senha
-          </label>
-          <input
-            id="password"
-            type={inputType}
-            autoComplete="new-password"
-            required
-            minLength={MIN_PASSWORD_LENGTH}
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <p className="mt-1 text-xs text-gray-500">
-            Mínimo de {MIN_PASSWORD_LENGTH} caracteres.
-          </p>
+            Solicitar novo link
+          </button>
         </div>
+      ) : null}
 
-        <div>
-          <label
-            htmlFor="confirmPassword"
-            className="mb-1 block text-sm font-medium text-gray-700"
-          >
-            Confirmar nova senha
-          </label>
-          <input
-            id="confirmPassword"
-            type={inputType}
-            autoComplete="new-password"
-            required
-            value={confirmPassword}
-            onChange={(event) => setConfirmPassword(event.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <label className="flex items-center gap-2 text-sm text-gray-600">
-          <input
-            type="checkbox"
-            checked={showPasswords}
-            onChange={(event) => setShowPasswords(event.target.checked)}
-          />
-          Mostrar senhas
-        </label>
-
-        {error && (
-          <div role="alert" className="text-sm text-red-600">
-            <p>{error}</p>
-            <Link
-              to="/esqueci-senha"
-              className="mt-1 inline-block font-medium text-blue-600 hover:underline"
-            >
-              Solicitar novo link
-            </Link>
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading || password === "" || confirmPassword === ""}
-          className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {loading ? "Salvando..." : "Redefinir senha"}
-        </button>
-      </form>
-    </Container>
+      <Button
+        type="submit"
+        isLoading={loading}
+        disabled={password === "" || confirmPassword === ""}
+        className="w-full"
+      >
+        Redefinir senha
+      </Button>
+    </Shell>
   );
 }
 
-function Container({ children }: { children: ReactNode }) {
+function Requirement({ ok, children }: { ok: boolean; children: ReactNode }) {
   return (
-    <div className="mx-auto w-full max-w-md px-4 py-12">
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-        {children}
-      </div>
+    <li
+      className={`flex items-center gap-2 ${
+        ok ? "text-emerald-700" : "text-brand-muted"
+      }`}
+    >
+      {ok ? (
+        <FaCheckCircle aria-hidden className="w-4 h-4" />
+      ) : (
+        <FaRegCircle aria-hidden className="w-4 h-4" />
+      )}
+      <span>{children}</span>
+      <span className="sr-only">{ok ? "(atendido)" : "(pendente)"}</span>
+    </li>
+  );
+}
+
+// Mesmo cartão e cabeçalho da tela de login.
+function Shell({
+  title,
+  subtitle,
+  onSubmit,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  onSubmit?: (event: FormEvent<HTMLFormElement>) => void;
+  children: ReactNode;
+}) {
+  const header = (
+    <header className="space-y-2 text-center">
+      <h2 className="font-sans text-brand-text text-2xl">{title}</h2>
+      <p className="text-brand-muted text-sm">{subtitle}</p>
+    </header>
+  );
+
+  return (
+    <div className="flex flex-col mx-auto w-full max-w-4xl text-brand-text">
+      <Card className="mt-8">
+        <div className="fade-in">
+          {onSubmit ? (
+            <form onSubmit={onSubmit} className="space-y-6" noValidate>
+              {header}
+              {children}
+            </form>
+          ) : (
+            <div className="space-y-6">
+              {header}
+              {children}
+            </div>
+          )}
+        </div>
+      </Card>
     </div>
   );
 }

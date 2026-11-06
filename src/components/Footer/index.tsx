@@ -7,7 +7,7 @@ import { BrandLogo } from "../BrandLogo";
 export default function Footer() {
   return (
     <footer className="bg-brand-text mt-auto pt-16 pb-10 text-brand-background/70">
-      <div className="gap-10 grid grid-cols-1 md:grid-cols-4 mx-auto px-4 max-w-7xl">
+      <div className="gap-10 grid grid-cols-1 md:grid-cols-4 mx-auto px-3 sm:px-6 max-w-7xl">
         <div className="space-y-4 md:col-span-1">
           <BrandLogo variant="dark" />
           <p className="text-brand-background/60 text-xs leading-relaxed">
@@ -81,8 +81,8 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="mx-auto mt-12 px-4 border-brand-background/10 border-t max-w-7xl">
-        <p className="pt-6 text-brand-background/40 text-[11px] text-center">
+      <div className="mx-auto mt-12 px-3 sm:px-6 max-w-7xl">
+        <p className="pt-6 border-brand-background/10 border-t text-brand-background/70 text-[11px] text-center">
           &copy; {new Date().getFullYear()} {BRAND.name}. Todos os direitos reservados.
         </p>
       </div>

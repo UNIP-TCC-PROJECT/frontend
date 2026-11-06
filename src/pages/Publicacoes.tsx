@@ -1,112 +1,169 @@
 import { useEffect, useState } from "react";
-
-import { api } from "../services/api";
+import { Link } from "react-router-dom";
+import { api, imagemUrl } from "../services/api";
+import { CATEGORIES } from "../services/transparency";
+import type { PostsPage } from "../services/transparency";
 import { useAuth } from "../context/useAuth";
+import FavoritoButton from "../components/FavoritoButton";
 import PublicacaoForm from "../components/PublicacaoForm";
-import PublicationCard, { type PublicationCardData } from "../components/PublicationCard";
-
-interface PublicacoesResponse {
-  items: PublicationCardData[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
+import PostCard from "../components/transparency/PostCard";
 
 export default function Publicacoes() {
   const { user } = useAuth();
-  const [publicacoes, setPublicacoes] = useState<Publicacao[]>([]);
+  const [data, setData] = useState<PostsPage | null>(null);
   const [pagina, setPagina] = useState(1);
-  const [totalPaginas, setTotalPaginas] = useState(0);
+  const [categoria, setCategoria] = useState("");
   const [atualizacao, setAtualizacao] = useState(0);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
 
   useEffect(() => {
     let ativo = true;
-
     setCarregando(true);
     setErro("");
-
     api
-      .get<PublicacoesResponse>("/publicacoes", {
-        params: { page: pagina, limit: 5 },
+      .get<PostsPage>("/publicacoes", {
+        params: {
+          page: pagina,
+          limit: 5,
+          ...(categoria ? { category: categoria } : {}),
+        },
       })
-      .then(({ data }) => {
-        if (!ativo) return;
-        setPublicacoes(data.items);
-        setTotalPaginas(data.totalPages);
-      })
-      .catch(() => {
-        if (ativo) setErro("Não foi possível carregar as publicações.");
-      })
-      .finally(() => {
-        if (ativo) setCarregando(false);
-      });
-
+      .then(({ data }) => ativo && setData(data))
+      .catch(
+        () => ativo && setErro("Não foi possível carregar as publicações."),
+      )
+      .finally(() => ativo && setCarregando(false));
     return () => {
       ativo = false;
     };
-  }, [pagina, atualizacao]);
+  }, [pagina, categoria, atualizacao]);
+
+  const chip = (active: boolean) =>
+    `rounded-full border px-3 py-1.5 text-xs font-semibold transition ${active ? "border-brand-primaryDark bg-brand-primary text-brand-onPrimary" : "border-brand-border bg-brand-surface text-brand-primaryText hover:bg-brand-champagne"}`;
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
-
+    <main className="py-8">
+      <h1 className="mb-2 font-sans text-brand-text text-3xl">
+        Publicações das ONGs
+      </h1>
+      <p className="mb-6 text-brand-muted text-sm">
+        Acompanhe o que as instituições validadas estão fazendo. Cada publicação
+        mostra o que já foi analisado pela plataforma.
+      </p>
 
       {user?.type === "ONG" && user.status === "ATIVO" && (
         <PublicacaoForm
           onCreated={() => {
             setPagina(1);
-            setAtualizacao((valor) => valor + 1);
+            setAtualizacao((v) => v + 1);
           }}
         />
       )}
 
-      {carregando && (
-        <p className="text-brand-muted">Carregando publicações...</p>
-      )}
+      <div
+        className="flex flex-wrap gap-2 mb-5"
+        role="group"
+        aria-label="Filtrar por categoria"
+      >
+        <button
+          type="button"
+          className={chip(categoria === "")}
+          aria-pressed={categoria === ""}
+          onClick={() => {
+            setCategoria("");
+            setPagina(1);
+          }}
+        >
+          Todas
+        </button>
+        {CATEGORIES.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            className={chip(categoria === c.id)}
+            aria-pressed={categoria === c.id}
+            onClick={() => {
+              setCategoria(c.id);
+              setPagina(1);
+            }}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
 
+      {carregando && (
+        <p className="text-brand-muted" aria-live="polite">
+          Carregando publicações...
+        </p>
+      )}
       {!carregando && erro && (
         <p role="alert" className="text-red-600">
           {erro}
         </p>
       )}
-
-      {!carregando && !erro && publicacoes.length === 0 && (
-        <p className="text-brand-muted">Ainda não há publicações.</p>
+      {!carregando && !erro && data?.items.length === 0 && (
+        <p className="bg-brand-surface p-6 border border-brand-border rounded-2xl text-brand-muted">
+          Ainda não há publicações{categoria ? " nesta categoria" : ""}.
+        </p>
       )}
 
-      {!carregando && !erro && publicacoes.length > 0 && (
+      {!carregando && !erro && data && data.items.length > 0 && (
         <>
-          <div className="space-y-6">
-            {publicacoes.map((publicacao) => (
-              <PublicationCard key={publicacao.id} publication={publicacao} />
+          <div className="gap-8 grid md:grid-cols-2 xl:grid-cols-3">
+            {data.items.map((p) => (
+              <div key={p.id} className="flex flex-col gap-2">
+                <div className="flex justify-between items-center gap-2 px-1">
+                  <Link
+                    to={`/ongs/${p.ongId}`}
+                    className="flex items-center gap-2 min-w-0"
+                  >
+                    {p.ong?.profileImage ? (
+                      <img
+                        src={imagemUrl(p.ong.profileImage) ?? ""}
+                        alt=""
+                        className="rounded-full w-9 h-9 object-cover shrink-0"
+                      />
+                    ) : (
+                      <span className="flex justify-center items-center bg-brand-champagne rounded-full w-9 h-9 font-semibold text-brand-primaryText shrink-0">
+                        {p.ong?.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                    <span className="font-semibold text-brand-text truncate">
+                      {p.ong?.name}
+                    </span>
+                  </Link>
+                  {user?.type === "DOADOR" && user.status === "ATIVO" && (
+                    <FavoritoButton ongId={p.ongId} />
+                  )}
+                </div>
+                <PostCard post={p} />
+              </div>
             ))}
           </div>
 
-          {totalPaginas > 1 && (
+          {data.totalPages > 1 && (
             <nav
               aria-label="Paginação do feed"
-              className="mt-6 flex items-center justify-center gap-4"
+              className="flex justify-center items-center gap-4 mt-8"
             >
               <button
                 type="button"
-                onClick={() => setPagina((valor) => valor - 1)}
+                onClick={() => setPagina((v) => v - 1)}
                 disabled={pagina === 1}
-                className="rounded-lg border border-brand-border px-4 py-2 text-brand-text disabled:opacity-50"
+                className="disabled:opacity-50 px-4 py-2 border border-brand-border rounded-full text-brand-text text-sm"
               >
                 Anterior
               </button>
-
-              <span className="text-sm text-brand-muted">
-                Página {pagina} de {totalPaginas}
+              <span className="text-brand-muted text-sm">
+                Página {pagina} de {data.totalPages}
               </span>
-
               <button
                 type="button"
-                onClick={() => setPagina((valor) => valor + 1)}
-                disabled={pagina === totalPaginas}
-                className="rounded-lg border border-brand-border px-4 py-2 text-brand-text disabled:opacity-50"
+                onClick={() => setPagina((v) => v + 1)}
+                disabled={pagina === data.totalPages}
+                className="disabled:opacity-50 px-4 py-2 border border-brand-border rounded-full text-brand-text text-sm"
               >
                 Próxima
               </button>
