@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../../services/api";
+import PaymentAccountCard from "./PaymentAccountCard";
 import {
   docTypes,
   downloadFile,
@@ -480,6 +481,11 @@ export default function AdminValidacaoDetails() {
           </div>
         </section>
       )}
+
+      <PaymentAccountCard
+        organizationId={org.id}
+        approved={org.status === "APROVADA"}
+      />
 
       <section className="bg-white p-4 border rounded-lg">
         <h2 className="mb-2 font-semibold">Histórico de validações</h2>
