@@ -34,13 +34,13 @@ export const levelRequirement: Record<LevelCode, string> = {
   EXEMPLAR: "Tudo atendido, informações atualizadas e ao menos uma entrega com evidência aprovada.",
 };
 // Somente tokens da paleta `brand`. Cada nível tem identidade própria, em ordem crescente:
-// Inicial = prata (neutro), Em desenvolvimento = bronze (gold), Avançada = dourado (goldLight), Exemplar = ouro especial (primary + anel).
+// Inicial = prata (neutro), Em desenvolvimento = bronze (gold), Avançada = dourado (goldLight), Exemplar = ouro especial (primary).
 export const levelStyle: Record<LevelCode | "NONE", string> = {
   NONE: "border-dashed border-brand-border bg-brand-background text-brand-muted",
   INICIAL: "border-brand-muted/50 bg-brand-text/5 text-brand-primaryText",
   DESENVOLVIMENTO: "border-brand-gold bg-brand-champagne text-brand-goldText",
   AVANCADA: "border-brand-goldLight bg-brand-goldLight/40 text-brand-primaryText",
-  EXEMPLAR: "border-brand-primaryDark bg-brand-primary text-brand-onPrimary ring-2 ring-brand-goldLight/70",
+  EXEMPLAR: "border-brand-primaryDark bg-brand-primary text-brand-onPrimary",
 };
 export const levelIcon: Record<LevelCode | "NONE", ComponentType<{ className?: string; "aria-hidden"?: boolean }>> = {
   NONE: FaSeedling, INICIAL: FaSeedling, DESENVOLVIMENTO: FaChartLine, AVANCADA: FaMedal, EXEMPLAR: FaAward,

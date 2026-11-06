@@ -11,7 +11,8 @@ import type {
 // Cadastro verificado = verde, sempre independente do nível de transparência (dourado).
 const verdeChip = "border-emerald-300 bg-emerald-50 text-emerald-800";
 
-const chip =
+/** Tamanho único dos chips de medalha (verde e níveis), para ficarem sempre na mesma altura. */
+export const chip =
   "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none";
 
 /** Chip compacto de "Cadastro verificado" (cards e cabeçalhos). Só aparece quando a ONG está verificada. */

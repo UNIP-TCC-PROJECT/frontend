@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { chip } from "../selos/SelosDaOng";
 import {
   FaCheckCircle,
   FaRegCircle,
@@ -176,7 +177,7 @@ export default function LevelBadge({
         type="button"
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
-        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-semibold transition hover:-translate-y-0.5 hover:shadow-sm ${levelStyle[code]}`}
+        className={`${compact ? chip : "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-semibold"} transition hover:-translate-y-0.5 hover:shadow-sm ${levelStyle[code]}`}
       >
         <Icon aria-hidden />
         <span>{level.levelLabel}</span>
