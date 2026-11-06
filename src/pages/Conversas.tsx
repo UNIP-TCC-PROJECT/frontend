@@ -23,6 +23,18 @@ interface Mensagem {
   createdAt: string;
 }
 
+const ATUALIZACAO_MS = 5000;
+
+const mesmaLista = (a: Conversa[], b: Conversa[]) =>
+  a.length === b.length &&
+  a.every(
+    (c, i) => c.id === b[i].id && c.ultimaMensagemEm === b[i].ultimaMensagemEm,
+  );
+
+const mesmasMensagens = (a: Mensagem[], b: Mensagem[]) =>
+  a.length === b.length &&
+  a.every((m, i) => m.id === b[i].id && m.texto === b[i].texto);
+
 export default function Conversas() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -35,6 +47,7 @@ export default function Conversas() {
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState("");
   const fimMensagens = useRef<HTMLDivElement>(null);
+  const envios = useRef(0);
   const conversaSelecionada = useMemo(
     () => conversas.find((conversa) => String(conversa.id) === id),
     [conversas, id],
@@ -105,6 +118,49 @@ export default function Conversas() {
   }, [id]);
 
   useEffect(() => {
+    if (user?.type !== "ONG" && user?.type !== "DOADOR") return;
+    let ativo = true;
+    let ocupado = false;
+    const atualizar = async () => {
+      if (document.hidden || ocupado) return;
+      ocupado = true;
+      const versao = envios.current;
+      try {
+        const [lista, mensagensNovas] = await Promise.all([
+          api.get<Conversa[]>("/conversas"),
+          id
+            ? api.get<Mensagem[]>(`/conversas/${id}/mensagens`)
+            : Promise.resolve(null),
+        ]);
+        if (!ativo || versao !== envios.current) return;
+        setConversas((atuais) =>
+          mesmaLista(atuais, lista.data) ? atuais : lista.data,
+        );
+        if (mensagensNovas)
+          setMensagens((atuais) =>
+            mesmasMensagens(atuais, mensagensNovas.data)
+              ? atuais
+              : mensagensNovas.data,
+          );
+      } catch {
+        /* tenta de novo no próximo ciclo */
+      } finally {
+        ocupado = false;
+      }
+    };
+    const timer = window.setInterval(() => void atualizar(), ATUALIZACAO_MS);
+    const aoVoltar = () => void atualizar();
+    window.addEventListener("focus", aoVoltar);
+    document.addEventListener("visibilitychange", aoVoltar);
+    return () => {
+      ativo = false;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", aoVoltar);
+      document.removeEventListener("visibilitychange", aoVoltar);
+    };
+  }, [id, user?.id, user?.type]);
+
+  useEffect(() => {
     fimMensagens.current?.scrollIntoView({ behavior: "smooth" });
   }, [mensagens]);
 
@@ -114,6 +170,7 @@ export default function Conversas() {
     if (!id || !conteudo || enviando) return;
     setEnviando(true);
     setErro("");
+    envios.current += 1;
     try {
       const { data } = await api.post<Mensagem>(`/conversas/${id}/mensagens`, {
         texto: conteudo,
