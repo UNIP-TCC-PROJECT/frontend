@@ -8,7 +8,11 @@ import { Section } from "./Section";
 import { useAuth } from "../../../context/useAuth";
 import { CATEGORIES } from "../../../constants/categories";
 import { BANKS, OTHER_BANK } from "../../../constants/banks";
-import { isValidCpf, isValidWebsite, normalizeWebsite } from "../../../utils/validators";
+import {
+  isValidCpf,
+  isValidWebsite,
+  normalizeWebsite,
+} from "../../../utils/validators";
 
 const ACCOUNT_TYPES = [
   { label: "Conta corrente", value: "Corrente" },
@@ -59,12 +63,15 @@ export function NgoRegisterForm() {
   const passwordValue = watch("password");
   const bankCode = watch("bankCode");
 
-  const [cepStatus, setCepStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [cepStatus, setCepStatus] = useState<"idle" | "loading" | "error">(
+    "idle",
+  );
   const lastCep = useRef("");
 
   const zipField = register("zip", {
     required: "O CEP é obrigatório.",
-    validate: (v) => v.replace(/\D/g, "").length === 8 || "O CEP deve ter 8 dígitos.",
+    validate: (v) =>
+      v.replace(/\D/g, "").length === 8 || "O CEP deve ter 8 dígitos.",
   });
 
   // Preenche rua, bairro, cidade e UF assim que os 8 dígitos do CEP forem digitados.
@@ -116,7 +123,10 @@ export function NgoRegisterForm() {
         // Banco da lista: envia o código (o servidor grava o nome oficial). "Outro": só o nome digitado.
         ...(data.bankCode === OTHER_BANK
           ? { bank: data.bankOther.trim() }
-          : { bank: BANKS.find((b) => b.code === data.bankCode)?.name ?? "", bankCode: data.bankCode }),
+          : {
+              bank: BANKS.find((b) => b.code === data.bankCode)?.name ?? "",
+              bankCode: data.bankCode,
+            }),
         agency: data.agency,
         account: data.account,
         accountType: data.accountType,
@@ -128,7 +138,8 @@ export function NgoRegisterForm() {
       const apiMessage = error.response?.data?.message;
       const message = Array.isArray(apiMessage)
         ? apiMessage.join(" ")
-        : apiMessage || "Não foi possível concluir o cadastro. Tente novamente.";
+        : apiMessage ||
+          "Não foi possível concluir o cadastro. Tente novamente.";
 
       setError("root.server", { message });
     }
@@ -195,7 +206,10 @@ export function NgoRegisterForm() {
           error={errors.password?.message}
           inputProps={register("password", {
             required: "A senha é obrigatória.",
-            minLength: { value: 8, message: "A senha deve ter pelo menos 8 caracteres." },
+            minLength: {
+              value: 8,
+              message: "A senha deve ter pelo menos 8 caracteres.",
+            },
           })}
         />
         <Input
@@ -251,7 +265,10 @@ export function NgoRegisterForm() {
           error={errors.website?.message}
           inputProps={{
             ...register("website", {
-              validate: (v) => !v || isValidWebsite(v) || "Informe um site válido (ex.: www.minhaong.org.br).",
+              validate: (v) =>
+                !v ||
+                isValidWebsite(v) ||
+                "Informe um site válido (ex.: www.minhaong.org.br).",
             }),
             inputMode: "url",
             autoCapitalize: "none",
@@ -284,7 +301,9 @@ export function NgoRegisterForm() {
             }}
           />
           {cepStatus === "loading" ? (
-            <p className="mt-1 text-brand-muted text-xs">Buscando endereço...</p>
+            <p className="mt-1 text-brand-muted text-xs">
+              Buscando endereço...
+            </p>
           ) : null}
           {cepStatus === "error" ? (
             <p className="mt-1 text-amber-600 text-xs">
@@ -330,7 +349,10 @@ export function NgoRegisterForm() {
           inputProps={{
             ...register("state", {
               required: "O estado é obrigatório.",
-              pattern: { value: /^[A-Za-z]{2}$/, message: "Use a sigla com 2 letras (ex.: SP)." },
+              pattern: {
+                value: /^[A-Za-z]{2}$/,
+                message: "Use a sigla com 2 letras (ex.: SP).",
+              },
               setValueAs: (v: string) => v.toUpperCase(),
             }),
             maxLength: 2,
@@ -347,7 +369,10 @@ export function NgoRegisterForm() {
           name="bankCode"
           placeholder="Selecione o banco"
           options={[
-            ...BANKS.map((b) => ({ label: `${b.code} – ${b.name}`, value: b.code })),
+            ...BANKS.map((b) => ({
+              label: `${b.code} – ${b.name}`,
+              value: b.code,
+            })),
             { label: "Outro (informar o nome)", value: OTHER_BANK },
           ]}
           required
@@ -363,7 +388,8 @@ export function NgoRegisterForm() {
             error={errors.bankOther?.message}
             inputProps={{
               ...register("bankOther", {
-                validate: (v) => (v ?? "").trim().length >= 2 || "Informe o nome do banco.",
+                validate: (v) =>
+                  (v ?? "").trim().length >= 2 || "Informe o nome do banco.",
               }),
               maxLength: 80,
             }}
@@ -379,7 +405,10 @@ export function NgoRegisterForm() {
           inputProps={{
             ...register("agency", {
               required: "A agência é obrigatória.",
-              pattern: { value: /^\d{4}$/, message: "A agência deve ter 4 dígitos." },
+              pattern: {
+                value: /^\d{4}$/,
+                message: "A agência deve ter 4 dígitos.",
+              },
             }),
             inputMode: "numeric",
           }}
@@ -393,7 +422,10 @@ export function NgoRegisterForm() {
           inputProps={(() => {
             const field = register("account", {
               required: "A conta é obrigatória.",
-              pattern: { value: /^\d{1,12}-?[\dxX]$/, message: "Use apenas números e o dígito (ex.: 12345-6)." },
+              pattern: {
+                value: /^\d{1,12}-?[\dxX]$/,
+                message: "Use apenas números e o dígito (ex.: 12345-6).",
+              },
             });
             return {
               ...field,
@@ -401,7 +433,10 @@ export function NgoRegisterForm() {
               maxLength: 14,
               // só dígitos, hífen e o dígito verificador "X"
               onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-                event.target.value = event.target.value.replace(/[^\dxX-]/g, "");
+                event.target.value = event.target.value.replace(
+                  /[^\dxX-]/g,
+                  "",
+                );
                 return field.onChange(event);
               },
             };

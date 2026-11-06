@@ -1,22 +1,31 @@
-/**
- * Formats a raw string against a pattern where "9" is a digit placeholder
- * and any other character is a literal to be inserted automatically.
- * Example: applyMask("11987654321", "(99) 99999-9999") -> "(11) 98765-4321"
- */
 export function applyMask(raw: string, pattern: string): string {
-  const digits = raw.replace(/\D/g, "");
+  const hasAlphanumericPlaceholder = pattern.includes("X");
+  const characters = hasAlphanumericPlaceholder
+    ? raw.toUpperCase().replace(/[^A-Z0-9]/g, "")
+    : raw.replace(/\D/g, "");
 
   let result = "";
-  let digitIndex = 0;
+  let characterIndex = 0;
 
-  for (let i = 0; i < pattern.length && digitIndex < digits.length; i++) {
-    const patternChar = pattern[i];
+  for (
+    let patternIndex = 0;
+    patternIndex < pattern.length && characterIndex < characters.length;
+    patternIndex++
+  ) {
+    const patternCharacter = pattern[patternIndex];
 
-    if (patternChar === "9") {
-      result += digits[digitIndex];
-      digitIndex++;
+    if (patternCharacter === "9") {
+      if (!/\d/.test(characters[characterIndex])) {
+        break;
+      }
+
+      result += characters[characterIndex];
+      characterIndex++;
+    } else if (patternCharacter === "X") {
+      result += characters[characterIndex];
+      characterIndex++;
     } else {
-      result += patternChar;
+      result += patternCharacter;
     }
   }
 

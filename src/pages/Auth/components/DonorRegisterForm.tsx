@@ -52,7 +52,8 @@ export function DonorRegisterForm() {
       setSubmitError(
         Array.isArray(apiMessage)
           ? apiMessage.join(" ")
-          : apiMessage || "Não foi possível concluir o cadastro. Tente novamente."
+          : apiMessage ||
+              "Não foi possível concluir o cadastro. Tente novamente.",
       );
     }
   }
@@ -60,7 +61,10 @@ export function DonorRegisterForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {submitError ? (
-        <p role="alert" className="bg-amber-50 p-3 rounded-lg text-amber-700 text-sm">
+        <p
+          role="alert"
+          className="bg-amber-50 p-3 rounded-lg text-amber-700 text-sm"
+        >
           {submitError}
         </p>
       ) : null}

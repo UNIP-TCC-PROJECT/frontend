@@ -21,9 +21,17 @@ export default function PublicacoesList({ ongId }: PublicacoesListProps) {
     setCarregando(true);
     setErro("");
     api
-      .get<PostsPage>(`/publicacoes/ong/${ongId}`, { params: { page: pagina, limit: 5, ...(categoria ? { category: categoria } : {}) } })
+      .get<PostsPage>(`/publicacoes/ong/${ongId}`, {
+        params: {
+          page: pagina,
+          limit: 5,
+          ...(categoria ? { category: categoria } : {}),
+        },
+      })
       .then(({ data }) => ativo && setData(data))
-      .catch(() => ativo && setErro("Não foi possível carregar as publicações."))
+      .catch(
+        () => ativo && setErro("Não foi possível carregar as publicações."),
+      )
       .finally(() => ativo && setCarregando(false));
     return () => {
       ativo = false;
@@ -35,35 +43,97 @@ export default function PublicacoesList({ ongId }: PublicacoesListProps) {
 
   return (
     <section aria-labelledby="pub-titulo" className="space-y-4">
-      <h2 id="pub-titulo" className="text-xl font-sans text-brand-text">Publicações da ONG</h2>
+      <h2 id="pub-titulo" className="font-sans text-brand-text text-xl">
+        Publicações da ONG
+      </h2>
 
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar por categoria">
-        <button type="button" className={chip(categoria === "")} aria-pressed={categoria === ""} onClick={() => { setCategoria(""); setPagina(1); }}>Todas</button>
+      <div
+        className="flex flex-wrap gap-2"
+        role="group"
+        aria-label="Filtrar por categoria"
+      >
+        <button
+          type="button"
+          className={chip(categoria === "")}
+          aria-pressed={categoria === ""}
+          onClick={() => {
+            setCategoria("");
+            setPagina(1);
+          }}
+        >
+          Todas
+        </button>
         {CATEGORIES.map((c) => (
-          <button key={c.id} type="button" className={chip(categoria === c.id)} aria-pressed={categoria === c.id} onClick={() => { setCategoria(c.id); setPagina(1); }}>{c.label}</button>
+          <button
+            key={c.id}
+            type="button"
+            className={chip(categoria === c.id)}
+            aria-pressed={categoria === c.id}
+            onClick={() => {
+              setCategoria(c.id);
+              setPagina(1);
+            }}
+          >
+            {c.label}
+          </button>
         ))}
       </div>
 
-      <p className="text-xs text-brand-muted">
-        Publicações são conteúdo da própria instituição. Apenas arquivos analisados pela plataforma aparecem como evidências; o selo de cada publicação mostra o que já foi analisado.
+      <p className="text-brand-muted text-xs">
+        Publicações são conteúdo da própria instituição. Apenas arquivos
+        analisados pela plataforma aparecem como evidências; o selo de cada
+        publicação mostra o que já foi analisado.
       </p>
 
-      {carregando && <p className="text-brand-muted" aria-live="polite">Carregando publicações...</p>}
-      {!carregando && erro && <p role="alert" className="text-red-600">{erro}</p>}
+      {carregando && (
+        <p className="text-brand-muted" aria-live="polite">
+          Carregando publicações...
+        </p>
+      )}
+      {!carregando && erro && (
+        <p role="alert" className="text-red-600">
+          {erro}
+        </p>
+      )}
       {!carregando && !erro && data?.items.length === 0 && (
-        <p className="rounded-2xl border border-brand-border bg-brand-surface p-6 text-brand-muted">
-          {categoria ? "Nenhuma publicação nesta categoria." : "Esta ONG ainda não publicou nada."}
+        <p className="bg-brand-surface p-6 border border-brand-border rounded-2xl text-brand-muted">
+          {categoria
+            ? "Nenhuma publicação nesta categoria."
+            : "Esta ONG ainda não publicou nada."}
         </p>
       )}
 
       {!carregando && !erro && data && data.items.length > 0 && (
         <>
-          <div className="space-y-5">{data.items.map((p) => <PostCard key={p.id} post={p} />)}</div>
+          <div className="space-y-5">
+            {data.items.map((p) => (
+              <PostCard key={p.id} post={p} />
+            ))}
+          </div>
           {data.totalPages > 1 && (
-            <nav aria-label="Paginação das publicações" className="flex items-center justify-center gap-4">
-              <button type="button" onClick={() => setPagina((a) => a - 1)} disabled={pagina === 1} className="rounded-full border border-brand-border px-4 py-2 text-sm text-brand-text disabled:cursor-not-allowed disabled:opacity-50">Anterior</button>
-              <span className="text-sm text-brand-muted">Página {pagina} de {data.totalPages}</span>
-              <button type="button" onClick={() => setPagina((a) => a + 1)} disabled={pagina === data.totalPages} className="rounded-full border border-brand-border px-4 py-2 text-sm text-brand-text disabled:cursor-not-allowed disabled:opacity-50">Próxima</button>
+            <nav
+              aria-label="Paginação das publicações"
+              className="flex justify-center items-center gap-4"
+            >
+              <button
+                type="button"
+                onClick={() => setPagina((a) => a - 1)}
+                disabled={pagina === 1}
+                className="disabled:opacity-50 px-4 py-2 border border-brand-border rounded-full text-brand-text text-sm disabled:cursor-not-allowed"
+              >
+                Anterior
+              </button>
+              <span className="text-brand-muted text-sm">
+                Página {pagina} de {data.totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPagina((a) => a + 1)}
+                disabled={pagina === data.totalPages}
+                className="disabled:opacity-50 px-4 py-2 border border-brand-border rounded-full text-brand-text text-sm disabled:cursor-not-allowed"
+              >
+                Próxima
+              </button>
             </nav>
           )}
         </>
