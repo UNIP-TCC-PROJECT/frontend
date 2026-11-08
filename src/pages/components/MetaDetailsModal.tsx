@@ -1,3 +1,5 @@
+import { FaBoxOpen, FaCoins, FaHandsHelping } from "react-icons/fa";
+
 interface Meta {
   id: number;
   title: string;
@@ -55,9 +57,9 @@ export default function MetaDetailsModal({
   }
 
   function getTypeIcon() {
-    if (meta.type === "FINANCEIRA") return "💰";
-    if (meta.type === "MATERIAL") return "📦";
-    return "🤝";
+    if (meta.type === "FINANCEIRA") return <FaCoins aria-hidden="true" />;
+    if (meta.type === "MATERIAL") return <FaBoxOpen aria-hidden="true" />;
+    return <FaHandsHelping aria-hidden="true" />;
   }
 
   const progress = getProgress();
@@ -77,7 +79,7 @@ export default function MetaDetailsModal({
 
           <div className="flex items-center gap-3">
 
-            <span className="text-3xl">
+            <span className="text-3xl text-brand-gold">
               {getTypeIcon()}
             </span>
 

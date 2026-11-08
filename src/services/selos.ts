@@ -21,6 +21,8 @@ export interface NivelTransparenciaResumo {
 }
 
 export interface SelosOng {
+  /** Conferência automática no cadastro: CNPJ, situação, natureza, nome e CNAEs. */
+  verificacaoCnpj: { verificado: boolean };
   cadastroVerificado: CadastroVerificado;
   nivelTransparencia: NivelTransparenciaResumo | null;
 }

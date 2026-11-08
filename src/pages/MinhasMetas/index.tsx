@@ -37,12 +37,14 @@ export default function MinhasMetas() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingMeta, setEditingMeta] = useState<Meta | null>(null);
   const [deactivatingId, setDeactivatingId] = useState<number | null>(null);
+  const [contentAccess, setContentAccess] = useState<{ canSubmit: boolean; canPublishWithoutReview: boolean } | null>(null);
 
   async function fetchMetas() {
     try {
       setError("");
-      const response = await api.get("/metas/mine");
+      const [response, access] = await Promise.all([api.get("/metas/mine"), api.get<{ canSubmit: boolean; canPublishWithoutReview: boolean }>("/organizations/me/content-access")]);
       setMetas(response.data);
+      setContentAccess(access.data);
     } catch (error) {
       console.error("Erro ao buscar metas:", error);
       setError("Não foi possível carregar suas metas.");
@@ -108,8 +110,11 @@ export default function MinhasMetas() {
           </p>
         </div>
 
-        {!formOpen && <Button onClick={handleNew}>Nova meta</Button>}
+        {!formOpen && contentAccess?.canSubmit && <Button onClick={handleNew}>Nova meta</Button>}
       </div>
+
+      {contentAccess?.canSubmit && !contentAccess.canPublishWithoutReview && <p className="mb-5 rounded-lg bg-blue-50 p-4 text-sm text-blue-900">Metas enviadas aguardam aprovação antes de aparecerem no perfil público.</p>}
+      {contentAccess && !contentAccess.canSubmit && <p className="mb-5 rounded-lg bg-amber-50 p-4 text-sm text-amber-900">Confira o CNPJ da organização para enviar metas.</p>}
 
       {formOpen && (
         <Card className="mb-6">
@@ -165,18 +170,24 @@ export default function MinhasMetas() {
                           Inativa
                         </span>
                       )}
+                      <span className={`px-2 py-0.5 rounded-full font-semibold text-xs ${meta.reviewStatus === "APROVADA" ? "bg-green-100 text-green-900" : meta.reviewStatus === "REPROVADA" ? "bg-red-100 text-red-900" : "bg-amber-100 text-amber-900"}`}>
+                        {meta.reviewStatus === "APROVADA" ? "Aprovada" : meta.reviewStatus === "REPROVADA" ? "Reprovada" : "Aguardando análise"}
+                      </span>
                     </div>
                     {meta.description && (
                       <p className="text-brand-muted text-sm">
                         {meta.description}
                       </p>
                     )}
+                    {meta.reviewReason && <p className="mt-2 text-sm text-red-700">Motivo: {meta.reviewReason}</p>}
                   </div>
 
                   <div className="flex gap-2">
-                    <Button variant="ghost" onClick={() => handleEdit(meta)}>
-                      Editar
-                    </Button>
+                    {contentAccess?.canSubmit && (
+                      <Button variant="ghost" onClick={() => handleEdit(meta)}>
+                        Editar
+                      </Button>
+                    )}
                     {meta.active && (
                       <Button
                         variant="ghost"

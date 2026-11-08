@@ -16,6 +16,19 @@ export default function Publicacoes() {
   const [atualizacao, setAtualizacao] = useState(0);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+  const [contentAccess, setContentAccess] = useState<{ canSubmit: boolean; canPublishWithoutReview: boolean } | null>(null);
+
+  useEffect(() => {
+    if (user?.type !== "ONG") {
+      setContentAccess(null);
+      return;
+    }
+    let ativo = true;
+    api.get<{ canSubmit: boolean; canPublishWithoutReview: boolean }>("/organizations/me/content-access")
+      .then(({ data }) => { if (ativo) setContentAccess(data); })
+      .catch(() => { if (ativo) setContentAccess({ canSubmit: false, canPublishWithoutReview: false }); });
+    return () => { ativo = false; };
+  }, [user?.id, user?.type]);
 
   useEffect(() => {
     let ativo = true;
@@ -52,13 +65,24 @@ export default function Publicacoes() {
         mostra o que já foi analisado pela plataforma.
       </p>
 
-      {user?.type === "ONG" && user.status === "ATIVO" && (
+      {user?.type === "ONG" && user.status === "ATIVO" && contentAccess?.canSubmit && (
         <PublicacaoForm
           onCreated={() => {
             setPagina(1);
             setAtualizacao((v) => v + 1);
           }}
         />
+      )}
+      {user?.type === "ONG" && user.status === "ATIVO" && contentAccess && !contentAccess.canSubmit && (
+        <p className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          Para enviar publicações, conclua a conferência automática do CNPJ. Depois disso, suas publicações passam por análise; com a Medalha Branca, ficam disponíveis imediatamente.
+          <Link to="/minha-instituicao" className="ml-1 font-semibold underline">Verificar instituição</Link>
+        </p>
+      )}
+      {user?.type === "ONG" && contentAccess?.canSubmit && !contentAccess.canPublishWithoutReview && (
+        <p className="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+          Suas publicações serão exibidas depois da aprovação da plataforma. A imagem também passa por análise de privacidade e autorização.
+        </p>
       )}
 
       <div

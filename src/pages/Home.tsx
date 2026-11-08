@@ -5,6 +5,7 @@ import {
   FaCheckCircle,
   FaShieldAlt,
   FaHandSparkles,
+  FaEye,
 } from "react-icons/fa";
 import { api, imagemUrl } from "../services/api";
 import { CATEGORIES as categories } from "../constants/categories";
@@ -129,7 +130,9 @@ export default function Home() {
     navigate(`/ongs?categoria=${cat}`);
   };
 
-  const verifiedCount = ongs.filter((ong) => isCadastroVerificado(selosPorOng[ong.id])).length;
+  const verifiedCount = ongs.filter((ong) =>
+    isCadastroVerificado(selosPorOng[ong.id]),
+  ).length;
 
   const featuredOngs = [...ongs]
     .sort((a, b) => {
@@ -344,9 +347,11 @@ export default function Home() {
                             "pt-BR",
                           )}
                         </time>
-                        <span className="inline-block mt-3 font-semibold text-brand-primaryText text-sm underline">
-                          Ver publicação
-                        </span>
+                        <div className="mt-auto flex flex-wrap items-center gap-4 pt-1 text-sm">
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-primary px-4 py-2 text-xs font-semibold text-brand-onPrimary shadow-sm transition hover:bg-brand-primaryDark">
+                            <FaEye aria-hidden /> Ver publicação
+                          </span>
+                        </div>
                       </div>
                     </article>
                   </Link>

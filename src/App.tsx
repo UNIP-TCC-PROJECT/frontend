@@ -27,6 +27,7 @@ import MinhaInstituicao from "./pages/MinhaInstituicao";
 import AdminValidacoes from "./pages/admin/AdminValidacoes";
 import AdminValidacaoDetails from "./pages/admin/AdminValidacaoDetails";
 import AdminMfa from "./pages/admin/AdminMfa";
+import AdminConteudos from "./pages/admin/AdminConteudos";
 
 import PublicacaoPrestacao from "./pages/PublicacaoPrestacao";
 import PublicacaoDetails from "./pages/PublicacaoDetails";
@@ -58,6 +59,7 @@ function App() {
                 <Route path="/admins/novo" element={<AdminCreateAdmin />} />
                 <Route path="/validacoes" element={<AdminValidacoes />} />
                 <Route path="/prestacao-de-contas" element={<AdminPrestacao />} />
+                <Route path="/conteudos" element={<AdminConteudos />} />
                 <Route path="/validacoes/:id" element={<AdminValidacaoDetails />} />
               </Routes>
             </AdminLayout>

@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { FaCheckCircle } from "react-icons/fa";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { FaCheck, FaCheckCircle } from "react-icons/fa";
 import { fmtDay, levelIcon, levelStyle } from "../../services/transparency";
 import type { LevelCode } from "../../services/transparency";
 import type {
@@ -10,6 +10,7 @@ import type {
 
 // Cadastro verificado = verde, sempre independente do nível de transparência (dourado).
 const verdeChip = "border-emerald-300 bg-emerald-50 text-emerald-800";
+const cnpjChip = "border-sky-300 bg-sky-50 text-sky-800";
 
 /** Tamanho único dos chips de medalha (verde e níveis), para ficarem sempre na mesma altura. */
 export const chip =
@@ -38,6 +39,74 @@ export function CadastroVerificadoChip({
       Cadastro verificado
       {detalharRessalvas && cadastro.comRessalvas ? " (com ressalvas)" : ""}
     </span>
+  );
+}
+
+/** Indica a conferência automática dos dados públicos do CNPJ no cadastro. */
+export function VerificacaoCnpjChip({ verificado }: { verificado?: boolean }) {
+  const [tooltipVisivel, setTooltipVisivel] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tooltipId = useId();
+
+  function cancelarTimer() {
+    if (timer.current) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
+  }
+
+  function iniciarTimer() {
+    cancelarTimer();
+    timer.current = setTimeout(() => setTooltipVisivel(true), 800);
+  }
+
+  useEffect(() => cancelarTimer, []);
+
+  if (!verificado) return null;
+  return (
+    <div
+      className={`${chip} ${cnpjChip} relative cursor-help`}
+      tabIndex={0}
+      aria-describedby={tooltipVisivel ? tooltipId : undefined}
+      onMouseEnter={iniciarTimer}
+      onMouseLeave={() => {
+        cancelarTimer();
+        setTooltipVisivel(false);
+      }}
+      onFocus={() => {
+        cancelarTimer();
+        setTooltipVisivel(true);
+      }}
+      onBlur={() => setTooltipVisivel(false)}
+    >
+      <FaCheckCircle aria-hidden />
+      CNPJ conferido
+      {tooltipVisivel && (
+        <div
+          id={tooltipId}
+          role="tooltip"
+          className="absolute left-0 top-full z-30 mt-2 w-56 rounded-xl border border-sky-200 bg-white p-3 text-left text-xs font-medium leading-relaxed text-brand-text shadow-lg"
+        >
+          <p className="mb-2 font-semibold">Critérios conferidos</p>
+          <ul className="space-y-1.5">
+            {[
+              "CNPJ ativo",
+              "Nome oficial",
+              "Natureza jurídica",
+              "Atividade econômica",
+            ].map((criterio) => (
+              <li key={criterio} className="flex items-start gap-2">
+                <FaCheck
+                  aria-hidden="true"
+                  className="mt-0.5 shrink-0 text-emerald-600"
+                />
+                {criterio}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -78,7 +147,7 @@ export function NivelTransparenciaChip({
   );
 }
 
-/** As duas medalhas lado a lado, quebrando de linha em telas estreitas. */
+/** Indicadores e nível de transparência lado a lado, quebrando em telas estreitas. */
 export default function SelosDaOng({
   selos,
   onAbrirNivel,
@@ -88,14 +157,17 @@ export default function SelosDaOng({
 }) {
   if (!selos) return null;
   const temAlgo =
-    selos.cadastroVerificado.verificado || selos.nivelTransparencia;
+    selos.verificacaoCnpj.verificado ||
+    selos.cadastroVerificado.verificado ||
+    selos.nivelTransparencia;
   if (!temAlgo) return null;
   return (
     <div
       className="flex flex-wrap items-center gap-1.5"
-      aria-label="Medalhas da instituição"
+      aria-label="Verificações e transparência da instituição"
     >
       <CadastroVerificadoChip cadastro={selos.cadastroVerificado} />
+      <VerificacaoCnpjChip verificado={selos.verificacaoCnpj.verificado} />
       <NivelTransparenciaChip
         nivel={selos.nivelTransparencia}
         onClick={onAbrirNivel}

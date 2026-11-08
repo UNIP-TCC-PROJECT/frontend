@@ -5,7 +5,7 @@ Aplicação **web** do projeto de TCC, feita em React + TypeScript com Vite.
 ficam visíveis em uma listagem, e os doadores podem se cadastrar, buscar e
 conhecer as ONGs.
 
-> ℹ️ Este é um projeto **web** — roda no navegador. **Não** é um app mobile,
+> Observação: este é um projeto **web** — roda no navegador. **Não** é um app mobile,
 > então **não** precisa de Expo, Android Studio nem de emulador/celular.
 
 ## Sumário
