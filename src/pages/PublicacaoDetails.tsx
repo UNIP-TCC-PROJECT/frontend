@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api, imagemUrl } from "../services/api";
+import { FaArrowLeft } from "react-icons/fa";
 
 interface Publicacao {
   id: number;
@@ -44,7 +45,11 @@ export default function PublicacaoDetails() {
   }, [id]);
 
   if (carregando) {
-    return <p className="mx-auto max-w-3xl py-8 text-brand-muted">Carregando publicação...</p>;
+    return (
+      <p className="mx-auto max-w-3xl py-8 text-brand-muted">
+        Carregando publicação...
+      </p>
+    );
   }
 
   if (erro || !publicacao) {
@@ -64,9 +69,9 @@ export default function PublicacaoDetails() {
     <main className="mx-auto max-w-3xl py-8">
       <Link
         to="/publicacoes"
-        className="mb-5 inline-block text-brand-primary underline"
+        className="mb-5 inline-flex items-center gap-1.5 rounded-full bg-brand-primary px-4 py-2 text-xs font-semibold text-brand-onPrimary shadow-sm transition hover:bg-brand-primaryDark"
       >
-        ← Voltar para publicações
+        <FaArrowLeft aria-hidden /> Voltar para publicações
       </Link>
 
       <article className="overflow-hidden rounded-2xl border border-brand-border bg-brand-surface shadow-sm">
@@ -106,10 +111,14 @@ export default function PublicacaoDetails() {
             dateTime={publicacao.createdAt}
             className="mt-4 block text-sm text-brand-muted"
           >
-            {publicacao.categoryLabel ? `${publicacao.categoryLabel} · ` : ""}{new Date(publicacao.createdAt).toLocaleDateString("pt-BR")}
+            {publicacao.categoryLabel ? `${publicacao.categoryLabel} · ` : ""}
+            {new Date(publicacao.createdAt).toLocaleDateString("pt-BR")}
           </time>
           {publicacao.accountability?.available && (
-            <Link to={`/publicacoes/${publicacao.id}/prestacao`} className="mt-4 inline-block rounded-full bg-brand-primary px-5 py-2 text-sm font-semibold text-brand-onPrimary shadow-sm hover:bg-brand-primaryDark">
+            <Link
+              to={`/publicacoes/${publicacao.id}/prestacao`}
+              className="mt-4 inline-block rounded-full bg-brand-primary px-5 py-2 text-sm font-semibold text-brand-onPrimary shadow-sm hover:bg-brand-primaryDark"
+            >
               Ver prestação de contas desta ação
             </Link>
           )}

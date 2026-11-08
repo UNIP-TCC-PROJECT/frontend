@@ -8,6 +8,9 @@ import {
   FaGlobe,
   FaCopy,
   FaComments,
+  FaBoxOpen,
+  FaCoins,
+  FaPhone,
 } from "react-icons/fa";
 import MetaCarousel from "./components/MetaCarousel";
 import MetaDetailsModal from "./components/MetaDetailsModal";
@@ -23,9 +26,7 @@ import ValidationStatus, {
   HistoricoValidacao,
 } from "../components/transparency/ValidationStatus";
 import TransparenciaTab from "../components/transparency/TransparenciaTab";
-import DocumentosTab from "../components/transparency/DocumentosTab";
 import TimelineTab from "../components/transparency/TimelineTab";
-import SecurityInfo from "../components/transparency/SecurityInfo";
 import { fmtDay, loadProfile, orgIdOfOwner } from "../services/transparency";
 import type { TransparencyProfile } from "../services/transparency";
 import { imagemUrl } from "../services/api";
@@ -34,6 +35,7 @@ import {
   CadastroVerificadoChip,
   CadastroVerificadoPanel,
   NivelTransparenciaChip,
+  VerificacaoCnpjChip,
 } from "../components/selos/SelosDaOng";
 import { carregarSelos } from "../services/selos";
 import type { SelosOng } from "../services/selos";
@@ -76,9 +78,7 @@ const ABAS = [
   { id: "sobre", label: "Sobre" },
   { id: "transparencia", label: "Transparência" },
   { id: "publicacoes", label: "Publicações" },
-  { id: "documentos", label: "Documentos" },
   { id: "historico", label: "Linha do tempo" },
-  { id: "seguranca", label: "Segurança" },
 ];
 
 function TabEmpty({ state }: { state: "loading" | "ok" | "none" | "error" }) {
@@ -297,6 +297,7 @@ export default function OngDetails() {
 
           <div className="space-y-3 mt-5">
             <div className="flex flex-wrap items-center gap-2">
+              <VerificacaoCnpjChip verificado={selos?.verificacaoCnpj.verificado} />
               <CadastroVerificadoChip
                 cadastro={selos?.cadastroVerificado}
                 detalharRessalvas
@@ -412,8 +413,9 @@ export default function OngDetails() {
 
                 <div className="gap-4 grid md:grid-cols-2">
                   <div className="bg-brand-champagne p-5 border border-brand-border rounded-xl">
-                    <h3 className="mb-2 font-bold text-brand-text">
-                      💰 Doação financeira
+                    <h3 className="mb-2 flex items-center gap-2 font-bold text-brand-text">
+                      <FaCoins className="text-brand-gold" aria-hidden="true" />
+                      Doação financeira
                     </h3>
 
                     <p className="text-brand-muted text-sm leading-relaxed">
@@ -423,8 +425,9 @@ export default function OngDetails() {
                   </div>
 
                   <div className="bg-brand-champagne p-5 border border-brand-border rounded-xl">
-                    <h3 className="mb-2 font-bold text-brand-text">
-                      📦 Doação de materiais
+                    <h3 className="mb-2 flex items-center gap-2 font-bold text-brand-text">
+                      <FaBoxOpen className="text-brand-gold" aria-hidden="true" />
+                      Doação de materiais
                     </h3>
 
                     <p className="text-brand-muted text-sm leading-relaxed">
@@ -450,7 +453,7 @@ export default function OngDetails() {
 
                     {ong.phone && (
                       <div className="flex items-center gap-3">
-                        <span>☎️</span>
+                        <FaPhone className="text-brand-gold" aria-hidden="true" />
                         <span>{ong.phone}</span>
                       </div>
                     )}
@@ -576,23 +579,6 @@ export default function OngDetails() {
           )}
         </section>
         <section
-          id="tabpanel-documentos"
-          role="tabpanel"
-          aria-labelledby="tab-documentos"
-          hidden={aba !== "documentos"}
-          className="space-y-6"
-        >
-          {aba === "documentos" && (
-            <>
-              {profile ? (
-                <DocumentosTab profile={profile} />
-              ) : (
-                <TabEmpty state={profileState} />
-              )}
-            </>
-          )}
-        </section>
-        <section
           id="tabpanel-historico"
           role="tabpanel"
           aria-labelledby="tab-historico"
@@ -606,19 +592,6 @@ export default function OngDetails() {
               ) : (
                 <TabEmpty state={profileState} />
               )}
-            </>
-          )}
-        </section>
-        <section
-          id="tabpanel-seguranca"
-          role="tabpanel"
-          aria-labelledby="tab-seguranca"
-          hidden={aba !== "seguranca"}
-          className="space-y-6"
-        >
-          {aba === "seguranca" && (
-            <>
-              <SecurityInfo />
             </>
           )}
         </section>

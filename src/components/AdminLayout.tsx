@@ -34,6 +34,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             Prestação de contas
           </button>
           <button
+            onClick={() => navigate("/admin/conteudos")}
+            className="text-sm text-gray-300 hover:text-white"
+          >
+            Conteúdos
+          </button>
+          <button
             onClick={() => navigate("/admin/admins/novo")}
             className="text-sm text-gray-300 hover:text-white"
           >

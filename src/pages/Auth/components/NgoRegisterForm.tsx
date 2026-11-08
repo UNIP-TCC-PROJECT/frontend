@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { api } from "../../../services/api";
 import { useForm } from "react-hook-form";
 
 import { Button } from "../../../components/Button/index";
@@ -47,6 +48,11 @@ interface NgoFormValues {
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+interface CnpjLookupResponse {
+  razaoSocial?: string;
+  nomeFantasia?: string | null;
+}
+
 export function NgoRegisterForm() {
   const {
     register,
@@ -62,6 +68,12 @@ export function NgoRegisterForm() {
 
   const passwordValue = watch("password");
   const bankCode = watch("bankCode");
+
+  const cnpj = watch("cnpj");
+  const [nomeOficial, setNomeOficial] = useState("");
+  const [cnpjStatus, setCnpjStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
 
   const [cepStatus, setCepStatus] = useState<"idle" | "loading" | "error">(
     "idle",
@@ -103,10 +115,53 @@ export function NgoRegisterForm() {
     }
   }
 
+  useEffect(() => {
+    const cnpjDigits = (cnpj ?? "").replace(/\D/g, "");
+
+    if (cnpjDigits.length !== 14) {
+      setNomeOficial("");
+      setCnpjStatus("idle");
+      return;
+    }
+
+    let ativo = true;
+
+    setNomeOficial("");
+    setCnpjStatus("loading");
+
+    api
+      .get<CnpjLookupResponse>(`/cnpj-verification/${cnpjDigits}`)
+      .then(({ data }) => {
+        if (!ativo) return;
+
+        const nome =
+          data.nomeFantasia?.trim() || data.razaoSocial?.trim() || "";
+
+        setNomeOficial(nome);
+        setCnpjStatus(nome ? "success" : "error");
+      })
+      .catch(() => {
+        if (ativo) {
+          setNomeOficial("");
+          setCnpjStatus("error");
+        }
+      });
+
+    return () => {
+      ativo = false;
+    };
+  }, [cnpj]);
+
   async function onSubmit(data: NgoFormValues) {
+    if (cnpjStatus !== "success" || !nomeOficial) {
+      setError("root.server", {
+        message: "Aguarde a consulta do CNPJ e confira o nome encontrado.",
+      });
+      return;
+    }
     try {
       await registerUser({
-        name: data.ngoName,
+        name: nomeOficial,
         email: data.email,
         password: data.password,
         type: "ONG",
@@ -154,13 +209,11 @@ export function NgoRegisterForm() {
         <Input
           label="Nome da ONG"
           name="ngoName"
-          placeholder="Nome da organização"
-          required
-          error={errors.ngoName?.message}
-          inputProps={register("ngoName", {
-            required: "O nome da ONG é obrigatório.",
-          })}
+          value={nomeOficial}
+          placeholder="Digite o CNPJ ao lado"
+          inputProps={{ readOnly: true }}
         />
+
         <Input
           label="CNPJ"
           name="cnpj"
@@ -170,6 +223,21 @@ export function NgoRegisterForm() {
           error={errors.cnpj?.message}
           inputProps={register("cnpj", { required: "O CNPJ é obrigatório." })}
         />
+        {cnpjStatus === "loading" && (
+          <p className="text-sm text-brand-muted">Consultando CNPJ...</p>
+        )}
+
+        {cnpjStatus === "success" && (
+          <p className="text-sm text-brand-muted">
+            Nome encontrado: <strong>{nomeOficial}</strong>
+          </p>
+        )}
+
+        {cnpjStatus === "error" && (
+          <p role="alert" className="text-sm text-amber-600">
+            Não foi possível obter o nome. Confira o CNPJ e tente novamente.
+          </p>
+        )}
         <div className="md:col-span-2">
           <Textarea
             label="Descrição"

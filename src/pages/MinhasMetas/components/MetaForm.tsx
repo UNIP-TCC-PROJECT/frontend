@@ -22,6 +22,8 @@ export interface Meta {
   deadline?: string;
   active: boolean;
   ongId: number;
+  reviewStatus: "PENDENTE" | "APROVADA" | "REPROVADA";
+  reviewReason?: string | null;
 }
 
 interface MetaFormValues {

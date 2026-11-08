@@ -74,7 +74,10 @@ export default function PublicacaoForm({ onCreated }: PublicacaoFormProps) {
 
     try {
       setSending(true);
-      const { data } = await api.post<{ id: number }>("/publicacoes", fd);
+      const { data } = await api.post<{
+        id: number;
+        reviewStatus: "APROVADA" | "PENDENTE";
+      }>("/publicacoes", fd);
       if (doc) {
         const df = new FormData();
         df.append("file", doc);
@@ -83,7 +86,13 @@ export default function PublicacaoForm({ onCreated }: PublicacaoFormProps) {
       setDescription(""); setImage(null); setDoc(null); setConsent(false); setCampaignId(""); setExpenseId(""); setDeliveryId("");
       if (imageInput.current) imageInput.current.value = "";
       if (docInput.current) docInput.current.value = "";
-      setSuccess(image || doc ? "Publicação criada. Imagens e documentos aparecem para o público depois da análise da plataforma." : "Publicação criada.");
+      const contentMessage = data.reviewStatus === "PENDENTE"
+        ? "Publicação enviada para análise. Ela ficará visível após a aprovação da plataforma."
+        : "Publicação publicada com sucesso.";
+      const attachmentMessage = image || doc
+        ? " Imagens e documentos aparecem para o público depois da análise específica dos arquivos."
+        : "";
+      setSuccess(contentMessage + attachmentMessage);
       onCreated();
     } catch (err) {
       setError(errMsg(err));

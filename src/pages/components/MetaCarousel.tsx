@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FaBoxOpen, FaCoins, FaHandsHelping } from "react-icons/fa";
 
 interface Meta {
   id: number;
@@ -58,9 +59,9 @@ export default function MetaCarousel({
   }
 
   function getTypeIcon(type: Meta["type"]) {
-    if (type === "FINANCEIRA") return "💰";
-    if (type === "MATERIAL") return "📦";
-    return "🤝";
+    if (type === "FINANCEIRA") return <FaCoins aria-hidden="true" />;
+    if (type === "MATERIAL") return <FaBoxOpen aria-hidden="true" />;
+    return <FaHandsHelping aria-hidden="true" />;
   }
 
   if (metas.length === 0) {
@@ -100,7 +101,7 @@ export default function MetaCarousel({
         {/* Cabeçalho */}
         <div className="mb-4 flex items-center justify-between">
 
-          <span className="text-3xl">
+          <span className="text-3xl text-brand-gold">
             {getTypeIcon(meta.type)}
           </span>
 

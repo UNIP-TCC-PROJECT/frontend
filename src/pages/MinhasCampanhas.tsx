@@ -7,7 +7,7 @@ import { fmtMoney } from "../services/campaigns";
 import { errorMessage, fmtDate } from "../services/organizations";
 
 interface Dash { totalRaisedCents: number; pendingCents: number; refundedCents: number; donationsTotal: number; donationsConfirmed: number; donationsPending: number; donationsCancelled: number; donationsRefunded: number; activeCampaigns: number; campaigns: { id: string; title: string; status: string; goalCents: number; raisedCents: number }[] }
-interface Camp { id: string; title: string; status: string; goalCents: number; imageUrl: string | null }
+interface Camp { id: string; title: string; status: string; reviewStatus: string; reviewReason?: string | null; goalCents: number; imageUrl: string | null }
 interface Mov { donationId: string; type: "ENTRADA" | "ESTORNO"; amountCents: number; at: string; campaignTitle: string }
 
 const input = "w-full rounded-xl border border-brand-text/15 px-3 py-2 text-sm";
@@ -19,14 +19,15 @@ export default function MinhasCampanhas() {
   const [camps, setCamps] = useState<Camp[]>([]);
   const [hist, setHist] = useState<Mov[]>([]);
   const [orgOk, setOrgOk] = useState<boolean | null>(null);
+  const [contentAccess, setContentAccess] = useState<{ canSubmit: boolean; canPublishWithoutReview: boolean } | null>(null);
   const [form, setForm] = useState(empty);
   const [erro, setErro] = useState("");
   const [aviso, setAviso] = useState("");
 
   const carregar = useCallback(async () => {
     try {
-      const [o, d, c, h] = await Promise.all([api.get("/organizations/me"), api.get<Dash>("/my/organization/dashboard"), api.get<Camp[]>("/my/campaigns"), api.get<Mov[]>("/my/organization/financial-history")]);
-      setOrgOk(o.data.status === "APROVADA"); setDash(d.data); setCamps(c.data); setHist(h.data);
+      const [o, d, c, h, access] = await Promise.all([api.get("/organizations/me"), api.get<Dash>("/my/organization/dashboard"), api.get<Camp[]>("/my/campaigns"), api.get<Mov[]>("/my/organization/financial-history"), api.get<{ canSubmit: boolean; canPublishWithoutReview: boolean }>("/organizations/me/content-access")]);
+      setOrgOk(o.data.status === "APROVADA"); setDash(d.data); setCamps(c.data); setHist(h.data); setContentAccess(access.data);
     } catch (e) { setErro(errorMessage(e)); }
   }, []);
   useEffect(() => { void carregar(); }, [carregar]);
@@ -54,7 +55,8 @@ export default function MinhasCampanhas() {
       <h1 className="text-2xl font-semibold">Campanhas e arrecadação</h1>
       {erro && <p role="alert" className="text-red-700">{erro}</p>}
       {aviso && <p role="status" className="text-green-800">{aviso}</p>}
-      {!orgOk && <p className="rounded-lg bg-amber-50 p-4 text-sm text-amber-900">Sua instituição ainda não foi aprovada. Conclua a validação em <Link className="underline" to="/minha-instituicao">Minha instituição</Link> para publicar campanhas e receber doações.</p>}
+      {!contentAccess?.canSubmit && <p className="rounded-lg bg-amber-50 p-4 text-sm text-amber-900">A conferência do CNPJ é necessária para enviar campanhas. Após a conferência, a plataforma analisará o conteúdo antes da publicação. <Link className="underline" to="/minha-instituicao">Verificar instituição</Link></p>}
+      {contentAccess?.canSubmit && !contentAccess.canPublishWithoutReview && <p className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">Campanhas enviadas passam por análise. A aprovação da campanha é necessária antes de ativá-la.</p>}
 
       {dash && (
         <section className="grid gap-3 sm:grid-cols-4">
@@ -71,14 +73,15 @@ export default function MinhasCampanhas() {
           return (
             <div key={c.id} className="space-y-2 rounded-xl border border-brand-border bg-brand-surface p-4 text-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <strong>{c.title}</strong><span className="rounded-full bg-gray-100 px-2 py-1 text-xs">{c.status}</span>
+                <strong>{c.title}</strong><div className="flex flex-wrap gap-2"><span className="rounded-full bg-gray-100 px-2 py-1 text-xs">{c.status}</span><span className={`rounded-full px-2 py-1 text-xs ${c.reviewStatus === "APROVADA" ? "bg-green-100 text-green-900" : c.reviewStatus === "REPROVADA" ? "bg-red-100 text-red-900" : "bg-amber-100 text-amber-900"}`}>{c.reviewStatus === "APROVADA" ? "Conteúdo aprovado" : c.reviewStatus === "REPROVADA" ? "Conteúdo reprovado" : "Aguardando análise"}</span></div>
               </div>
+              {c.reviewReason && <p className="text-sm text-red-800">Motivo: {c.reviewReason}</p>}
               {c.imageUrl && <img src={imagemUrl(c.imageUrl)!} alt="" className="h-24 rounded object-cover" />}
               <ProgressBar value={raised} goal={c.goalCents} />
               <p>{fmtMoney(raised)} de {fmtMoney(c.goalCents)}</p>
               <div className="flex flex-wrap gap-2">
                 <label className={`${btn} cursor-pointer`}>Imagem<input type="file" hidden accept="image/jpeg,image/png" onChange={(e) => { void enviarImagem(c.id, e.target.files?.[0]); e.target.value = ""; }} /></label>
-                {c.status === "RASCUNHO" && <button className={btn} disabled={!orgOk} onClick={() => void run(() => api.post(`/my/campaigns/${c.id}/status`, { status: "ATIVA" }), "Campanha publicada.")}>Publicar</button>}
+                {c.status === "RASCUNHO" && <button className={btn} disabled={c.reviewStatus !== "APROVADA"} onClick={() => void run(() => api.post(`/my/campaigns/${c.id}/status`, { status: "ATIVA" }), "Campanha publicada.")}>Publicar</button>}
                 {c.status === "ATIVA" && <button className={btn} onClick={() => void run(() => api.post(`/my/campaigns/${c.id}/status`, { status: "ENCERRADA" }), "Campanha encerrada.")}>Encerrar</button>}
               </div>
             </div>
@@ -87,7 +90,7 @@ export default function MinhasCampanhas() {
         {!camps.length && <p className="text-sm text-brand-muted">Nenhuma campanha ainda.</p>}
       </section>
 
-      {orgOk && (
+      {contentAccess?.canSubmit && (
         <form onSubmit={criar} className="space-y-3 rounded-2xl border border-brand-border bg-brand-surface p-6">
           <h2 className="text-lg font-semibold">Nova campanha</h2>
           <input className={input} placeholder="Título" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
