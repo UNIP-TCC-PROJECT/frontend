@@ -2,8 +2,8 @@ import { api } from "./api";
 import { LEVEL_ORDER } from "./transparency";
 import type { LevelCode } from "./transparency";
 
-/** Cadastro verificado (selo verde): validação institucional da plataforma. Independente do nível de transparência. */
-export type CadastroVerificado =
+/** Medalha Branca: CNPJ conferido e validação institucional aprovada. Independente do nível de transparência. */
+export type MedalhaBranca =
   | { verificado: false }
   | {
       verificado: true;
@@ -23,7 +23,7 @@ export interface NivelTransparenciaResumo {
 export interface SelosOng {
   /** Conferência automática no cadastro: CNPJ, situação, natureza, nome e CNAEs. */
   verificacaoCnpj: { verificado: boolean };
-  cadastroVerificado: CadastroVerificado;
+  medalhaBranca: MedalhaBranca;
   nivelTransparencia: NivelTransparenciaResumo | null;
 }
 
@@ -42,7 +42,7 @@ export async function carregarSelos(ownerIds: number[]): Promise<SelosPorOng> {
   return Object.assign({}, ...partes) as SelosPorOng;
 }
 
-export const isCadastroVerificado = (selos?: SelosOng) => selos?.cadastroVerificado.verificado === true;
+export const temMedalhaBranca = (selos?: SelosOng) => selos?.medalhaBranca.verificado === true;
 
 /** Posição do nível na escala (0 = Inicial … 3 = Exemplar); -1 quando não há nível atribuído. */
 export const posicaoNivelTransparencia = (selos?: SelosOng) =>

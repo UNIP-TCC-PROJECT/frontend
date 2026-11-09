@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
 import { carregarSelos } from "../../services/selos";
 import type { SelosOng } from "../../services/selos";
-import { CadastroVerificadoChip, NivelTransparenciaChip, VerificacaoCnpjChip } from "./SelosDaOng";
+import { MedalhaBrancaChip, NivelTransparenciaChip, VerificacaoCnpjChip } from "./SelosDaOng";
 
 /** Painel da própria ONG (Perfil): como as duas medalhas estão hoje e onde agir. */
 export default function SelosDaInstituicao() {
@@ -22,7 +22,7 @@ export default function SelosDaInstituicao() {
   }, [user?.id, user?.type]);
 
   if (user?.type !== "ONG" || !carregado) return null;
-  const verificado = selos?.cadastroVerificado.verificado === true;
+  const concedida = selos?.medalhaBranca.verificado === true;
 
   return (
     <section aria-labelledby="medalhas-instituicao" className="rounded-2xl border border-brand-border bg-brand-surface p-8 shadow-sm">
@@ -38,13 +38,13 @@ export default function SelosDaInstituicao() {
           </dd>
         </div>
         <div className="rounded-xl border border-brand-border bg-brand-background p-4">
-          <dt className="mb-2 text-sm font-semibold text-brand-text">Cadastro verificado</dt>
+          <dt className="mb-2 text-sm font-semibold text-brand-text">Medalha Branca</dt>
           <dd className="space-y-2 text-sm text-brand-muted">
-            {verificado ? <CadastroVerificadoChip cadastro={selos?.cadastroVerificado} /> : <p>Ainda não verificado.</p>}
+            {concedida ? <MedalhaBrancaChip medalha={selos?.medalhaBranca} /> : <p>Ainda não concedida.</p>}
             <p>
-              {verificado
-                ? "A instituição passou pela validação institucional. Se for suspensa ou um documento obrigatório deixar de estar aprovado, o selo é retirado automaticamente."
-                : "Depende da validação institucional: instituição aprovada, consulta cadastral registrada e documentos obrigatórios aprovados."}
+              {concedida
+                ? "A instituição passou pela validação institucional. Se for suspensa ou um documento obrigatório deixar de estar aprovado, a medalha é retirada automaticamente."
+                : "É concedida após a conferência do CNPJ, aprovação institucional, consulta cadastral e aprovação dos documentos obrigatórios."}
             </p>
           </dd>
         </div>

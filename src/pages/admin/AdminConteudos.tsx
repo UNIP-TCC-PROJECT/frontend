@@ -10,6 +10,7 @@ interface ReviewItem {
   category?: string;
   name?: string;
   createdAt?: string;
+  images?: { id: string; name: string; mime: string }[];
   ong?: { name?: string };
   organization?: { tradeName?: string | null; legalName?: string };
 }
@@ -24,8 +25,23 @@ function ReviewCard({ kind, item, onDone }: { kind: Kind; item: ReviewItem; onDo
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const organization = item.ong?.name ?? item.organization?.tradeName ?? item.organization?.legalName ?? 'ONG';
   const title = item.title ?? item.name ?? (kind === 'publicacao' ? `Publicação #${item.id}` : `${config[kind].label.slice(0, -1)} #${item.id}`);
+
+  useEffect(() => {
+    let active = true;
+    const urls: string[] = [];
+    void Promise.all((item.images ?? []).filter((image) => image.mime.startsWith('image/')).map(async (image) => {
+      const response = await api.get(`/admin/publication-attachments/${image.id}/file`, { responseType: 'blob' });
+      return URL.createObjectURL(response.data as Blob);
+    })).then((loaded) => {
+      if (!active) { loaded.forEach(URL.revokeObjectURL); return; }
+      urls.push(...loaded);
+      setImageUrls(loaded);
+    }).catch(() => setError('Não foi possível carregar a imagem desta publicação.'));
+    return () => { active = false; urls.forEach(URL.revokeObjectURL); };
+  }, [item.images]);
 
   async function decide(decision: 'APROVAR' | 'REPROVAR') {
     setError('');
@@ -54,6 +70,11 @@ function ReviewCard({ kind, item, onDone }: { kind: Kind; item: ReviewItem; onDo
         {item.createdAt && <time className="text-xs text-slate-500">{new Date(item.createdAt).toLocaleString('pt-BR')}</time>}
       </div>
       {item.description && <p className="whitespace-pre-wrap text-sm text-slate-700">{item.description}</p>}
+      {imageUrls.length > 0 && (
+        <div className="flex flex-wrap gap-3" aria-label="Imagens incluídas na publicação">
+          {imageUrls.map((url) => <img key={url} src={url} alt="Imagem enviada com a publicação" className="max-h-64 max-w-full rounded-lg border border-slate-200 object-contain" />)}
+        </div>
+      )}
       <label className="block text-sm text-slate-700">
         Motivo da reprovação
         <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2} maxLength={1000} className="mt-1 w-full rounded-lg border border-slate-300 p-2" placeholder="Obrigatório somente ao reprovar" />
@@ -91,7 +112,7 @@ export default function AdminConteudos() {
     <section className="mx-auto max-w-5xl space-y-5">
       <header>
         <h1 className="text-2xl font-semibold text-slate-900">Análise de conteúdo</h1>
-        <p className="mt-1 text-sm text-slate-600">Conteúdos de ONGs com CNPJ conferido aguardam aprovação. A Medalha Branca permite publicação imediata.</p>
+        <p className="mt-1 text-sm text-slate-600">Publicações de ONGs com CNPJ conferido aguardam aprovação; a decisão também libera ou rejeita a imagem enviada com a publicação. A Medalha Branca permite publicação imediata.</p>
       </header>
       <nav className="flex flex-wrap gap-2" aria-label="Tipo de conteúdo">
         {(Object.keys(config) as Kind[]).map((key) => (

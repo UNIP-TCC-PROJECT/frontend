@@ -6,7 +6,7 @@ import { CATEGORIES as categories } from "../constants/categories";
 import { useAuth } from "../context/useAuth";
 import FavoritoButton from "../components/FavoritoButton";
 import SelosDaOng from "../components/selos/SelosDaOng";
-import { carregarSelos, isCadastroVerificado, posicaoNivelTransparencia } from "../services/selos";
+import { carregarSelos, temMedalhaBranca, posicaoNivelTransparencia } from "../services/selos";
 import type { SelosPorOng } from "../services/selos";
 import { LEVEL_ORDER, levelNames } from "../services/transparency";
 import type { LevelCode } from "../services/transparency";
@@ -35,7 +35,7 @@ export default function Ongs() {
   const { user } = useAuth();
 
   const [search, setSearch] = useState("");
-  const [somenteCadastroVerificado, setSomenteCadastroVerificado] = useState(false);
+  const [somenteMedalhaBranca, setSomenteMedalhaBranca] = useState(false);
   const [nivelMinimoTransparencia, setNivelMinimoTransparencia] = useState<LevelCode | "">("");
   const [ongs, setOngs] = useState<Ong[]>([]);
   const [selosPorOng, setSelosPorOng] = useState<SelosPorOng>({});
@@ -61,7 +61,7 @@ export default function Ongs() {
 
   function limparFiltros() {
     setSearch("");
-    setSomenteCadastroVerificado(false);
+    setSomenteMedalhaBranca(false);
     setNivelMinimoTransparencia("");
     selectCategory("");
   }
@@ -93,18 +93,18 @@ export default function Ongs() {
 
   const buscaNormalizada = normalizarTexto(search.trim());
   const temFiltros = Boolean(
-    buscaNormalizada || category || somenteCadastroVerificado || nivelMinimoTransparencia,
+    buscaNormalizada || category || somenteMedalhaBranca || nivelMinimoTransparencia,
   );
 
   const filteredOngs = ongs.filter((ong) => {
     const matchName = normalizarTexto(ong.name ?? "").includes(buscaNormalizada);
     const matchCategory = !category || ong.category === category;
     const selos = selosPorOng[ong.id];
-    const matchCadastroVerificado = !somenteCadastroVerificado || isCadastroVerificado(selos);
+    const matchMedalhaBranca = !somenteMedalhaBranca || temMedalhaBranca(selos);
     const matchNivelTransparencia =
       !nivelMinimoTransparencia || posicaoNivelTransparencia(selos) >= LEVEL_ORDER.indexOf(nivelMinimoTransparencia);
 
-    return matchName && matchCategory && matchCadastroVerificado && matchNivelTransparencia;
+    return matchName && matchCategory && matchMedalhaBranca && matchNivelTransparencia;
   });
 
   return (
@@ -197,12 +197,12 @@ export default function Ongs() {
           <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-brand-text">
             <input
               type="checkbox"
-              checked={somenteCadastroVerificado}
-              onChange={(event) => setSomenteCadastroVerificado(event.target.checked)}
+              checked={somenteMedalhaBranca}
+              onChange={(event) => setSomenteMedalhaBranca(event.target.checked)}
               className="h-4 w-4 accent-brand-primary"
             />
             <FaCheckCircle aria-hidden="true" className="text-emerald-600" />
-            Somente com cadastro verificado
+            Somente com Medalha Branca
           </label>
 
           <label className="inline-flex items-center gap-2 text-sm text-brand-text">

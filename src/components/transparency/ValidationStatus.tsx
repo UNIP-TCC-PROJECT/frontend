@@ -1,7 +1,7 @@
 import { FaHourglassHalf } from "react-icons/fa";
 import { fmtDay } from "../../services/transparency";
 import type { TransparencyProfile } from "../../services/transparency";
-import type { CadastroVerificado } from "../../services/selos";
+import type { MedalhaBranca } from "../../services/selos";
 
 /** Histórico das etapas de validação (somente eventos públicos já filtrados pelo backend). */
 export function HistoricoValidacao({ profile }: { profile: TransparencyProfile }) {
@@ -19,10 +19,9 @@ export function HistoricoValidacao({ profile }: { profile: TransparencyProfile }
 const aviso = "flex gap-3 rounded-2xl border border-brand-border bg-brand-champagne p-4 text-sm text-brand-primaryText";
 
 /**
- * Aviso quando a instituição NÃO tem cadastro verificado. Quando tem, a explicação completa fica no painel
- * "Cadastro verificado" (que é calculado e muda sozinho), então aqui não repetimos a mensagem.
+ * Aviso quando a instituição NÃO tem Medalha Branca. Quando tem, a explicação fica no painel da medalha.
  */
-export default function ValidationStatus({ profile, cadastro }: { profile: TransparencyProfile | null; cadastro?: CadastroVerificado }) {
+export default function ValidationStatus({ profile, medalha }: { profile: TransparencyProfile | null; medalha?: MedalhaBranca }) {
   if (!profile) {
     return (
       <div className={aviso}>
@@ -31,12 +30,12 @@ export default function ValidationStatus({ profile, cadastro }: { profile: Trans
       </div>
     );
   }
-  if (!cadastro || cadastro.verificado) return null; // carregando, ou já explicado no painel do cadastro verificado
+  if (!medalha || medalha.verificado) return null; // carregando, ou já explicado no painel da Medalha Branca
   return (
     <div className={`${aviso} flex-col`}>
       <div className="flex gap-3">
         <FaHourglassHalf className="mt-1 shrink-0 text-brand-goldText" aria-hidden />
-        <p><strong>Cadastro em revisão.</strong> Algum requisito da validação institucional deixou de ser atendido (por exemplo, um documento voltou para análise), então o selo de cadastro verificado não está sendo exibido no momento. Consulte as informações declaradas com cautela.</p>
+        <p><strong>Validação institucional em revisão.</strong> Algum requisito deixou de ser atendido (por exemplo, um documento voltou para análise), então a Medalha Branca não está sendo exibida no momento. Consulte as informações declaradas com cautela.</p>
       </div>
       <HistoricoValidacao profile={profile} />
     </div>
