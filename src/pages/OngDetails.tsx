@@ -32,8 +32,8 @@ import type { TransparencyProfile } from "../services/transparency";
 import { imagemUrl } from "../services/api";
 import { fmtCnpj } from "../services/organizations";
 import {
-  CadastroVerificadoChip,
-  CadastroVerificadoPanel,
+  MedalhaBrancaChip,
+  MedalhaBrancaPanel,
   NivelTransparenciaChip,
   VerificacaoCnpjChip,
 } from "../components/selos/SelosDaOng";
@@ -147,7 +147,7 @@ export default function OngDetails() {
     }
   }, [id]);
 
-  // Medalhas (cadastro verificado e nível de transparência): endpoint próprio; sem ele o perfil continua funcionando.
+  // Medalhas (CNPJ, Medalha Branca e transparência): endpoint próprio; sem ele o perfil continua funcionando.
   useEffect(() => {
     if (!ong) return;
     let ativo = true;
@@ -298,8 +298,8 @@ export default function OngDetails() {
           <div className="space-y-3 mt-5">
             <div className="flex flex-wrap items-center gap-2">
               <VerificacaoCnpjChip verificado={selos?.verificacaoCnpj.verificado} />
-              <CadastroVerificadoChip
-                cadastro={selos?.cadastroVerificado}
+              <MedalhaBrancaChip
+                medalha={selos?.medalhaBranca}
                 detalharRessalvas
               />
               {profile ? (
@@ -308,9 +308,9 @@ export default function OngDetails() {
                 <NivelTransparenciaChip nivel={selos?.nivelTransparencia} />
               )}
             </div>
-            <CadastroVerificadoPanel cadastro={selos?.cadastroVerificado}>
+            <MedalhaBrancaPanel medalha={selos?.medalhaBranca}>
               {profile && <HistoricoValidacao profile={profile} />}
-            </CadastroVerificadoPanel>
+            </MedalhaBrancaPanel>
             {profileState === "loading" && (
               <p className="text-brand-muted text-sm" aria-live="polite">
                 Carregando informações de transparência…
@@ -324,7 +324,7 @@ export default function OngDetails() {
             {(profileState === "ok" || profileState === "none") && (
               <ValidationStatus
                 profile={profile}
-                cadastro={selos?.cadastroVerificado}
+                medalha={selos?.medalhaBranca}
               />
             )}
           </div>

@@ -3,41 +3,40 @@ import { FaCheck, FaCheckCircle } from "react-icons/fa";
 import { fmtDay, levelIcon, levelStyle } from "../../services/transparency";
 import type { LevelCode } from "../../services/transparency";
 import type {
-  CadastroVerificado,
+  MedalhaBranca,
   NivelTransparenciaResumo,
   SelosOng,
 } from "../../services/selos";
 
-// Cadastro verificado = verde, sempre independente do nível de transparência (dourado).
-const verdeChip = "border-emerald-300 bg-emerald-50 text-emerald-800";
+// Medalha Branca = validação institucional; o nível de transparência é independente.
+const medalhaBrancaChip = "border-slate-300 bg-white text-slate-800";
 const cnpjChip = "border-sky-300 bg-sky-50 text-sky-800";
 
 /** Tamanho único dos chips de medalha (verde e níveis), para ficarem sempre na mesma altura. */
 export const chip =
   "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none";
 
-/** Chip compacto de "Cadastro verificado" (cards e cabeçalhos). Só aparece quando a ONG está verificada. */
-/** `detalharRessalvas` acrescenta "(com ressalvas)" ao rótulo; nos cards o chip fica enxuto e a informação aparece no perfil. */
-export function CadastroVerificadoChip({
-  cadastro,
+/** Chip compacto da Medalha Branca. */
+export function MedalhaBrancaChip({
+  medalha,
   detalharRessalvas = false,
 }: {
-  cadastro?: CadastroVerificado;
+  medalha?: MedalhaBranca;
   detalharRessalvas?: boolean;
 }) {
-  if (!cadastro?.verificado) return null;
+  if (!medalha?.verificado) return null;
   return (
     <span
-      className={`${chip} ${verdeChip}`}
+      className={`${chip} ${medalhaBrancaChip}`}
       title={
-        cadastro.comRessalvas
-          ? "Cadastro verificado com ressalvas (aprovação administrativa)"
-          : "Cadastro verificado pela validação institucional da plataforma"
+        medalha.comRessalvas
+          ? "Medalha Branca concedida com ressalvas após validação institucional"
+          : "Medalha Branca concedida após validação institucional"
       }
     >
       <FaCheckCircle aria-hidden />
-      Cadastro verificado
-      {detalharRessalvas && cadastro.comRessalvas ? " (com ressalvas)" : ""}
+      Medalha Branca
+      {detalharRessalvas && medalha.comRessalvas ? " (com ressalvas)" : ""}
     </span>
   );
 }
@@ -158,7 +157,7 @@ export default function SelosDaOng({
   if (!selos) return null;
   const temAlgo =
     selos.verificacaoCnpj.verificado ||
-    selos.cadastroVerificado.verificado ||
+    selos.medalhaBranca.verificado ||
     selos.nivelTransparencia;
   if (!temAlgo) return null;
   return (
@@ -166,7 +165,7 @@ export default function SelosDaOng({
       className="flex flex-wrap items-center gap-1.5"
       aria-label="Verificações e transparência da instituição"
     >
-      <CadastroVerificadoChip cadastro={selos.cadastroVerificado} />
+      <MedalhaBrancaChip medalha={selos.medalhaBranca} />
       <VerificacaoCnpjChip verificado={selos.verificacaoCnpj.verificado} />
       <NivelTransparenciaChip
         nivel={selos.nivelTransparencia}
@@ -176,73 +175,73 @@ export default function SelosDaOng({
   );
 }
 
-/** Explicação completa do cadastro verificado (perfil público): o que foi conferido, quando e o que o selo não significa. */
-export function CadastroVerificadoPanel({
-  cadastro,
+/** Explicação da Medalha Branca no perfil público. */
+export function MedalhaBrancaPanel({
+  medalha,
   children,
 }: {
-  cadastro?: CadastroVerificado;
+  medalha?: MedalhaBranca;
   children?: ReactNode;
 }) {
-  if (!cadastro?.verificado) return null;
+  if (!medalha?.verificado) return null;
   return (
     <section
-      aria-labelledby="cadastro-verificado-titulo"
-      className="bg-emerald-50/60 p-5 border border-emerald-200 rounded-2xl"
+      aria-labelledby="medalha-branca-titulo"
+      className="bg-slate-50 p-5 border border-slate-200 rounded-2xl"
     >
       <div className="flex items-start gap-3">
         <span
           aria-hidden
-          className="flex justify-center items-center bg-emerald-600 mt-0.5 rounded-full w-10 h-10 text-white text-lg shrink-0"
+          className="flex justify-center items-center bg-white mt-0.5 rounded-full w-10 h-10 text-slate-700 text-lg shrink-0 border border-slate-300"
         >
           <FaCheckCircle />
         </span>
         <div className="min-w-0">
           <h2
-            id="cadastro-verificado-titulo"
+            id="medalha-branca-titulo"
             className="text-brand-text text-lg"
           >
-            Cadastro verificado
+            Medalha Branca
           </h2>
           <p className="mt-1 text-brand-muted text-sm">
             A instituição passou pela validação institucional da plataforma
-            {cadastro.validadoEm ? (
+            {medalha.validadoEm ? (
               <>
                 {" "}
                 em{" "}
                 <strong className="text-brand-text">
-                  {fmtDay(cadastro.validadoEm)}
+                  {fmtDay(medalha.validadoEm)}
                 </strong>
               </>
             ) : null}
             .
-            {cadastro.consultadoEm ? (
+            {medalha.consultadoEm ? (
               <>
                 {" "}
                 A consulta cadastral mais recente foi em{" "}
-                {fmtDay(cadastro.consultadoEm)}.
+                {fmtDay(medalha.consultadoEm)}.
               </>
             ) : null}
           </p>
         </div>
       </div>
 
-      <h3 className="mt-4 font-semibold text-emerald-800 text-xs uppercase tracking-wider">
+      <h3 className="mt-4 font-semibold text-slate-700 text-xs uppercase tracking-wider">
         O que foi verificado
       </h3>
       <ul className="space-y-1.5 mt-2 text-brand-text text-sm">
-        {cadastro.criterios.map((c) => (
+        {medalha.criterios.map((c) => (
           <li key={c} className="flex items-start gap-2">
             <FaCheckCircle
               aria-hidden
-              className="mt-0.5 text-emerald-700 shrink-0"
+              className="mt-0.5 text-slate-600 shrink-0"
             />
             {c}
           </li>
         ))}
       </ul>
 
-      {cadastro.comRessalvas && (
+      {medalha.comRessalvas && (
         <p
           role="note"
           className="bg-brand-champagne mt-4 p-3 border border-brand-gold rounded-xl text-brand-primaryText text-sm"
@@ -257,10 +256,10 @@ export function CadastroVerificadoPanel({
       {children && <div className="mt-4 text-brand-text">{children}</div>}
 
       <p className="mt-4 pt-3 border-emerald-200 border-t text-brand-muted text-xs">
-        O cadastro verificado confirma a validação institucional feita pela
+        A Medalha Branca confirma a validação institucional feita pela
         plataforma. Não é garantia de honestidade, idoneidade ou do uso correto
         dos recursos, e é recalculado automaticamente: se a instituição for
-        suspensa ou deixar de atender aos requisitos, o selo deixa de aparecer.
+        suspensa ou deixar de atender aos requisitos, a medalha deixa de aparecer.
         Ele é independente do nível de transparência.
       </p>
     </section>

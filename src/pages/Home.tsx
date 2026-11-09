@@ -11,7 +11,7 @@ import { api, imagemUrl } from "../services/api";
 import { CATEGORIES as categories } from "../constants/categories";
 import { useAuth } from "../context/useAuth";
 import SelosDaOng from "../components/selos/SelosDaOng";
-import { carregarSelos, isCadastroVerificado } from "../services/selos";
+import { carregarSelos, temMedalhaBranca } from "../services/selos";
 import type { SelosPorOng } from "../services/selos";
 
 interface Ong {
@@ -131,7 +131,7 @@ export default function Home() {
   };
 
   const verifiedCount = ongs.filter((ong) =>
-    isCadastroVerificado(selosPorOng[ong.id]),
+    temMedalhaBranca(selosPorOng[ong.id]),
   ).length;
 
   const featuredOngs = [...ongs]
@@ -169,7 +169,7 @@ export default function Home() {
 
             <p className="max-w-xl text-brand-muted text-lg">
               {isOng
-                ? "Agora você pode encontrar doadores e ver o interesse deles na sua causa. Para ter o cadastro verificado, mantenha os dados e os documentos da instituição em dia em Minha instituição."
+                ? "Agora você pode encontrar doadores e ver o interesse deles na sua causa. Para receber a Medalha Branca, mantenha os dados e os documentos da instituição em dia em Minha instituição."
                 : isDoador
                   ? "Você agora pode buscar ONGs para ajudar, prestar serviços e demonstrar interesse. Boa jornada."
                   : "Encontre ONGs verificadas para apoiar com doações, materiais ou trabalho voluntário."}
@@ -216,7 +216,7 @@ export default function Home() {
                   </span>
                 </div>
                 <span className="font-medium text-brand-muted text-xs">
-                  Com cadastro verificado
+                  Com Medalha Branca
                 </span>
               </div>
             </div>

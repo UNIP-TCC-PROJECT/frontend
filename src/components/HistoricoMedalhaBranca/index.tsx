@@ -13,8 +13,8 @@ const textos: Record<StatusMedalha, string> = {
 const fmt = (d: string) => new Date(d).toLocaleString('pt-BR');
 
 /**
- * Histórico do antigo programa da Medalha Branca (encerrado). Somente leitura: pedidos, análises e documentos
- * enviados continuam consultáveis, mas não é mais possível solicitar nem analisar. Com `ongId`, é a visão do admin.
+ * Histórico do antigo fluxo de solicitações da Medalha Branca. Somente leitura: pedidos, análises e documentos
+ * enviados continuam consultáveis. A medalha atual é concedida pela validação institucional. Com `ongId`, é a visão do admin.
  * Não aparece quando a instituição nunca participou do programa.
  */
 export default function HistoricoMedalhaBranca({ ongId }: { ongId?: number }) {
@@ -58,8 +58,8 @@ export default function HistoricoMedalhaBranca({ ongId }: { ongId?: number }) {
         Histórico da Medalha Branca
       </h2>
       <p className="mt-1 text-sm text-brand-muted">
-        O programa da Medalha Branca foi encerrado. Os registros abaixo são mantidos como histórico. A validação da
-        instituição agora é feita pelos documentos da instituição e sustenta o <strong>cadastro verificado</strong>.
+        Os registros abaixo pertencem ao antigo fluxo de solicitações e são mantidos como histórico. Atualmente, a
+        Medalha Branca é concedida após a conferência do CNPJ, a aprovação institucional e dos documentos obrigatórios.
       </p>
       {erro && (
         <p role="alert" className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-800">

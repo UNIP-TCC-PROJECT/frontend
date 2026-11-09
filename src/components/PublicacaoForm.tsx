@@ -89,10 +89,12 @@ export default function PublicacaoForm({ onCreated }: PublicacaoFormProps) {
       const contentMessage = data.reviewStatus === "PENDENTE"
         ? "Publicação enviada para análise. Ela ficará visível após a aprovação da plataforma."
         : "Publicação publicada com sucesso.";
-      const attachmentMessage = image || doc
-        ? " Imagens e documentos aparecem para o público depois da análise específica dos arquivos."
-        : "";
-      setSuccess(contentMessage + attachmentMessage);
+      const attachmentMessages: string[] = [];
+      if (image) attachmentMessages.push(data.reviewStatus === "PENDENTE"
+        ? " A imagem acompanha a publicação após a aprovação."
+        : " A imagem foi publicada junto com a publicação.");
+      if (doc) attachmentMessages.push(" O documento aparece para o público somente após análise própria.");
+      setSuccess(contentMessage + attachmentMessages.join(""));
       onCreated();
     } catch (err) {
       setError(errMsg(err));
@@ -104,7 +106,7 @@ export default function PublicacaoForm({ onCreated }: PublicacaoFormProps) {
   return (
     <section className="mb-8 w-full rounded-2xl border border-brand-border bg-brand-surface p-5 shadow-xs sm:p-6">
       <h2 className="text-xl font-sans text-brand-text">Nova publicação</h2>
-      <p className="mt-1 max-w-4xl text-sm text-brand-muted">Conte o que a instituição está fazendo. Publicações são conteúdo declarado por vocês; só arquivos analisados pela plataforma são exibidos como evidência.</p>
+      <p className="mt-1 max-w-4xl text-sm text-brand-muted">Conte o que a instituição está fazendo. A foto enviada acompanha a análise da publicação; documentos e evidências seguem uma análise própria antes de serem exibidos.</p>
 
       <form onSubmit={handleSubmit} className="mt-5 space-y-5">
         <div className="grid gap-5 lg:grid-cols-3">
@@ -136,7 +138,7 @@ export default function PublicacaoForm({ onCreated }: PublicacaoFormProps) {
         {image && (
           <label className="flex items-start gap-2 rounded-xl bg-brand-champagne p-3 text-sm text-brand-primaryText">
             <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1" />
-            <span>Declaro ter autorização para divulgar esta imagem e que ela <strong>não expõe crianças ou pessoas vulneráveis</strong> nem dados pessoais (rostos de beneficiários, documentos, endereços). A imagem só aparece publicamente depois da análise da plataforma.</span>
+            <span>Declaro ter autorização para divulgar esta imagem e que ela <strong>não expõe crianças ou pessoas vulneráveis</strong> nem dados pessoais (rostos de beneficiários, documentos, endereços). A imagem será publicada junto com a publicação, após a análise quando ela for necessária.</span>
           </label>
         )}
 

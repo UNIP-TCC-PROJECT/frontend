@@ -23,16 +23,16 @@ const topicos = [
     titulo: "Medalhas e verificação",
     perguntas: [
       [
-        "O que é o cadastro verificado?",
-        "É a medalha verde. Indica que a instituição passou pela validação institucional da plataforma: foi aprovada pela administração, teve a consulta cadastral na Receita Federal registrada e os documentos obrigatórios analisados e aprovados. É calculada automaticamente e deixa de aparecer se a instituição for suspensa ou deixar de atender a esses requisitos. Quando a aprovação precisou de análise manual por divergências nas conferências, o perfil informa que houve aprovação com ressalvas.",
+        "O que é a Medalha Branca?",
+        "É o selo branco da validação institucional. Indica que o CNPJ foi conferido, a instituição foi aprovada pela administração, a consulta cadastral foi registrada e os documentos obrigatórios foram analisados e aprovados. É calculada automaticamente e deixa de aparecer se a instituição for suspensa ou deixar de atender aos critérios. Quando a aprovação precisou de análise manual por divergências nas conferências, o perfil informa que houve aprovação com ressalvas.",
       ],
       [
         "O que é o nível de transparência?",
-        "É a medalha dourada, que muda de cor conforme o nível: Inicial, Em desenvolvimento, Avançada ou Exemplar. O nível é calculado a partir dos registros da plataforma (uso dos recursos, comprovantes, entregas com evidência e informações atualizadas). A instituição não escolhe o próprio nível, e clicar na medalha mostra os critérios usados. Ele é independente do cadastro verificado.",
+        "É a medalha dourada, que muda de cor conforme o nível: Inicial, Em desenvolvimento, Avançada ou Exemplar. O nível é calculado a partir dos registros da plataforma (uso dos recursos, comprovantes, entregas com evidência e informações atualizadas). A instituição não escolhe o próprio nível, e clicar na medalha mostra os critérios usados. Ele é independente da Medalha Branca.",
       ],
       [
-        "Como uma ONG consegue o cadastro verificado?",
-        "Entre com a conta da ONG, abra “Minha instituição”, preencha os dados e envie os documentos obrigatórios. A administração analisa os documentos e a instituição. O antigo programa da Medalha Branca foi encerrado, e o histórico de quem participou continua disponível no perfil da ONG.",
+        "Como uma ONG consegue a Medalha Branca?",
+        "A ONG precisa ter o CNPJ conferido, preencher os dados institucionais e enviar os documentos obrigatórios em “Minha instituição”. Após a consulta cadastral e a aprovação institucional pela administração, a Medalha Branca é concedida. Se a ONG for suspensa ou deixar de atender aos critérios, a medalha é retirada até a regularização.",
       ],
     ],
   },
@@ -45,7 +45,7 @@ const topicos = [
       ],
       [
         "Minha doação tem 100% de segurança?",
-        "Não. O Donatio divulga os dados cadastrados pela ONG. Mesmo quando há cadastro verificado ou um nível de transparência alto, a plataforma não garante a transferência nem o uso do valor doado. Confira no banco quem vai receber o Pix e esclareça qualquer divergência com a ONG antes de enviar.",
+        "Não. O Donatio divulga os dados cadastrados pela ONG. Mesmo com Medalha Branca ou nível de transparência alto, a plataforma não garante a transferência nem o uso do valor doado. Confira no banco quem vai receber o Pix e esclareça qualquer divergência com a ONG antes de enviar.",
       ],
     ],
   },

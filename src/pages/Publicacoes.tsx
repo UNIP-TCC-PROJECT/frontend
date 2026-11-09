@@ -81,7 +81,7 @@ export default function Publicacoes() {
       )}
       {user?.type === "ONG" && contentAccess?.canSubmit && !contentAccess.canPublishWithoutReview && (
         <p className="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
-          Suas publicações serão exibidas depois da aprovação da plataforma. A imagem também passa por análise de privacidade e autorização.
+          Suas publicações e a imagem enviada serão exibidas juntas depois da aprovação da plataforma. Documentos anexados continuam com análise própria.
         </p>
       )}
 
