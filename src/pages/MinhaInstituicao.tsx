@@ -147,13 +147,16 @@ export default function MinhaInstituicao() {
         </p>
         {org.status === "APROVADA" && (
           <p className="text-green-800 text-sm">
-            Instituição validada: você já pode publicar campanhas.
+            Validação institucional aprovada. O CNPJ conferido habilita o envio
+            de publicações, metas e campanhas. A Medalha Branca permite publicar
+            esses conteúdos sem análise prévia.
           </p>
         )}
         {org.status !== "APROVADA" && (
           <p className="text-brand-muted text-sm">
-            Campanhas e doações só ficam disponíveis depois da aprovação pela
-            nossa equipe.
+            A aprovação institucional é necessária para obter a Medalha Branca.
+            Com o CNPJ conferido, você já pode enviar publicações, metas e
+            campanhas, que passarão por análise antes da publicação.
           </p>
         )}
         {org.statusReason &&

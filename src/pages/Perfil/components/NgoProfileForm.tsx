@@ -27,7 +27,6 @@ interface NgoProfile {
 
 interface NgoProfileFormValues {
   name: string;
-  cnpj: string;
   description: string;
   category: string;
   email: string;
@@ -55,7 +54,6 @@ export function NgoProfileForm({ profile, onSaved, onCancel }: NgoProfileFormPro
     mode: "onBlur",
     defaultValues: {
       name: profile.name ?? "",
-      cnpj: profile.cnpj ?? "",
       description: profile.description ?? "",
       category: profile.category ?? "",
       email: profile.email ?? "",
@@ -110,10 +108,13 @@ export function NgoProfileForm({ profile, onSaved, onCancel }: NgoProfileFormPro
         <Input
           label="CNPJ"
           name="cnpj"
+          value={profile.cnpj ?? ""}
           placeholder="00.000.000/0001-00"
-          mask="99.999.999/9999-99"
-          inputProps={register("cnpj")}
+          inputProps={{ readOnly: true, "aria-describedby": "cnpj-help" }}
         />
+        <p id="cnpj-help" className="-mt-1 text-xs text-brand-muted">
+          O CNPJ está vinculado à conferência cadastral e não pode ser alterado por esta tela.
+        </p>
         <div className="md:col-span-2">
           <Textarea
             label="Descrição"

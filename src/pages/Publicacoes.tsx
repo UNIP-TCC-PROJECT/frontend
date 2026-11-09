@@ -61,8 +61,9 @@ export default function Publicacoes() {
         Publicações das ONGs
       </h1>
       <p className="mb-6 text-brand-muted text-sm">
-        Acompanhe o que as instituições validadas estão fazendo. Cada publicação
-        mostra o que já foi analisado pela plataforma.
+        Acompanhe as atualizações de ONGs com CNPJ conferido. Publicações de
+        ONGs sem Medalha Branca passam por análise antes de aparecer; com a
+        Medalha Branca, podem ser exibidas sem análise prévia.
       </p>
 
       {user?.type === "ONG" && user.status === "ATIVO" && contentAccess?.canSubmit && (
