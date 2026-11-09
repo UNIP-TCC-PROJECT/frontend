@@ -19,7 +19,9 @@ export default function Campanhas() {
     <div className="space-y-6 py-8">
       <h1 className="font-semibold text-brand-text text-2xl">Campanhas</h1>
       <p className="text-brand-muted text-sm">
-        Somente instituições validadas pela nossa equipe publicam campanhas.
+        As campanhas exibidas foram aprovadas pela plataforma e estão ativas
+        dentro do período informado. ONGs com CNPJ conferido podem enviá-las
+        para análise; com a Medalha Branca, a aprovação ocorre sem análise prévia.
       </p>
       {erro && (
         <p role="alert" className="text-red-700">

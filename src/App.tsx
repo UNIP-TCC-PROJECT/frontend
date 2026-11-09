@@ -28,6 +28,7 @@ import AdminValidacoes from "./pages/admin/AdminValidacoes";
 import AdminValidacaoDetails from "./pages/admin/AdminValidacaoDetails";
 import AdminMfa from "./pages/admin/AdminMfa";
 import AdminConteudos from "./pages/admin/AdminConteudos";
+import AdminDenuncias from "./pages/admin/AdminDenuncias";
 
 import PublicacaoPrestacao from "./pages/PublicacaoPrestacao";
 import PublicacaoDetails from "./pages/PublicacaoDetails";
@@ -60,6 +61,7 @@ function App() {
                 <Route path="/validacoes" element={<AdminValidacoes />} />
                 <Route path="/prestacao-de-contas" element={<AdminPrestacao />} />
                 <Route path="/conteudos" element={<AdminConteudos />} />
+                <Route path="/denuncias" element={<AdminDenuncias />} />
                 <Route path="/validacoes/:id" element={<AdminValidacaoDetails />} />
               </Routes>
             </AdminLayout>

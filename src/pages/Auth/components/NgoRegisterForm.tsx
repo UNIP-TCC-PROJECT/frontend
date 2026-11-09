@@ -74,6 +74,7 @@ export function NgoRegisterForm() {
   const [cnpjStatus, setCnpjStatus] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
+  const [cnpjRetry, setCnpjRetry] = useState(0);
 
   const [cepStatus, setCepStatus] = useState<"idle" | "loading" | "error">(
     "idle",
@@ -150,7 +151,7 @@ export function NgoRegisterForm() {
     return () => {
       ativo = false;
     };
-  }, [cnpj]);
+  }, [cnpj, cnpjRetry]);
 
   async function onSubmit(data: NgoFormValues) {
     if (cnpjStatus !== "success" || !nomeOficial) {
@@ -234,9 +235,19 @@ export function NgoRegisterForm() {
         )}
 
         {cnpjStatus === "error" && (
-          <p role="alert" className="text-sm text-amber-600">
-            Não foi possível obter o nome. Confira o CNPJ e tente novamente.
-          </p>
+          <div role="alert" className="text-sm text-amber-700">
+            <p>
+              Não foi possível concluir a consulta do CNPJ. Confira o número e
+              tente novamente.
+            </p>
+            <button
+              type="button"
+              className="mt-1 font-semibold underline"
+              onClick={() => setCnpjRetry((attempt) => attempt + 1)}
+            >
+              Tentar consulta novamente
+            </button>
+          </div>
         )}
         <div className="md:col-span-2">
           <Textarea

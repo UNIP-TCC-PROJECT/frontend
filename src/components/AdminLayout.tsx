@@ -40,6 +40,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             Conteúdos
           </button>
           <button
+            onClick={() => navigate("/admin/denuncias")}
+            className="text-sm text-gray-300 hover:text-white"
+          >
+            Denúncias
+          </button>
+          <button
             onClick={() => navigate("/admin/admins/novo")}
             className="text-sm text-gray-300 hover:text-white"
           >
