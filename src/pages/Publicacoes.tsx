@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { FaTrash } from "react-icons/fa";
 import { api, imagemUrl } from "../services/api";
 import { CATEGORIES } from "../services/transparency";
 import type { PostsPage } from "../services/transparency";
@@ -17,6 +18,7 @@ export default function Publicacoes() {
   const [atualizacao, setAtualizacao] = useState(0);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+  const [removendoId, setRemovendoId] = useState<number | null>(null);
   const [contentAccess, setContentAccess] = useState<ContentAccess | null>(null);
 
   useEffect(() => {
@@ -52,6 +54,31 @@ export default function Publicacoes() {
       ativo = false;
     };
   }, [pagina, categoria, atualizacao]);
+
+  async function handleRemover(postId: number) {
+    if (!window.confirm("Tem certeza que deseja remover esta publicação?")) {
+      return;
+    }
+
+    try {
+      setRemovendoId(postId);
+      await api.delete(`/publicacoes/${postId}`);
+
+      if (data?.items.length === 1 && pagina > 1) {
+        setPagina((v) => v - 1);
+      } else {
+        setAtualizacao((v) => v + 1);
+      }
+    } catch {
+      alert("Não foi possível remover a publicação. Tente novamente.");
+    } finally {
+      setRemovendoId(null);
+    }
+  }
+
+  const podeRemover = (ongId: number) =>
+    (user?.type === "ONG" && Number(user.id) === Number(ongId)) ||
+    user?.type === "ADMIN";
 
   const chip = (active: boolean) =>
     `rounded-full border px-3 py-1.5 text-xs font-semibold transition ${active ? "border-brand-primaryDark bg-brand-primary text-brand-onPrimary" : "border-brand-border bg-brand-surface text-brand-primaryText hover:bg-brand-champagne"}`;
@@ -164,9 +191,26 @@ export default function Publicacoes() {
                       {p.ong?.name}
                     </span>
                   </Link>
-                  {user?.type === "DOADOR" && user.status === "ATIVO" && (
-                    <FavoritoButton ongId={p.ongId} />
-                  )}
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    {user?.type === "DOADOR" && user.status === "ATIVO" && (
+                      <FavoritoButton ongId={p.ongId} />
+                    )}
+
+                    {podeRemover(p.ongId) && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemover(p.id)}
+                        disabled={removendoId === p.id}
+                        title="Remover publicação"
+                        aria-label="Remover publicação"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 disabled:opacity-50"
+                      >
+                        <FaTrash aria-hidden className="h-3 w-3" />
+                        <span>{removendoId === p.id ? "Removendo..." : "Remover"}</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <PostCard post={p} />
               </div>
