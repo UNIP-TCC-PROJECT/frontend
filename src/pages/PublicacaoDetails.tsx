@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { FaArrowLeft, FaTrash } from "react-icons/fa";
 import { api, imagemUrl } from "../services/api";
-import { FaArrowLeft } from "react-icons/fa";
+import { useAuth } from "../context/useAuth";
 
 interface Publicacao {
   id: number;
@@ -20,8 +21,12 @@ interface Publicacao {
 
 export default function PublicacaoDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
   const [publicacao, setPublicacao] = useState<Publicacao | null>(null);
   const [carregando, setCarregando] = useState(true);
+  const [removendo, setRemovendo] = useState(false);
   const [erro, setErro] = useState("");
 
   useEffect(() => {
@@ -44,6 +49,22 @@ export default function PublicacaoDetails() {
     };
   }, [id]);
 
+  async function handleRemover() {
+    if (!publicacao) return;
+    if (!window.confirm("Tem certeza que deseja remover esta publicação?")) {
+      return;
+    }
+
+    try {
+      setRemovendo(true);
+      await api.delete(`/publicacoes/${publicacao.id}`);
+      navigate("/publicacoes", { replace: true });
+    } catch {
+      alert("Não foi possível remover a publicação. Tente novamente.");
+      setRemovendo(false);
+    }
+  }
+
   if (carregando) {
     return (
       <p className="mx-auto max-w-3xl py-8 text-brand-muted">
@@ -65,14 +86,32 @@ export default function PublicacaoDetails() {
     );
   }
 
+  const podeRemover =
+    (user?.type === "ONG" && Number(user.id) === Number(publicacao.ongId)) ||
+    user?.type === "ADMIN";
+
   return (
     <main className="mx-auto max-w-3xl py-8">
-      <Link
-        to="/publicacoes"
-        className="mb-5 inline-flex items-center gap-1.5 rounded-full bg-brand-primary px-4 py-2 text-xs font-semibold text-brand-onPrimary shadow-sm transition hover:bg-brand-primaryDark"
-      >
-        <FaArrowLeft aria-hidden /> Voltar para publicações
-      </Link>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <Link
+          to="/publicacoes"
+          className="inline-flex items-center gap-1.5 rounded-full bg-brand-primary px-4 py-2 text-xs font-semibold text-brand-onPrimary shadow-sm transition hover:bg-brand-primaryDark"
+        >
+          <FaArrowLeft aria-hidden /> Voltar para publicações
+        </Link>
+
+        {podeRemover && (
+          <button
+            type="button"
+            onClick={handleRemover}
+            disabled={removendo}
+            className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-xs font-semibold text-red-700 shadow-sm transition hover:bg-red-100 disabled:opacity-50"
+          >
+            <FaTrash aria-hidden className="h-3 w-3" />
+            {removendo ? "Removendo..." : "Remover publicação"}
+          </button>
+        )}
+      </div>
 
       <article className="overflow-hidden rounded-2xl border border-brand-border bg-brand-surface shadow-sm">
         <Link

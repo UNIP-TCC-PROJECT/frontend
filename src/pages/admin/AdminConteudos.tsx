@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { FaTrash } from 'react-icons/fa';
 import { api } from '../../services/api';
 import { errorMessage } from '../../services/organizations';
 
@@ -24,6 +25,7 @@ const config: Record<Kind, { label: string; list: string; review: (id: string | 
 function ReviewCard({ kind, item, onDone }: { kind: Kind; item: ReviewItem; onDone: () => void }) {
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
+  const [removing, setRemoving] = useState(false);
   const [error, setError] = useState('');
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const organization = item.ong?.name ?? item.organization?.tradeName ?? item.organization?.legalName ?? 'ONG';
@@ -60,6 +62,24 @@ function ReviewCard({ kind, item, onDone }: { kind: Kind; item: ReviewItem; onDo
     }
   }
 
+  async function removePublication() {
+    if (!window.confirm('Tem certeza que deseja excluir permanentemente esta publicação e todos os seus anexos?')) {
+      return;
+    }
+    setError('');
+    setRemoving(true);
+    try {
+      await api.delete(`/publicacoes/${item.id}`);
+      onDone();
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setRemoving(false);
+    }
+  }
+
+  const isDisabled = busy || removing;
+
   return (
     <article className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -80,9 +100,23 @@ function ReviewCard({ kind, item, onDone }: { kind: Kind; item: ReviewItem; onDo
         <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2} maxLength={1000} className="mt-1 w-full rounded-lg border border-slate-300 p-2" placeholder="Obrigatório somente ao reprovar" />
       </label>
       {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
-      <div className="flex gap-2">
-        <button disabled={busy} onClick={() => void decide('APROVAR')} className="rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">Aprovar</button>
-        <button disabled={busy} onClick={() => void decide('REPROVAR')} className="rounded-lg bg-red-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">Reprovar</button>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex gap-2">
+          <button disabled={isDisabled} onClick={() => void decide('APROVAR')} className="rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">Aprovar</button>
+          <button disabled={isDisabled} onClick={() => void decide('REPROVAR')} className="rounded-lg bg-red-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">Reprovar</button>
+        </div>
+
+        {kind === 'publicacao' && (
+          <button
+            type="button"
+            disabled={isDisabled}
+            onClick={() => void removePublication()}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3.5 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100 disabled:opacity-50"
+          >
+            <FaTrash aria-hidden className="h-3.5 w-3.5" />
+            {removing ? 'Removendo...' : 'Remover'}
+          </button>
+        )}
       </div>
     </article>
   );
