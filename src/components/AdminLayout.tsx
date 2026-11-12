@@ -12,14 +12,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="flex items-center justify-between bg-slate-900 px-6 py-4 text-white">
-        <div className="flex items-center gap-6">
+      <header className="flex flex-wrap gap-4 items-center justify-between bg-slate-900 px-6 py-4 text-white">
+        <div className="flex flex-wrap items-center gap-6">
           <span className="font-bold text-lg">Painel Admin</span>
           <button
             onClick={() => navigate("/admin")}
             className="text-sm text-gray-300 hover:text-white"
           >
             ONGs
+          </button>
+          <button
+            onClick={() => navigate("/admin/doadores")}
+            className="text-sm text-gray-300 hover:text-white"
+          >
+            Doadores
           </button>
           <button
             onClick={() => navigate("/admin/validacoes")}
@@ -44,6 +50,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             className="text-sm text-gray-300 hover:text-white"
           >
             Denúncias
+          </button>
+          <button
+            onClick={() => navigate("/admin/sac")}
+            className="text-sm text-gray-300 hover:text-white"
+          >
+            Atendimento SAC
           </button>
           <button
             onClick={() => navigate("/admin/admins/novo")}

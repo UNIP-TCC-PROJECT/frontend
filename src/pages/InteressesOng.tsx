@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaComments } from "react-icons/fa";
 import { api, imagemUrl } from "../services/api";
+import { ReportModal } from "../components/ReportModal";
 
 interface Interesse {
   id: number;
@@ -16,6 +17,7 @@ export default function InteressesOng() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [abrindo, setAbrindo] = useState<number | null>(null);
+  const [doadorDenuncia, setDoadorDenuncia] = useState<Interesse["doador"] | null>(null);
 
   useEffect(() => {
     let ativo = true;
@@ -85,19 +87,36 @@ export default function InteressesOng() {
                     <p className="text-sm text-brand-muted">Interessado desde {new Date(createdAt).toLocaleDateString("pt-BR")}</p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => void abrirConversa(doador.id)}
-                  disabled={abrindo !== null}
-                  className="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-4 py-2 font-semibold text-brand-onPrimary hover:bg-brand-primaryDark disabled:opacity-60"
-                >
-                  <FaComments aria-hidden="true" />
-                  {abrindo === doador.id ? "Abrindo..." : "Iniciar conversa"}
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void abrirConversa(doador.id)}
+                    disabled={abrindo !== null}
+                    className="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-4 py-2 font-semibold text-brand-onPrimary hover:bg-brand-primaryDark disabled:opacity-60"
+                  >
+                    <FaComments aria-hidden="true" />
+                    {abrindo === doador.id ? "Abrindo..." : "Iniciar conversa"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDoadorDenuncia(doador)}
+                    className="rounded-xl px-3 py-2 text-sm font-medium text-red-700 underline hover:bg-red-50"
+                  >
+                    Denunciar doador
+                  </button>
+                </div>
               </article>
             );
           })}
         </div>
+      )}
+      {doadorDenuncia && (
+        <ReportModal
+          targetType="DOADOR"
+          targetId={doadorDenuncia.id}
+          targetLabel={doadorDenuncia.name}
+          onClose={() => setDoadorDenuncia(null)}
+        />
       )}
     </main>
   );

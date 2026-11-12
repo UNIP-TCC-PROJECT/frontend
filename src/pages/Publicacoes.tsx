@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { api, imagemUrl } from "../services/api";
 import { CATEGORIES } from "../services/transparency";
 import type { PostsPage } from "../services/transparency";
+import { CONTENT_RESTRICTED_MESSAGE, type ContentAccess } from "../services/organizations";
 import { useAuth } from "../context/useAuth";
 import FavoritoButton from "../components/FavoritoButton";
 import PublicacaoForm from "../components/PublicacaoForm";
@@ -16,7 +17,7 @@ export default function Publicacoes() {
   const [atualizacao, setAtualizacao] = useState(0);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
-  const [contentAccess, setContentAccess] = useState<{ canSubmit: boolean; canPublishWithoutReview: boolean } | null>(null);
+  const [contentAccess, setContentAccess] = useState<ContentAccess | null>(null);
 
   useEffect(() => {
     if (user?.type !== "ONG") {
@@ -24,7 +25,7 @@ export default function Publicacoes() {
       return;
     }
     let ativo = true;
-    api.get<{ canSubmit: boolean; canPublishWithoutReview: boolean }>("/organizations/me/content-access")
+    api.get<ContentAccess>("/organizations/me/content-access")
       .then(({ data }) => { if (ativo) setContentAccess(data); })
       .catch(() => { if (ativo) setContentAccess({ canSubmit: false, canPublishWithoutReview: false }); });
     return () => { ativo = false; };
@@ -76,8 +77,12 @@ export default function Publicacoes() {
       )}
       {user?.type === "ONG" && user.status === "ATIVO" && contentAccess && !contentAccess.canSubmit && (
         <p className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          Para enviar publicações, conclua a conferência automática do CNPJ. Depois disso, suas publicações passam por análise; com a Medalha Branca, ficam disponíveis imediatamente.
-          <Link to="/minha-instituicao" className="ml-1 font-semibold underline">Verificar instituição</Link>
+          {contentAccess.restricted ? CONTENT_RESTRICTED_MESSAGE : (
+            <>
+              Para enviar publicações, conclua a conferência automática do CNPJ. Depois disso, suas publicações passam por análise; com a Medalha Branca, ficam disponíveis imediatamente.
+              <Link to="/minha-instituicao" className="ml-1 font-semibold underline">Verificar instituição</Link>
+            </>
+          )}
         </p>
       )}
       {user?.type === "ONG" && contentAccess?.canSubmit && !contentAccess.canPublishWithoutReview && (

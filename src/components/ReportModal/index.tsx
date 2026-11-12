@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { api } from "../../services/api";
 import { useAuth } from "../../context/useAuth";
 
-export type ReportTargetType = "ONG" | "COMENTARIO";
+export type ReportTargetType = "ONG" | "DOADOR" | "COMENTARIO";
 
 interface ReportModalProps {
   targetType: ReportTargetType;
@@ -28,7 +28,13 @@ export function ReportModal({
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
 
-  const title = targetType === "ONG" ? "Denunciar ONG" : "Denunciar comentário";
+  const title = targetType === "ONG"
+    ? "Denunciar ONG"
+    : targetType === "DOADOR"
+      ? "Denunciar doador"
+      : "Denunciar comentário";
+  const requiredAuthorType = targetType === "DOADOR" ? "ONG" : "DOADOR";
+  const reporterLabel = requiredAuthorType === "ONG" ? "ONG" : "doador";
   const trimmedLength = motivo.trim().length;
 
   async function handleSubmit(e: FormEvent) {
@@ -68,7 +74,7 @@ export function ReportModal({
       return (
         <>
           <p className="mb-6 text-brand-muted">
-            Para enviar uma denúncia, entre na sua conta de doador.
+            Para enviar uma denúncia, entre na sua conta de {reporterLabel}.
           </p>
           <div className="flex justify-end gap-3">
             <button
@@ -88,11 +94,11 @@ export function ReportModal({
       );
     }
 
-    if (user?.type !== "DOADOR") {
+    if (user?.type !== requiredAuthorType) {
       return (
         <>
           <p className="mb-6 text-brand-muted">
-            Somente doadores podem enviar denúncias.
+            Somente {requiredAuthorType === "ONG" ? "ONGs" : "doadores"} podem enviar este tipo de denúncia.
           </p>
           <div className="flex justify-end">
             <button

@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../../services/api";
 import { errorMessage } from "../../services/organizations";
 
 type Status = "PENDENTE" | "EM_ANALISE" | "PROCEDENTE" | "IMPROCEDENTE";
-type TargetType = "ONG" | "COMENTARIO";
+type TargetType = "ONG" | "DOADOR" | "COMENTARIO";
 
 interface Report {
   id: number;
-  autor?: { id: number; name: string };
+  autor?: { id: number; name: string; type?: "ONG" | "DOADOR" | "ADMIN" };
   tipoAlvo: TargetType;
   alvoId: number;
   motivo: string;
@@ -43,6 +44,13 @@ function contextLines(report: Report): Array<[string, unknown]> {
     ];
     return lines.filter(([, value]) => typeof value === "string" && value.trim());
   }
+  if (report.tipoAlvo === "DOADOR") {
+    const lines: Array<[string, unknown]> = [
+      ["Doador", context.nome],
+      ["Situação da conta", context.statusConta],
+    ];
+    return lines.filter(([, value]) => typeof value === "string" && value.trim());
+  }
   const lines: Array<[string, unknown]> = [
     ["ONG relacionada", context.ongNome],
     ["Autor do comentário", context.autorComentarioNome],
@@ -57,6 +65,13 @@ function ReportCard({ report, onUpdated }: { report: Report; onUpdated: () => vo
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const open = report.status === "PENDENTE" || report.status === "EM_ANALISE";
+  const ongId = report.tipoAlvo === "ONG" ? report.alvoId : report.contexto?.ongId;
+  const targetLabel = report.tipoAlvo === "ONG"
+    ? "ONG"
+    : report.tipoAlvo === "DOADOR"
+      ? "doador"
+      : "comentário";
+  const authorTypeLabel = report.autor?.type === "ONG" ? "ONG" : "doador";
 
   async function decide(decision: Status) {
     setError("");
@@ -83,10 +98,10 @@ function ReportCard({ report, onUpdated }: { report: Report; onUpdated: () => vo
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="font-semibold text-slate-900">
-            Denúncia #{report.id} · {report.tipoAlvo === "ONG" ? "ONG" : "comentário"}
+            Denúncia #{report.id} · {targetLabel}
           </h2>
           <p className="text-sm text-slate-600">
-            Enviada por {report.autor?.name ?? "usuário"} · alvo #{report.alvoId} ·{" "}
+            Enviada por {report.autor?.name ?? "usuário"} ({authorTypeLabel}) · alvo #{report.alvoId} ·{" "}
             {new Date(report.createdAt).toLocaleString("pt-BR")}
           </p>
         </div>
@@ -103,6 +118,12 @@ function ReportCard({ report, onUpdated }: { report: Report; onUpdated: () => vo
           </p>
         ))}
       </section>
+
+      {typeof ongId === "number" && (
+        <Link className="inline-block text-sm font-medium text-blue-700 underline" to={`/admin/ongs/${ongId}`}>
+          Abrir ficha da ONG
+        </Link>
+      )}
 
       <section>
         <h3 className="font-medium text-slate-800">Motivo informado</h3>
@@ -161,8 +182,14 @@ function ReportCard({ report, onUpdated }: { report: Report; onUpdated: () => vo
 }
 
 export default function AdminDenuncias() {
+  const [params] = useSearchParams();
+  const ongId = params.get("ongId");
+  return <ReportList key={ongId ?? "geral"} ongId={ongId} />;
+}
+
+function ReportList({ ongId }: { ongId: string | null }) {
   const [reports, setReports] = useState<Report[]>([]);
-  const [filter, setFilter] = useState("ABERTAS");
+  const [filter, setFilter] = useState(ongId ? "TODAS" : "ABERTAS");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -171,13 +198,15 @@ export default function AdminDenuncias() {
     setError("");
     try {
       const params = filter === "ABERTAS" ? {} : filter === "TODAS" ? { all: "true" } : { status: filter };
-      setReports((await api.get<Report[]>("/admin/denuncias", { params })).data);
+      setReports((await api.get<Report[]>("/admin/denuncias", {
+        params: { ...params, ...(ongId ? { ongId } : {}) },
+      })).data);
     } catch (e) {
       setError(errorMessage(e));
     } finally {
       setLoading(false);
     }
-  }, [filter]);
+  }, [filter, ongId]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -205,10 +234,18 @@ export default function AdminDenuncias() {
         </select>
       </header>
 
+      {ongId && (
+        <div className="flex flex-wrap items-center gap-3 text-sm text-slate-700">
+          <span>Denúncias relacionadas à ONG #{ongId}</span>
+          <Link className="text-blue-700 underline" to={`/admin/ongs/${ongId}`}>Voltar à ficha</Link>
+          <Link className="text-blue-700 underline" to="/admin/denuncias">Ver todas as ONGs</Link>
+        </div>
+      )}
+
       {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-800">{error}</p>}
       {loading ? (
         <p className="py-8 text-center text-slate-500">Carregando denúncias…</p>
-      ) : reports.length === 0 ? (
+      ) : error ? null : reports.length === 0 ? (
         <p className="rounded-xl border border-slate-200 bg-white p-6 text-slate-600">Nenhuma denúncia encontrada para este filtro.</p>
       ) : (
         <div className="space-y-3">
