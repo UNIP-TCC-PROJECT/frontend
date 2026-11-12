@@ -5,6 +5,7 @@ import { Button } from "../../components/Button/index";
 import { MetaForm, type Meta } from "./components/MetaForm";
 
 import { api } from "../../services/api";
+import { CONTENT_RESTRICTED_MESSAGE, type ContentAccess } from "../../services/organizations";
 
 function getProgress(meta: Meta) {
   if (meta.type === "FINANCEIRA") {
@@ -37,12 +38,12 @@ export default function MinhasMetas() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingMeta, setEditingMeta] = useState<Meta | null>(null);
   const [deactivatingId, setDeactivatingId] = useState<number | null>(null);
-  const [contentAccess, setContentAccess] = useState<{ canSubmit: boolean; canPublishWithoutReview: boolean } | null>(null);
+  const [contentAccess, setContentAccess] = useState<ContentAccess | null>(null);
 
   async function fetchMetas() {
     try {
       setError("");
-      const [response, access] = await Promise.all([api.get("/metas/mine"), api.get<{ canSubmit: boolean; canPublishWithoutReview: boolean }>("/organizations/me/content-access")]);
+      const [response, access] = await Promise.all([api.get("/metas/mine"), api.get<ContentAccess>("/organizations/me/content-access")]);
       setMetas(response.data);
       setContentAccess(access.data);
     } catch (error) {
@@ -114,7 +115,11 @@ export default function MinhasMetas() {
       </div>
 
       {contentAccess?.canSubmit && !contentAccess.canPublishWithoutReview && <p className="mb-5 rounded-lg bg-blue-50 p-4 text-sm text-blue-900">Metas enviadas aguardam aprovação antes de aparecerem no perfil público.</p>}
-      {contentAccess && !contentAccess.canSubmit && <p className="mb-5 rounded-lg bg-amber-50 p-4 text-sm text-amber-900">Confira o CNPJ da organização para enviar metas.</p>}
+      {contentAccess && !contentAccess.canSubmit && (
+        <p className="mb-5 rounded-lg bg-amber-50 p-4 text-sm text-amber-900">
+          {contentAccess.restricted ? CONTENT_RESTRICTED_MESSAGE : "Confira o CNPJ da organização para enviar metas."}
+        </p>
+      )}
 
       {formOpen && (
         <Card className="mb-6">

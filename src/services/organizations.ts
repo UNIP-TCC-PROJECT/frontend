@@ -70,6 +70,14 @@ export interface Organization {
   [key: string]: any;
 }
 
+export interface ContentAccess {
+  canSubmit: boolean;
+  canPublishWithoutReview: boolean;
+  restricted?: boolean;
+}
+
+export const CONTENT_RESTRICTED_MESSAGE = "A administração restringiu o envio e as alterações de conteúdo desta ONG.";
+
 export function errorMessage(error: unknown): string {
   if (isAxiosError(error)) {
     const m = error.response?.data?.message;

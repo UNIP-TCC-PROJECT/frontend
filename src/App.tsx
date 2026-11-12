@@ -6,12 +6,15 @@ import Ongs from "./pages/Ongs";
 import OngDetails from "./pages/OngDetails";
 import AdminOngs from "./pages/admin/AdminOngs";
 import AdminOngDetails from "./pages/admin/AdminOngDetails";
+import AdminDoadores from "./pages/admin/AdminDoadores";
+import AdminDoadorDetails from "./pages/admin/AdminDoadorDetails";
 import AdminCreateAdmin from "./pages/admin/AdminCreateAdmin";
 import Perfil from "./pages/Perfil";
 import MinhasMetas from "./pages/MinhasMetas";
 import OngsFavoritas from "./pages/OngsFavoritas";
 import InteressesOng from "./pages/InteressesOng";
 import Conversas from "./pages/Conversas";
+import Sac from "./pages/Sac";
 import Sobre from "./pages/Sobre";
 import Ajuda from "./pages/Ajuda";
 
@@ -57,11 +60,15 @@ function App() {
               <Routes>
                 <Route path="/" element={<AdminOngs />} />
                 <Route path="/ongs/:id" element={<AdminOngDetails />} />
+                <Route path="/doadores" element={<AdminDoadores />} />
+                <Route path="/doadores/:id" element={<AdminDoadorDetails />} />
                 <Route path="/admins/novo" element={<AdminCreateAdmin />} />
                 <Route path="/validacoes" element={<AdminValidacoes />} />
                 <Route path="/prestacao-de-contas" element={<AdminPrestacao />} />
                 <Route path="/conteudos" element={<AdminConteudos />} />
                 <Route path="/denuncias" element={<AdminDenuncias />} />
+                <Route path="/sac" element={<Sac />} />
+                <Route path="/sac/:id" element={<Sac />} />
                 <Route path="/validacoes/:id" element={<AdminValidacaoDetails />} />
               </Routes>
             </AdminLayout>
@@ -79,6 +86,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/sobre" element={<Sobre />} />
               <Route path="/ajuda" element={<Ajuda />} />
+              <Route path="/sac" element={<RequireAuth><Sac /></RequireAuth>} />
+              <Route path="/sac/:id" element={<RequireAuth><Sac /></RequireAuth>} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/esqueci-senha" element={<ForgotPassword />} />
               <Route path="/redefinir-senha" element={<ResetPassword />} />

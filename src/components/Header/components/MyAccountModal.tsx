@@ -37,6 +37,11 @@ function MyAccountModal({ setOpen, navigate, logout, isOng, isDonor, isParticipa
           Mensagens
         </button>
       )}
+      {isParticipant && (
+        <button className={itemClass} onClick={() => go("/sac")}>
+          Atendimento SAC
+        </button>
+      )}
       <button
         className="hover:bg-red-50 mt-1 px-4 py-2 border-brand-border border-t rounded w-full font-medium text-red-600 text-left"
         onClick={() => {

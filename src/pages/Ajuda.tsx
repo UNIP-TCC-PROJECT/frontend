@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 
 const topicos = [
   {
@@ -78,6 +80,7 @@ function normalizar(texto: string) {
 }
 
 export default function Ajuda() {
+  const { user } = useAuth();
   const [busca, setBusca] = useState("");
   const termo = normalizar(busca);
   const resultados = topicos
@@ -97,6 +100,14 @@ export default function Ajuda() {
         você pode conhecer o trabalho das organizações e descobrir como
         contribuir.
       </p>
+      <section className="bg-brand-surface mt-6 p-5 border border-brand-border rounded-xl">
+        <h2 className="font-semibold text-xl">Precisa falar com a administração?</h2>
+        <p className="mt-2 text-brand-muted">Envie sua dúvida pelo SAC e acompanhe as respostas no atendimento da sua conta.</p>
+        <Link to={user ? (user.type === "ADMIN" ? "/admin/sac" : "/sac") : "/auth"}
+          className="inline-block mt-4 bg-brand-primary hover:bg-brand-primaryDark px-5 py-3 rounded-xl font-semibold text-brand-onPrimary">
+          {user?.type === "ADMIN" ? "Abrir atendimentos" : user ? "Falar com a administração" : "Entrar para falar com a administração"}
+        </Link>
+      </section>
       <label htmlFor="busca-ajuda" className="block mt-8 font-semibold">
         Buscar nas perguntas e respostas
       </label>

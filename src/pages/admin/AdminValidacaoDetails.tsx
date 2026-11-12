@@ -68,6 +68,8 @@ export default function AdminValidacaoDetails() {
   const { id } = useParams();
   const [org, setOrg] = useState<Detail | null>(null);
   const [text, setText] = useState("");
+  const [rejectingDocumentId, setRejectingDocumentId] = useState<string | null>(null);
+  const [documentReason, setDocumentReason] = useState("");
   const [override, setOverride] = useState("");
   const [erro, setErro] = useState("");
   const [aviso, setAviso] = useState("");
@@ -83,6 +85,17 @@ export default function AdminValidacaoDetails() {
   }, [id]);
   useEffect(() => {
     void carregar();
+  }, [carregar]);
+  useEffect(() => {
+    const atualizarSeVisivel = () => {
+      if (document.visibilityState === "visible") void carregar();
+    };
+    const timer = window.setInterval(atualizarSeVisivel, 10_000);
+    window.addEventListener("focus", atualizarSeVisivel);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", atualizarSeVisivel);
+    };
   }, [carregar]);
   useEffect(() => {
     api
@@ -317,21 +330,37 @@ export default function AdminValidacaoDetails() {
 
       <section className="bg-white p-4 border rounded-lg">
         <h2 className="mb-3 font-semibold">Documentos vigentes</h2>
+        <p className="mb-3 text-gray-500 text-xs">
+          A lista é atualizada automaticamente quando a ONG envia uma nova versão.
+        </p>
+        <p className="mb-3 text-gray-500 text-xs">
+          Você pode aprovar ou reprovar cada documento individualmente. Ao
+          reprovar, informe o motivo solicitado.
+        </p>
         <ul className="space-y-2 text-sm">
-          {vigentes.map((d) => (
-            <li
+          {vigentes.map((d) => {
+            const anteriores = org.documents.filter(
+              (versao) => versao.type === d.type && versao.supersededAt,
+            ).length;
+            const numeroVersao = anteriores + 1;
+            return <li
               key={d.id}
               className="flex flex-wrap justify-between items-center gap-2 pb-2 border-b"
             >
               <div>
                 <strong>{docTypes[d.type] ?? d.type}</strong> — {d.name} ·{" "}
                 {fmtDate(d.createdAt)}
+                {numeroVersao > 1 && (
+                  <span className="bg-blue-50 ml-2 px-2 py-0.5 rounded text-blue-800 text-xs font-semibold">
+                    Nova entrada · versão {numeroVersao}
+                  </span>
+                )}
                 <div className="text-gray-500 text-xs">
                   SHA-256 {d.sha256.slice(0, 16)}… · {d.status}
                   {d.reviewReason ? ` · ${d.reviewReason}` : ""}
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap justify-end gap-2">
                 <button
                   className={`${btn} bg-slate-700`}
                   onClick={() =>
@@ -344,41 +373,72 @@ export default function AdminValidacaoDetails() {
                   Abrir
                 </button>
                 <button
-                  className={`${btn} bg-green-700`}
-                  disabled={busy}
+                  className={`${btn} bg-green-700 disabled:bg-green-600 disabled:opacity-80 disabled:cursor-not-allowed`}
+                  disabled={busy || d.status === "REPROVADO"}
+                  aria-pressed={d.status === "APROVADO"}
                   onClick={() =>
+                    d.status !== "APROVADO" &&
                     void run(
-                      () =>
-                        api.post(
-                          `/admin/organizations/documents/${d.id}/review`,
-                          { decision: "APROVAR" },
-                        ),
-                      "Documento aprovado.",
-                    )
+                        () =>
+                          api.post(
+                            `/admin/organizations/documents/${d.id}/review`,
+                            { decision: "APROVAR" },
+                          ),
+                        "Documento aprovado.",
+                      )
                   }
                 >
-                  Aprovar
+                  {d.status === "APROVADO" ? "Aprovado" : "Aprovar"}
                 </button>
                 <button
-                  className={`${btn} bg-red-700`}
-                  disabled={busy || text.trim().length < 5}
-                  title="Informe o motivo no campo abaixo"
-                  onClick={() =>
-                    void run(
-                      () =>
-                        api.post(
-                          `/admin/organizations/documents/${d.id}/review`,
-                          { decision: "REPROVAR", reason: text },
-                        ),
-                      "Documento reprovado.",
-                    )
-                  }
+                  className={`${btn} bg-red-700 disabled:bg-red-500 disabled:opacity-80 disabled:cursor-not-allowed`}
+                  disabled={busy || d.status === "APROVADO"}
+                  aria-pressed={d.status === "REPROVADO"}
+                  onClick={() => {
+                    if (d.status !== "PENDENTE") return;
+                    setDocumentReason("");
+                    setRejectingDocumentId((current) => current === d.id ? null : d.id);
+                  }}
                 >
-                  Reprovar
+                  {d.status === "REPROVADO"
+                    ? "Reprovado"
+                    : rejectingDocumentId === d.id
+                      ? "Cancelar"
+                      : "Reprovar"}
                 </button>
               </div>
-            </li>
-          ))}
+              {rejectingDocumentId === d.id && (
+                <div className="basis-full space-y-2">
+                  <label className="block text-xs">
+                    Motivo da reprovação (mínimo de 5 caracteres)
+                    <textarea
+                      className="mt-1 p-2 border rounded w-full text-sm"
+                      rows={2}
+                      value={documentReason}
+                      onChange={(e) => setDocumentReason(e.target.value)}
+                      placeholder="Ex.: arquivo ilegível; envie uma versão mais nítida."
+                    />
+                  </label>
+                  <button
+                    className={`${btn} bg-red-700`}
+                    disabled={busy || documentReason.trim().length < 5}
+                    onClick={() =>
+                      void run(
+                        () =>
+                          api.post(
+                            `/admin/organizations/documents/${d.id}/review`,
+                            { decision: "REPROVAR", reason: documentReason },
+                          ),
+                        "Documento reprovado.",
+                      )
+                    }
+                  >
+                    Confirmar reprovação
+                  </button>
+                </div>
+              )}
+            </li>;
+          })}
           {!vigentes.length && (
             <li className="text-gray-500">Nenhum documento enviado.</li>
           )}
@@ -391,7 +451,7 @@ export default function AdminValidacaoDetails() {
         )}
       </section>
 
-      {["EM_ANALISE", "APROVADA", "AGUARDANDO_DOCUMENTACAO"].includes(
+      {["EM_ANALISE", "APROVADA", "AGUARDANDO_DOCUMENTACAO", "SUSPENSA"].includes(
         org.status,
       ) && (
         <section className="space-y-3 bg-white p-4 border rounded-lg">
@@ -476,6 +536,21 @@ export default function AdminValidacaoDetails() {
                 }
               >
                 Suspender (derruba campanhas ativas)
+              </button>
+            )}
+            {org.status === "SUSPENSA" && (
+              <button
+                className={`${btn} bg-green-700`}
+                disabled={busy || text.trim().length < 5}
+                onClick={() =>
+                  void run(
+                    () => post("reactivate", { reason: text }),
+                    "Instituição reativada e aprovada.",
+                    true,
+                  )
+                }
+              >
+                Reativar instituição
               </button>
             )}
           </div>

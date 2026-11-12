@@ -61,6 +61,7 @@ export default function MinhaInstituicao() {
   const [erro, setErro] = useState("");
   const [aviso, setAviso] = useState("");
   const [busy, setBusy] = useState(false);
+  const [arquivosSelecionados, setArquivosSelecionados] = useState<Record<string, File>>({});
 
   const carregar = useCallback(async () => {
     try {
@@ -90,7 +91,7 @@ export default function MinhaInstituicao() {
     void carregar();
   }, [carregar]);
 
-  async function run(fn: () => Promise<unknown>, ok: string) {
+  async function run(fn: () => Promise<unknown>, ok: string): Promise<boolean> {
     setBusy(true);
     setErro("");
     setAviso("");
@@ -98,8 +99,10 @@ export default function MinhaInstituicao() {
       await fn();
       setAviso(ok);
       await carregar();
+      return true;
     } catch (e) {
       setErro(errorMessage(e));
+      return false;
     } finally {
       setBusy(false);
     }
@@ -114,15 +117,22 @@ export default function MinhaInstituicao() {
     return run(() => api.patch("/organizations/me", body), "Dados salvos.");
   };
 
-  const enviarDoc = (type: string, file: File | undefined) => {
+  const enviarDoc = async (type: string, file: File | undefined) => {
     if (!file) return;
     const fd = new FormData();
     fd.append("type", type);
     fd.append("file", file);
-    return run(
+    const enviado = await run(
       () => api.post("/organizations/me/documents", fd),
       "Documento enviado.",
     );
+    if (enviado) {
+      setArquivosSelecionados((atuais) => {
+        const atualizados = { ...atuais };
+        delete atualizados[type];
+        return atualizados;
+      });
+    }
   };
 
   if (!org) return <p className="p-8">{erro || "Carregando…"}</p>;
@@ -263,26 +273,85 @@ export default function MinhaInstituicao() {
                 <div>
                   <strong>{label}</strong>
                   {REQUIRED_DOCS.includes(type) ? " *" : ""}
-                  <div className="text-brand-muted">
+                  <div className="mt-1 text-brand-muted text-xs">
                     {doc
-                      ? `${doc.name} · enviado em ${fmtDate(doc.createdAt)} · ${doc.status === "PENDENTE" ? "aguardando análise" : doc.status === "APROVADO" ? "aprovado" : `reprovado${doc.reviewReason ? `: ${doc.reviewReason}` : ""}`}`
+                      ? `${doc.name} · enviado em ${fmtDate(doc.createdAt)}`
                       : "Não enviado"}
                   </div>
+                  {doc?.status === "APROVADO" && (
+                    <p role="status" className="bg-green-50 mt-2 p-2 rounded text-green-800 text-sm">
+                      Documento aprovado pela administração.
+                    </p>
+                  )}
+                  {doc?.status === "PENDENTE" && (
+                    <p role="status" className="bg-blue-50 mt-2 p-2 rounded text-blue-800 text-sm">
+                      Documento enviado e aguardando análise.
+                    </p>
+                  )}
+                  {doc?.status === "REPROVADO" && (
+                    <div role="alert" className="bg-red-50 mt-2 p-3 rounded text-red-900 text-sm">
+                      <p className="font-semibold">Este documento precisa ser enviado novamente.</p>
+                      <p className="mt-1">
+                        <strong>Motivo informado pela administração:</strong>{" "}
+                        {doc.reviewReason || "A administração não informou um motivo."}
+                      </p>
+                      {!editavel && org.status === "EM_ANALISE" && (
+                        <p className="mt-1">
+                          O cadastro continua em análise. Aguarde a solicitação de documentos complementares para poder reenviar.
+                        </p>
+                      )}
+                      {!editavel && org.status === "SUSPENSA" && (
+                        <p className="mt-1">O envio de documentos está bloqueado enquanto a instituição estiver suspensa.</p>
+                      )}
+                    </div>
+                  )}
                 </div>
-                {editavel && (
-                  <label className={`${btn} cursor-pointer`}>
-                    {doc ? "Substituir" : "Enviar"}
-                    <input
-                      type="file"
-                      hidden
-                      accept="application/pdf,image/jpeg,image/png"
-                      disabled={busy}
-                      onChange={(e) => {
-                        void enviarDoc(type, e.target.files?.[0]);
-                        e.target.value = "";
-                      }}
-                    />
-                  </label>
+                {editavel && (!doc || doc.status === "REPROVADO") && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label className={`${btn} cursor-pointer`}>
+                      {doc ? "Enviar documento" : "Escolher documento"}
+                      <input
+                        type="file"
+                        hidden
+                        accept="application/pdf,image/jpeg,image/png"
+                        disabled={busy}
+                        onChange={(e) => {
+                          const arquivo = e.target.files?.[0];
+                          if (arquivo) setArquivosSelecionados((atuais) => ({ ...atuais, [type]: arquivo }));
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                    {arquivosSelecionados[type] && (
+                      <div className="basis-full mt-2 space-y-2 rounded-lg bg-blue-50 p-3 text-sm text-blue-900">
+                        <p><strong>Arquivo escolhido:</strong> {arquivosSelecionados[type].name}</p>
+                        <p>Confirme para enviar este documento à administração. O envio substituirá a versão atual, que continuará no histórico.</p>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            className={btn}
+                            disabled={busy}
+                            onClick={() => void enviarDoc(type, arquivosSelecionados[type])}
+                          >
+                            Confirmar e enviar documento
+                          </button>
+                          <button
+                            type="button"
+                            className="px-3 py-1.5 text-sm underline"
+                            disabled={busy}
+                            onClick={() => setArquivosSelecionados((atuais) => {
+                              const atualizados = { ...atuais };
+                              delete atualizados[type];
+                              return atualizados;
+                            })}
+                          >
+                            Remover arquivo escolhido
+                          </button>
+                        </div>
+                        <p className="text-xs">Remover arquivo escolhido cancela apenas esta seleção; não apaga documentos já enviados.</p>
+                      </div>
+                    )}
+                  </div>
                 )}
               </li>
             );

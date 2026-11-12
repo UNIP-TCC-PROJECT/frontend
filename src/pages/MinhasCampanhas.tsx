@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import ProgressBar from "../components/ProgressBar";
 import { api, imagemUrl } from "../services/api";
 import { fmtMoney } from "../services/campaigns";
-import { errorMessage, fmtDate } from "../services/organizations";
+import { CONTENT_RESTRICTED_MESSAGE, errorMessage, fmtDate, type ContentAccess } from "../services/organizations";
 
 interface Dash { totalRaisedCents: number; pendingCents: number; refundedCents: number; donationsTotal: number; donationsConfirmed: number; donationsPending: number; donationsCancelled: number; donationsRefunded: number; activeCampaigns: number; campaigns: { id: string; title: string; status: string; goalCents: number; raisedCents: number }[] }
 interface Camp { id: string; title: string; status: string; reviewStatus: string; reviewReason?: string | null; goalCents: number; imageUrl: string | null }
@@ -19,14 +19,14 @@ export default function MinhasCampanhas() {
   const [camps, setCamps] = useState<Camp[]>([]);
   const [hist, setHist] = useState<Mov[]>([]);
   const [orgOk, setOrgOk] = useState<boolean | null>(null);
-  const [contentAccess, setContentAccess] = useState<{ canSubmit: boolean; canPublishWithoutReview: boolean } | null>(null);
+  const [contentAccess, setContentAccess] = useState<ContentAccess | null>(null);
   const [form, setForm] = useState(empty);
   const [erro, setErro] = useState("");
   const [aviso, setAviso] = useState("");
 
   const carregar = useCallback(async () => {
     try {
-      const [o, d, c, h, access] = await Promise.all([api.get("/organizations/me"), api.get<Dash>("/my/organization/dashboard"), api.get<Camp[]>("/my/campaigns"), api.get<Mov[]>("/my/organization/financial-history"), api.get<{ canSubmit: boolean; canPublishWithoutReview: boolean }>("/organizations/me/content-access")]);
+      const [o, d, c, h, access] = await Promise.all([api.get("/organizations/me"), api.get<Dash>("/my/organization/dashboard"), api.get<Camp[]>("/my/campaigns"), api.get<Mov[]>("/my/organization/financial-history"), api.get<ContentAccess>("/organizations/me/content-access")]);
       setOrgOk(o.data.status === "APROVADA"); setDash(d.data); setCamps(c.data); setHist(h.data); setContentAccess(access.data);
     } catch (e) { setErro(errorMessage(e)); }
   }, []);
@@ -55,7 +55,9 @@ export default function MinhasCampanhas() {
       <h1 className="text-2xl font-semibold">Campanhas e arrecadação</h1>
       {erro && <p role="alert" className="text-red-700">{erro}</p>}
       {aviso && <p role="status" className="text-green-800">{aviso}</p>}
-      {!contentAccess?.canSubmit && <p className="rounded-lg bg-amber-50 p-4 text-sm text-amber-900">A conferência do CNPJ é necessária para enviar campanhas. Após a conferência, a plataforma analisará o conteúdo antes da publicação. <Link className="underline" to="/minha-instituicao">Verificar instituição</Link></p>}
+      {contentAccess?.restricted ? (
+        <p className="rounded-lg bg-amber-50 p-4 text-sm text-amber-900">{CONTENT_RESTRICTED_MESSAGE}</p>
+      ) : !contentAccess?.canSubmit && <p className="rounded-lg bg-amber-50 p-4 text-sm text-amber-900">A conferência do CNPJ é necessária para enviar campanhas. Após a conferência, a plataforma analisará o conteúdo antes da publicação. <Link className="underline" to="/minha-instituicao">Verificar instituição</Link></p>}
       {contentAccess?.canSubmit && !contentAccess.canPublishWithoutReview && <p className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">Campanhas enviadas passam por análise. A aprovação da campanha é necessária antes de ativá-la.</p>}
 
       {dash && (
@@ -79,11 +81,11 @@ export default function MinhasCampanhas() {
               {c.imageUrl && <img src={imagemUrl(c.imageUrl)!} alt="" className="h-24 rounded object-cover" />}
               <ProgressBar value={raised} goal={c.goalCents} />
               <p>{fmtMoney(raised)} de {fmtMoney(c.goalCents)}</p>
-              <div className="flex flex-wrap gap-2">
+              {!contentAccess?.restricted && <div className="flex flex-wrap gap-2">
                 <label className={`${btn} cursor-pointer`}>Imagem<input type="file" hidden accept="image/jpeg,image/png" onChange={(e) => { void enviarImagem(c.id, e.target.files?.[0]); e.target.value = ""; }} /></label>
                 {c.status === "RASCUNHO" && <button className={btn} disabled={c.reviewStatus !== "APROVADA"} onClick={() => void run(() => api.post(`/my/campaigns/${c.id}/status`, { status: "ATIVA" }), "Campanha publicada.")}>Publicar</button>}
                 {c.status === "ATIVA" && <button className={btn} onClick={() => void run(() => api.post(`/my/campaigns/${c.id}/status`, { status: "ENCERRADA" }), "Campanha encerrada.")}>Encerrar</button>}
-              </div>
+              </div>}
             </div>
           );
         })}
